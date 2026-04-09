@@ -281,6 +281,8 @@
     </style>
 </head>
 <body>
+
+<a href="receiver.html">walkie - talkie</a>
   
    <canvas id="matrix"></canvas>
   
