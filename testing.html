@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAC/COM-04 | LAST ATTEMPT</title>
+    <title>TAC/COM-04 | MANUAL CONNECT</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root { --amber: #ffb000; --bg: #0d0900; --red: #8c3024; --blue: #00d4ff; --green: #39ff14; }
@@ -16,7 +16,7 @@
         .btn-ptt { width: 100%; height: 145px; background: var(--red); color: white; border: 5px solid #5e1e16; font-weight: bold; font-size: 1.35rem; cursor: pointer; transition: 0.1s; box-shadow: 0 6px 0 #401010; }
         .btn-ptt:active:not(:disabled) { background: #f00; transform: translateY(4px); box-shadow: 0 2px 0 #401010; }
         .btn-ptt:disabled { background: #333; opacity: 0.45; box-shadow: none; }
-        .btn-action { width: 100%; padding: 11px; background: #333; color: #fff; border: 1px solid #555; cursor: pointer; font-weight: bold; font-size: 0.72rem; text-transform: uppercase; }
+        .btn-action { width: 100%; padding: 11px; background: #333; color: #fff; border: 1px solid #555; cursor: pointer; font-weight: bold; font-size: 0.72rem; text-transform: uppercase; margin: 5px 0; }
         input { width: 100%; background: #000; border: 1px solid #444; color: var(--amber); padding: 10px; box-sizing: border-box; outline: none; text-align: center; font-size: 1.2rem; letter-spacing: 2px; margin-bottom: 8px; }
         .status-led { width: 13px; height: 13px; border-radius: 50%; background: #200; display: inline-block; vertical-align: middle; }
         .online { background: var(--blue); box-shadow: 0 0 12px var(--blue); }
@@ -33,7 +33,7 @@
             <span>FREQ: <span id="curFreq" style="color:var(--blue)">UNSET</span></span>
             <span>UPLINK: <span id="stat">OFFLINE</span></span>
         </div>
-        <div id="output"><div>> LAST OPTIMIZED VERSION FOR 5G + Wi-Fi</div></div>
+        <div id="output"><div>> MANUAL CONNECT MODE - Best for different networks</div></div>
         <div id="meter"><div id="meter-fill"></div></div>
     </div>
     <div class="side-panel">
@@ -42,7 +42,8 @@
             <input type="number" id="chanInput" value="42" min="1" max="99">
             <div style="font-size: 0.6rem; color: #555; margin: 8px 0 5px;">SHARED SECRET</div>
             <input type="password" id="secretInput" value="tacsecure2026">
-            <button class="btn-action" id="bootBtn" onclick="initChannel()" style="margin-top:8px; border-color:var(--green); color:var(--green);">INITIATE SECURE LINK</button>
+            <button class="btn-action" onclick="initChannel()" style="border-color:var(--green); color:var(--green);">1. INITIATE (Both devices)</button>
+            <button class="btn-action" onclick="manualConnect()" style="background:#006600;">2. MANUAL CONNECT</button>
         </div>
         <div class="module" style="text-align:center;">
             <button class="btn-ptt" id="pttBtn" disabled>HOLD TO TALK</button>
@@ -58,7 +59,6 @@
 <script>
     let peer, conn, localStream, audioCtx, recorder, analyser, streamSource, cryptoKey;
     let isPTTActive = false;
-    let retryCount = 0;
     const APP_PREFIX = "TAC-SECURE-V33-";
 
     function log(msg, color = "#ffb000") {
@@ -98,8 +98,6 @@
         if (!chan || chan < 1 || chan > 99) return log("INVALID CHANNEL", "red");
         if (pass.length < 6) return log("SECRET TOO SHORT", "red");
 
-        retryCount = 0;
-
         try {
             cryptoKey = await deriveKey(pass);
             localStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 48000 }});
@@ -114,61 +112,43 @@
             recorder.ondataavailable = async (e) => {
                 if (!conn?.open || !isPTTActive || !e.data?.size) return;
                 const buf = await e.data.arrayBuffer();
-                const enc = await encryptData(buf);
-                conn.send(enc);
+                conn.send(await encryptData(buf));
             };
 
             document.getElementById('bootBtn').disabled = true;
             document.getElementById('curFreq').innerText = "CH-" + chan;
-            document.getElementById('stat').innerText = "CONNECTING...";
+            document.getElementById('stat').innerText = "READY";
 
             initPeer(APP_PREFIX + chan);
             updateMeter();
-            log("BOTH DEVICES MUST CLICK INITIATE NOW", "#39ff14");
+            log("DEVICE INITIALIZED - Now click MANUAL CONNECT on one device", "#39ff14");
         } catch(e) {
-            log("MIC PERMISSION DENIED", "red");
+            log("MIC ERROR", "red");
         }
     }
 
     function initPeer(myId) {
-        const config = {
-            iceServers: [
-                { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"] },
-                { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
-                { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
-                { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" },
-                { urls: "turn:global.relay.metered.ca:80", username: "metered", credential: "metered" },
-                { urls: "turn:global.relay.metered.ca:443", username: "metered", credential: "metered" }
-            ]
-        };
-
-        peer = new Peer(myId, { config, debug: 2 });
-
-        peer.on('open', () => {
-            log("DEVICE ONLINE - CHANNEL " + myId.split('-').pop(), "#39ff14");
-            setTimeout(tryConnect, 1800);
-        });
-
-        peer.on('connection', c => setupConnection(c));
-
-        peer.on('error', err => {
-            log("WEBRTC ERROR: " + err.type, "red");
-            if (err.type === "peer-unavailable" || err.type === "unavailable-id") {
-                if (retryCount < 12) {
-                    retryCount++;
-                    log(`RETRYING... (${retryCount}/12)`, "#ffb000");
-                    setTimeout(tryConnect, 2500);
-                } else {
-                    log("CONNECTION FAILED AFTER MANY RETRIES", "red");
-                    log("Try: 1. Wi-Fi on both   2. Different channel   3. Refresh both", "#ffb000");
-                }
+        peer = new Peer(myId, {
+            config: {
+                iceServers: [
+                    { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
+                    { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
+                    { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
+                    { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" },
+                    { urls: "turn:global.relay.metered.ca:80", username: "metered", credential: "metered" },
+                    { urls: "turn:global.relay.metered.ca:443", username: "metered", credential: "metered" }
+                ]
             }
         });
+
+        peer.on('open', () => log("PEER OPENED SUCCESSFULLY", "#39ff14"));
+        peer.on('connection', c => setupConnection(c));
+        peer.on('error', err => log("WEBRTC ERROR: " + err.type, "red"));
     }
 
-    function tryConnect() {
-        if (conn && conn.open) return;
-        log("TRYING TO CONNECT TO OTHER DEVICE...", "#ffb000");
+    function manualConnect() {
+        if (!peer) return log("Click INITIATE first", "red");
+        log("MANUAL CONNECT ATTEMPT...", "#ffb000");
         const c = peer.connect(peer.id, { reliable: true });
         setupConnection(c);
     }
@@ -178,9 +158,8 @@
         conn.on('open', () => {
             document.getElementById('ledNet').classList.add('online');
             document.getElementById('pttBtn').disabled = false;
-            document.getElementById('stat').innerText = "LINK ACTIVE (E2EE)";
-            log("✅ SUCCESS! LINK ESTABLISHED", "#39ff14");
-            playBeep(950, 0.15);
+            document.getElementById('stat').innerText = "LINK ACTIVE";
+            log("✅ CONNECTION ESTABLISHED SUCCESSFULLY!", "#39ff14");
         });
 
         conn.on('data', async data => {
@@ -192,9 +171,7 @@
                 const audio = new Audio(URL.createObjectURL(blob));
                 audio.onended = () => URL.revokeObjectURL(audio.src);
                 await audio.play();
-            } catch(e) {
-                log("DECRYPT FAILED", "red");
-            }
+            } catch(e) {}
             setTimeout(() => document.getElementById('ledTx').classList.remove('tx'), 900);
         });
 
@@ -228,14 +205,7 @@
     pttBtn.ontouchstart = e => { e.preventDefault(); startPTT(); };
     pttBtn.ontouchend = e => { e.preventDefault(); stopPTT(); };
 
-    window.addEventListener('beforeunload', () => {
-        if (recorder?.state === 'recording') recorder.stop();
-        if (localStream) localStream.getTracks().forEach(t => t.stop());
-        if (peer) peer.destroy();
-    });
-
-    log("FINAL VERSION - Many retries added", "#39ff14");
-    log("Click INITIATE on BOTH devices at the same time", "#ffb000");
+    log("MANUAL MODE ENABLED - Click INITIATE on both, then MANUAL CONNECT on one", "#39ff14");
 </script>
 </body>
 </html>
