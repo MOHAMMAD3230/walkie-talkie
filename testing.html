@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAC/COM-04 | FIXED MIC + CONNECT</title>
+    <title>TAC/COM-04 | RECONNECT FIXED</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root { --amber: #ffb000; --bg: #0d0900; --red: #8c3024; --blue: #00d4ff; --green: #39ff14; }
@@ -11,7 +11,7 @@
         .mainframe { width: 95%; max-width: 850px; background: #222; border: 6px solid #111; padding: 15px; display: flex; flex-direction: column; box-shadow: 0 0 60px #000; box-sizing: border-box; }
         @media (min-width: 768px) { .mainframe { display: grid; grid-template-columns: 1fr 320px; height: 680px; gap: 20px; } }
         .monitor { background: var(--bg); border: 10px solid #1a1a1a; border-radius: 15px; padding: 20px; flex-grow: 1; display: flex; flex-direction: column; box-shadow: inset 0 0 20px #000; }
-        #output { height: 320px; overflow-y: auto; font-size: 0.78rem; scrollbar-width: none; border-bottom: 1px solid #333; margin-bottom: 12px; color: var(--amber); }
+        #output { height: 340px; overflow-y: auto; font-size: 0.78rem; scrollbar-width: none; border-bottom: 1px solid #333; margin-bottom: 12px; color: var(--amber); }
         .module { background: #111; padding: 12px; border: 1px solid #333; margin-bottom: 10px; }
         .btn-ptt { width: 100%; height: 145px; background: var(--red); color: white; border: 5px solid #5e1e16; font-weight: bold; font-size: 1.35rem; cursor: pointer; transition: 0.1s; box-shadow: 0 6px 0 #401010; }
         .btn-ptt:active:not(:disabled) { background: #f00; transform: translateY(4px); box-shadow: 0 2px 0 #401010; }
@@ -33,7 +33,7 @@
             <span>FREQ: <span id="curFreq" style="color:var(--blue)">UNSET</span></span>
             <span>UPLINK: <span id="stat">OFFLINE</span></span>
         </div>
-        <div id="output"><div>> STEP-BY-STEP MODE</div></div>
+        <div id="output"><div>> RECONNECT VERSION LOADED</div></div>
         <div id="meter"><div id="meter-fill"></div></div>
     </div>
     <div class="side-panel">
@@ -42,13 +42,8 @@
             <input type="number" id="chanInput" value="42" min="1" max="99">
             <div style="font-size: 0.6rem; color: #555; margin: 8px 0 5px;">SHARED SECRET</div>
             <input type="password" id="secretInput" value="tacsecure2026">
-            
-            <button class="btn-action" onclick="initChannel()" style="border-color:var(--green); color:var(--green); background:#003300;">
-                1. INITIATE (Click on BOTH devices first)
-            </button>
-            <button class="btn-action" onclick="manualConnect()" style="background:#006600;">
-                2. MANUAL CONNECT (Click on ONE device only)
-            </button>
+            <button class="btn-action" onclick="initChannel()" style="border-color:var(--green); color:var(--green);">1. INITIATE ON BOTH</button>
+            <button class="btn-action" onclick="manualConnect()" style="background:#006600;">2. MANUAL CONNECT (One device)</button>
         </div>
         <div class="module" style="text-align:center;">
             <button class="btn-ptt" id="pttBtn" disabled>HOLD TO TALK</button>
@@ -64,6 +59,7 @@
 <script>
     let peer, conn, localStream, audioCtx, recorder, analyser, streamSource, cryptoKey;
     let isPTTActive = false;
+    let reconnectTimer = null;
     const APP_PREFIX = "TAC-SECURE-V33-";
 
     function log(msg, color = "#ffb000") {
@@ -73,47 +69,6 @@
         div.style.color = color;
         out.appendChild(div);
         out.scrollTop = out.scrollHeight;
-    }
-
-    async function initChannel() {
-        const chan = document.getElementById('chanInput').value.trim();
-        const pass = document.getElementById('secretInput').value.trim();
-
-        if (!chan || chan < 1 || chan > 99) return log("INVALID CHANNEL (1-99)", "red");
-        if (pass.length < 6) return log("SECRET TOO SHORT (min 6 chars)", "red");
-
-        log("REQUESTING MICROPHONE ACCESS...", "#ffb000");
-
-        try {
-            localStream = await navigator.mediaDevices.getUserMedia({ 
-                audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 48000 } 
-            });
-
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioCtx.createAnalyser();
-            analyser.fftSize = 256;
-            streamSource = audioCtx.createMediaStreamSource(localStream);
-            streamSource.connect(analyser);
-
-            recorder = new MediaRecorder(localStream, { mimeType: 'audio/webm;codecs=opus' });
-            recorder.ondataavailable = async (e) => {
-                if (!conn?.open || !isPTTActive || !e.data?.size) return;
-                const buf = await e.data.arrayBuffer();
-                conn.send(await encryptData(buf));
-            };
-
-            cryptoKey = await deriveKey(pass);
-
-            document.getElementById('curFreq').innerText = "CH-" + chan;
-            document.getElementById('stat').innerText = "READY";
-
-            initPeer(APP_PREFIX + chan);
-            updateMeter();
-            log("MIC ACCESS SUCCESSFUL - Now click MANUAL CONNECT on ONE device", "#39ff14");
-        } catch (e) {
-            log("MIC ERROR - Allow microphone permission when prompted", "red");
-            console.error(e);
-        }
     }
 
     async function deriveKey(password) {
@@ -137,6 +92,42 @@
         return crypto.subtle.decrypt({ name: "AES-GCM", iv }, cryptoKey, ct);
     }
 
+    async function initChannel() {
+        const chan = document.getElementById('chanInput').value.trim();
+        const pass = document.getElementById('secretInput').value.trim();
+
+        if (!chan || chan < 1 || chan > 99) return log("INVALID CHANNEL", "red");
+        if (pass.length < 6) return log("SECRET TOO SHORT", "red");
+
+        log("REQUESTING MIC...", "#ffb000");
+
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 48000 }});
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 256;
+            streamSource = audioCtx.createMediaStreamSource(localStream);
+            streamSource.connect(analyser);
+
+            recorder = new MediaRecorder(localStream, { mimeType: 'audio/webm;codecs=opus' });
+            recorder.ondataavailable = async (e) => {
+                if (!conn?.open || !isPTTActive || !e.data?.size) return;
+                conn.send(await encryptData(await e.data.arrayBuffer()));
+            };
+
+            cryptoKey = await deriveKey(pass);
+
+            document.getElementById('curFreq').innerText = "CH-" + chan;
+            document.getElementById('stat').innerText = "READY";
+
+            initPeer(APP_PREFIX + chan);
+            updateMeter();
+            log("MIC OK → Now click MANUAL CONNECT on ONE device", "#39ff14");
+        } catch(e) {
+            log("MIC ACCESS DENIED - Allow permission", "red");
+        }
+    }
+
     function initPeer(myId) {
         peer = new Peer(myId, {
             config: {
@@ -148,17 +139,14 @@
             }
         });
 
-        peer.on('open', () => log("DEVICE IS ONLINE", "#39ff14"));
+        peer.on('open', () => log("DEVICE ONLINE", "#39ff14"));
         peer.on('connection', c => setupConnection(c));
         peer.on('error', err => log("WEBRTC ERROR: " + err.type, "red"));
     }
 
     function manualConnect() {
-        if (!peer) {
-            log("ERROR: Click '1. INITIATE' first on this device", "red");
-            return;
-        }
-        log("ATTEMPTING MANUAL CONNECTION...", "#ffb000");
+        if (!peer) return log("Click 1. INITIATE first", "red");
+        log("MANUAL CONNECT ATTEMPT...", "#ffb000");
         const c = peer.connect(peer.id, { reliable: true });
         setupConnection(c);
     }
@@ -169,7 +157,8 @@
             document.getElementById('ledNet').classList.add('online');
             document.getElementById('pttBtn').disabled = false;
             document.getElementById('stat').innerText = "LINK ACTIVE (E2EE)";
-            log("✅ CONNECTION SUCCESSFUL! You can now talk", "#39ff14");
+            log("✅ CONNECTED SUCCESSFULLY", "#39ff14");
+            clearTimeout(reconnectTimer);
         });
 
         conn.on('data', async data => {
@@ -185,7 +174,13 @@
             setTimeout(() => document.getElementById('ledTx').classList.remove('tx'), 900);
         });
 
-        conn.on('close', () => log("CONNECTION CLOSED", "red"));
+        conn.on('close', () => {
+            log("CONNECTION DISCONNECTED - Auto reconnecting...", "red");
+            document.getElementById('ledNet').classList.remove('online');
+            document.getElementById('pttBtn').disabled = true;
+            document.getElementById('stat').innerText = "RECONNECTING...";
+            reconnectTimer = setTimeout(manualConnect, 3000);
+        });
     }
 
     function updateMeter() {
@@ -198,26 +193,23 @@
     }
 
     const pttBtn = document.getElementById('pttBtn');
-    function startPTT() { 
-        if (conn?.open && recorder) { 
-            if (recorder.state === 'inactive') recorder.start(160); 
-            isPTTActive = true; 
-            document.getElementById('ledTx').classList.add('tx'); 
-        }
-    }
-    function stopPTT() { 
-        isPTTActive = false; 
-        if (recorder?.state === 'recording') recorder.stop(); 
-        document.getElementById('ledTx').classList.remove('tx'); 
-    }
+    function startPTT() { if (conn?.open && recorder) { if (recorder.state === 'inactive') recorder.start(160); isPTTActive = true; document.getElementById('ledTx').classList.add('tx'); }}
+    function stopPTT() { isPTTActive = false; if (recorder?.state === 'recording') recorder.stop(); document.getElementById('ledTx').classList.remove('tx'); }
 
     pttBtn.onmousedown = startPTT;
     pttBtn.onmouseup = stopPTT;
     pttBtn.ontouchstart = e => { e.preventDefault(); startPTT(); };
     pttBtn.ontouchend = e => { e.preventDefault(); stopPTT(); };
 
-    log("STEP 1: Click INITIATE on BOTH devices", "#39ff14");
-    log("STEP 2: Click MANUAL CONNECT on only ONE device", "#ffb000");
+    window.addEventListener('beforeunload', () => {
+        if (recorder?.state === 'recording') recorder.stop();
+        if (localStream) localStream.getTracks().forEach(t => t.stop());
+        if (peer) peer.destroy();
+    });
+
+    log("RECONNECT ENABLED", "#39ff14");
+    log("1. Click INITIATE on BOTH", "#ffb000");
+    log("2. Click MANUAL CONNECT on ONE device", "#ffb000");
 </script>
 </body>
 </html>
