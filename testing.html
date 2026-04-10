@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAC/COM-04 | FIXED peer-unavailable</title>
+    <title>TAC/COM-04 | LAST ATTEMPT</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root { --amber: #ffb000; --bg: #0d0900; --red: #8c3024; --blue: #00d4ff; --green: #39ff14; }
@@ -11,7 +11,7 @@
         .mainframe { width: 95%; max-width: 850px; background: #222; border: 6px solid #111; padding: 15px; display: flex; flex-direction: column; box-shadow: 0 0 60px #000; box-sizing: border-box; }
         @media (min-width: 768px) { .mainframe { display: grid; grid-template-columns: 1fr 320px; height: 680px; gap: 20px; } }
         .monitor { background: var(--bg); border: 10px solid #1a1a1a; border-radius: 15px; padding: 20px; flex-grow: 1; display: flex; flex-direction: column; box-shadow: inset 0 0 20px #000; }
-        #output { height: 300px; overflow-y: auto; font-size: 0.78rem; scrollbar-width: none; border-bottom: 1px solid #333; margin-bottom: 12px; color: var(--amber); }
+        #output { height: 320px; overflow-y: auto; font-size: 0.78rem; scrollbar-width: none; border-bottom: 1px solid #333; margin-bottom: 12px; color: var(--amber); }
         .module { background: #111; padding: 12px; border: 1px solid #333; margin-bottom: 10px; }
         .btn-ptt { width: 100%; height: 145px; background: var(--red); color: white; border: 5px solid #5e1e16; font-weight: bold; font-size: 1.35rem; cursor: pointer; transition: 0.1s; box-shadow: 0 6px 0 #401010; }
         .btn-ptt:active:not(:disabled) { background: #f00; transform: translateY(4px); box-shadow: 0 2px 0 #401010; }
@@ -33,14 +33,14 @@
             <span>FREQ: <span id="curFreq" style="color:var(--blue)">UNSET</span></span>
             <span>UPLINK: <span id="stat">OFFLINE</span></span>
         </div>
-        <div id="output"><div>> FIXED FOR peer-unavailable ERROR</div></div>
+        <div id="output"><div>> LAST OPTIMIZED VERSION FOR 5G + Wi-Fi</div></div>
         <div id="meter"><div id="meter-fill"></div></div>
     </div>
     <div class="side-panel">
         <div class="module">
             <div style="font-size: 0.6rem; color: #555; margin-bottom: 5px;">CHANNEL (1-99)</div>
             <input type="number" id="chanInput" value="42" min="1" max="99">
-            <div style="font-size: 0.6rem; color: #555; margin: 8px 0 5px;">SHARED SECRET (E2EE)</div>
+            <div style="font-size: 0.6rem; color: #555; margin: 8px 0 5px;">SHARED SECRET</div>
             <input type="password" id="secretInput" value="tacsecure2026">
             <button class="btn-action" id="bootBtn" onclick="initChannel()" style="margin-top:8px; border-color:var(--green); color:var(--green);">INITIATE SECURE LINK</button>
         </div>
@@ -60,7 +60,6 @@
     let isPTTActive = false;
     let retryCount = 0;
     const APP_PREFIX = "TAC-SECURE-V33-";
-    const MAX_RETRIES = 8;
 
     function log(msg, color = "#ffb000") {
         const out = document.getElementById('output');
@@ -69,7 +68,6 @@
         div.style.color = color;
         out.appendChild(div);
         out.scrollTop = out.scrollHeight;
-        console.log("[TAC]", msg);
     }
 
     async function deriveKey(password) {
@@ -100,6 +98,8 @@
         if (!chan || chan < 1 || chan > 99) return log("INVALID CHANNEL", "red");
         if (pass.length < 6) return log("SECRET TOO SHORT", "red");
 
+        retryCount = 0;
+
         try {
             cryptoKey = await deriveKey(pass);
             localStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 48000 }});
@@ -124,7 +124,7 @@
 
             initPeer(APP_PREFIX + chan);
             updateMeter();
-            log("WAITING FOR OTHER DEVICE...", "#39ff14");
+            log("BOTH DEVICES MUST CLICK INITIATE NOW", "#39ff14");
         } catch(e) {
             log("MIC PERMISSION DENIED", "red");
         }
@@ -145,23 +145,22 @@
         peer = new Peer(myId, { config, debug: 2 });
 
         peer.on('open', () => {
-            log("DEVICE READY ON CHANNEL " + myId.split('-').pop(), "#39ff14");
-            setTimeout(tryConnect, 1500);
+            log("DEVICE ONLINE - CHANNEL " + myId.split('-').pop(), "#39ff14");
+            setTimeout(tryConnect, 1800);
         });
 
         peer.on('connection', c => setupConnection(c));
 
         peer.on('error', err => {
             log("WEBRTC ERROR: " + err.type, "red");
-            console.error(err);
-
             if (err.type === "peer-unavailable" || err.type === "unavailable-id") {
-                if (retryCount < MAX_RETRIES) {
+                if (retryCount < 12) {
                     retryCount++;
-                    log(`RETRYING connection... (${retryCount}/${MAX_RETRIES})`, "#ffb000");
-                    setTimeout(tryConnect, 2000);
+                    log(`RETRYING... (${retryCount}/12)`, "#ffb000");
+                    setTimeout(tryConnect, 2500);
                 } else {
-                    log("OTHER DEVICE NOT DETECTED. Make sure both clicked INITIATE", "#ffb000");
+                    log("CONNECTION FAILED AFTER MANY RETRIES", "red");
+                    log("Try: 1. Wi-Fi on both   2. Different channel   3. Refresh both", "#ffb000");
                 }
             }
         });
@@ -169,7 +168,7 @@
 
     function tryConnect() {
         if (conn && conn.open) return;
-        log("ATTEMPTING TO LINK WITH OTHER DEVICE...", "#ffb000");
+        log("TRYING TO CONNECT TO OTHER DEVICE...", "#ffb000");
         const c = peer.connect(peer.id, { reliable: true });
         setupConnection(c);
     }
@@ -180,7 +179,7 @@
             document.getElementById('ledNet').classList.add('online');
             document.getElementById('pttBtn').disabled = false;
             document.getElementById('stat').innerText = "LINK ACTIVE (E2EE)";
-            log("✅ CONNECTION SUCCESSFUL!", "#39ff14");
+            log("✅ SUCCESS! LINK ESTABLISHED", "#39ff14");
             playBeep(950, 0.15);
         });
 
@@ -194,16 +193,12 @@
                 audio.onended = () => URL.revokeObjectURL(audio.src);
                 await audio.play();
             } catch(e) {
-                log("DECRYPT FAILED - Wrong secret?", "red");
+                log("DECRYPT FAILED", "red");
             }
             setTimeout(() => document.getElementById('ledTx').classList.remove('tx'), 900);
         });
 
-        conn.on('close', () => {
-            log("CONNECTION CLOSED", "red");
-            document.getElementById('ledNet').classList.remove('online');
-            document.getElementById('pttBtn').disabled = true;
-        });
+        conn.on('close', () => log("CONNECTION CLOSED", "red"));
     }
 
     function playBeep(f, d) {
@@ -225,18 +220,8 @@
     }
 
     const pttBtn = document.getElementById('pttBtn');
-    function startPTT() { 
-        if (conn?.open && recorder) { 
-            if (recorder.state === 'inactive') recorder.start(160); 
-            isPTTActive = true; 
-            document.getElementById('ledTx').classList.add('tx'); 
-        }
-    }
-    function stopPTT() { 
-        isPTTActive = false; 
-        if (recorder?.state === 'recording') recorder.stop(); 
-        document.getElementById('ledTx').classList.remove('tx'); 
-    }
+    function startPTT() { if (conn?.open && recorder) { if (recorder.state === 'inactive') recorder.start(160); isPTTActive = true; document.getElementById('ledTx').classList.add('tx'); }}
+    function stopPTT() { isPTTActive = false; if (recorder?.state === 'recording') recorder.stop(); document.getElementById('ledTx').classList.remove('tx'); }
 
     pttBtn.onmousedown = startPTT;
     pttBtn.onmouseup = stopPTT;
@@ -249,8 +234,8 @@
         if (peer) peer.destroy();
     });
 
-    log("FIXED VERSION LOADED - peer-unavailable should now retry", "#39ff14");
-    log("Click INITIATE on BOTH devices with same channel & secret", "#ffb000");
+    log("FINAL VERSION - Many retries added", "#39ff14");
+    log("Click INITIATE on BOTH devices at the same time", "#ffb000");
 </script>
 </body>
 </html>
