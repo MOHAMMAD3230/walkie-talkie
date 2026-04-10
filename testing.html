@@ -3,47 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAC/COM v10.2 | MASTER_DECK</title>
+    <title>TAC/COM v10.3 | OMNI-DECK</title>
     <script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.4/dist/mqtt.min.js"></script>
     <style>
-        :root{--g:#39ff14;--b:#00d4ff;--r:#ff3131;--bg:#000;--p:rgba(10,10,10,0.96)}
+        :root{--g:#39ff14;--b:#00d4ff;--r:#ff3131;--bg:#000;--p:rgba(8,8,8,0.94)}
         body{background:var(--bg);color:var(--g);font-family:'Courier New',monospace;margin:0;overflow:hidden;display:flex;justify-content:center;align-items:center;min-height:100vh}
         
-        /* Background Scanner Animation */
-        #scannerCanvas{position:fixed;inset:0;z-index:-1;opacity:0.35}
+        /* Tactical Scanner Background */
+        #scannerCanvas{position:fixed;inset:0;z-index:-1;opacity:0.4}
 
-        /* CRT Scanline Overlay */
-        body::after{content:" ";display:block;position:absolute;top:0;left:0;bottom:0;right:0;background:linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,0.15) 50%);z-index:10;background-size:100% 3px;pointer-events:none}
+        /* Scanline Filter */
+        body::after{content:" ";display:block;position:absolute;top:0;left:0;bottom:0;right:0;background:linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,0.2) 50%);z-index:10;background-size:100% 3px;pointer-events:none}
 
-        .mainframe{width:95%;max-width:500px;background:var(--p);border:1px solid #333;padding:20px;box-shadow:0 0 60px #000;position:relative;z-index:5;backdrop-filter:blur(6px);border-top:4px solid var(--g)}
+        .mainframe{width:95%;max-width:520px;background:var(--p);border:1px solid #222;padding:20px;box-shadow:0 0 80px #000;position:relative;z-index:5;backdrop-filter:blur(8px);border-top:2px solid var(--g)}
         
-        /* Signal Scopes */
-        #scope{width:100%;height:70px;background:#000;border:1px solid #222;margin-bottom:10px;display:block}
+        .label{font-size:0.6rem;text-transform:uppercase;color:#444;letter-spacing:2px;margin-bottom:6px;display:block}
 
-        .dual-monitors{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-        .monitor{background:#000;border:1px solid #1a1a1a;height:130px;overflow-y:auto;font-size:0.65rem;padding:6px;scrollbar-width:none;line-height:1.2}
+        /* Oscilloscope Display */
+        #scope{width:100%;height:100px;background:#000;border:1px solid #1a1a1a;margin-bottom:15px;box-shadow:inset 0 0 10px rgba(57,255,20,0.1)}
+
+        .monitors{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:15px}
+        .monitor{background:#000;border:1px solid #1a1a1a;height:140px;overflow-y:auto;font-size:0.65rem;padding:8px;scrollbar-width:none;line-height:1.3}
         .monitor::-webkit-scrollbar{display:none}
 
-        .label{font-size:0.55rem;text-transform:uppercase;color:#555;letter-spacing:1px;margin-bottom:4px;display:block}
-
-        .ctrl-box{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:5px}
+        .input-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
         .field{background:#000;border:1px solid #333;color:var(--g);padding:10px;font-family:inherit;font-size:0.9rem;text-align:center}
         .field:focus{outline:none;border-color:var(--b)}
         
-        .btn{background:#111;border:1px solid #444;color:#666;padding:12px;cursor:pointer;font-weight:bold;font-size:0.7rem;text-transform:uppercase;font-family:inherit}
-        .btn:active{background:var(--g);color:#000}
+        .btn{background:#0a0a0a;border:1px solid #444;color:#777;padding:12px;cursor:pointer;font-weight:bold;font-size:0.75rem;text-transform:uppercase;font-family:inherit;transition:0.2s}
+        .btn:hover{color:var(--g);border-color:var(--g)}
 
-        .ptt-group{margin-top:15px;display:grid;grid-template-columns:3fr 1fr;gap:10px}
-        .ptt-btn{height:100px;background:#1a0000;border:2px solid var(--r);color:var(--r);font-weight:bold;font-size:1.3rem;cursor:pointer;letter-spacing:6px;font-family:inherit}
-        .ptt-btn:active:not(:disabled){background:var(--r);color:#000;box-shadow:0 0 25px var(--r)}
-        .ptt-btn:disabled{opacity:0.05}
+        .ptt-container{display:grid;grid-template-columns:3fr 1fr;gap:10px;margin-top:10px}
+        .ptt-btn{height:100px;background:#110000;border:2px solid var(--r);color:var(--r);font-weight:bold;font-size:1.4rem;cursor:pointer;letter-spacing:8px;font-family:inherit}
+        .ptt-btn:active:not(:disabled){background:var(--r);color:#000;box-shadow:0 0 30px var(--r)}
+        .ptt-btn:disabled{opacity:0.1}
         
-        .burst-btn{height:100px;background:#001;border:2px solid var(--b);color:var(--b);font-size:0.7rem}
+        .burst-btn{height:100px;background:#000511;border:2px solid var(--b);color:var(--b);font-size:0.65rem}
 
-        .status-bar{margin-top:15px;font-size:0.55rem;display:flex;justify-content:space-between;color:#444;border-top:1px solid #222;padding-top:10px}
-        .val{color:#fff}
-        .alert{animation:flash 0.4s infinite; color:var(--r) !important;}
-        @keyframes flash {50%{opacity:0.3}}
+        .footer{margin-top:20px;font-size:0.55rem;display:flex;justify-content:space-between;color:#333;border-top:1px solid #1a1a1a;padding-top:10px}
+        .stat-val{color:#eee}
     </style>
 </head>
 <body>
@@ -51,200 +49,198 @@
 <canvas id="scannerCanvas"></canvas>
 
 <div class="mainframe">
-    <span class="label">SIGINT // FREQUENCY_ANALYSIS</span>
+    <span class="label">Signal Intel // Live Oscilloscope</span>
     <canvas id="scope"></canvas>
 
-    <div class="dual-monitors">
+    <div class="monitors">
         <div>
-            <span class="label">Kernel Log</span>
-            <div id="sysLog" class="monitor">> SYSTEM_BOOT: OK<br>> NET_DRV: MQTT_WSS</div>
+            <span class="label">System Audit</span>
+            <div id="sysLog" class="monitor">> KERNEL: ACTIVE<br>> CRYPTO: AES-GCM</div>
         </div>
         <div>
-            <span class="label">Packet Stream</span>
+            <span class="label">Packet Log</span>
             <div id="pktLog" class="monitor" style="color:var(--b)">> LISTENING...</div>
         </div>
     </div>
 
-    <div class="ctrl-box">
-        <input type="number" id="freq" class="field" value="44">
-        <input type="password" id="key" class="field" value="gamma">
-        <button class="btn" onclick="connectLink('host')">Establish Host</button>
-        <button class="btn" onclick="connectLink('client')">Join Uplink</button>
+    <div class="input-row">
+        <input type="number" id="ch" class="field" value="101">
+        <input type="password" id="key" class="field" value="omni">
+        <button class="btn" onclick="startUplink('host')">Host</button>
+        <button class="btn" onclick="startUplink('client')">Join</button>
     </div>
 
-    <div class="ptt-group">
-        <button id="ptt" class="ptt-btn" disabled>HOLD TO TX</button>
-        <button class="btn burst-btn" onmousedown="triggerBurst()">DATA<br>BURST</button>
+    <div class="ptt-container">
+        <button id="ptt" class="ptt-btn" disabled>TRANSMIT</button>
+        <button class="btn burst-btn" onmousedown="emitBurst()">DATA<br>BURST</button>
     </div>
 
-    <div class="status-bar">
-        <span>LINK: <span id="linkStat" class="val">OFFLINE</span></span>
-        <span>LAT: <span id="latStat" class="val">--</span></span>
-        <span>DROP: <span id="dropStat" class="val">0</span></span>
+    <div class="footer">
+        <span>LINK: <span id="lSt" class="stat-val">OFFLINE</span></span>
+        <span>LAT: <span id="tSt" class="stat-val">--</span></span>
+        <span>DRP: <span id="dSt" class="stat-val">0</span></span>
     </div>
 </div>
 
 <script>
-let mqttClient, micStream, audioCtx, analyser, outGain, cipherKey, isTransmitting=false, nextPlayTime=0, dropCount=0;
-const SAMPLE_RATE = 12000, TOPIC_ROOT = 'omni_v10_final/';
+let mc, mic, actx, ana, pG, ck, isTx=false, nxt=0, drops=0;
+const SR=12000, TP='tac_v10_3/';
 
-// Log helper
-function writeLog(msg, target="sysLog", color="") {
-    const el = document.getElementById(target);
-    const div = document.createElement('div');
-    if(color) div.style.color = color;
-    div.innerText = `> ${msg}`;
-    el.appendChild(div); el.scrollTop = el.scrollHeight;
-    if(el.childNodes.length > 25) el.removeChild(el.firstChild);
+// ═══ REAL VULNERABILITY SCANNER BACKGROUND ═══
+const bcvs = document.getElementById('scannerCanvas');
+const bctx = bcvs.getContext('2d');
+let columns = [];
+const vulnData = ["CVE-2024-", "PORT_80:OPEN", "SQL_INJECT", "XSS_DETECT", "BRUTE_FORCE", "NMAP_SCAN", "OVERFLOW", "SYN_FLOOD", "SHELL_EXEC"];
+
+function resize() {
+    bcvs.width = window.innerWidth;
+    bcvs.height = window.innerHeight;
+    const colCount = Math.floor(bcvs.width / 20);
+    columns = new Array(colCount).fill(0).map(() => ({
+        y: Math.random() * bcvs.height,
+        v: 2 + Math.random() * 5,
+        text: ""
+    }));
 }
+window.onresize = resize; resize();
 
-// ═══ BACKGROUND ANIMATION (Scanner) ═══
-const bgCanvas = document.getElementById('scannerCanvas');
-const bctx = bgCanvas.getContext('2d');
-let drops = [];
-const chars = "0123456789ABCDEF!@#$%&*+";
-
-function initScanner() {
-    bgCanvas.width = window.innerWidth;
-    bgCanvas.height = window.innerHeight;
-    const cols = Math.floor(bgCanvas.width / 20);
-    drops = new Array(cols).fill(0).map(() => Math.random() * bgCanvas.height);
+function drawScanner() {
+    bctx.fillStyle = 'rgba(0,0,0,0.1)';
+    bctx.fillRect(0, 0, bcvs.width, bcvs.height);
+    bctx.font = '14px monospace';
+    
+    columns.forEach(c => {
+        if(Math.random() > 0.98 || c.text === "") {
+            c.text = Math.random() > 0.9 ? vulnData[Math.floor(Math.random()*vulnData.length)] : Math.random().toString(16).slice(2,4).toUpperCase();
+        }
+        bctx.fillStyle = c.text.length > 2 ? '#f33' : '#0f0';
+        bctx.fillText(c.text, columns.indexOf(c) * 20, c.y);
+        c.y += c.v;
+        if(c.y > bcvs.height) c.y = -20;
+    });
+    requestAnimationFrame(drawScanner);
 }
-window.onresize = initScanner; initScanner();
+drawScanner();
 
-function runScanner() {
-    bctx.fillStyle = 'rgba(0,0,0,0.05)';
-    bctx.fillRect(0,0,bgCanvas.width,bgCanvas.height);
-    bctx.font = '15px monospace';
-    for(let i=0; i<drops.length; i++) {
-        const char = chars[Math.floor(Math.random()*chars.length)];
-        bctx.fillStyle = Math.random() > 0.99 ? '#f33' : '#0f0'; // Random vuln highlight
-        bctx.fillText(char, i*20, drops[i]);
-        drops[i] += 20;
-        if(drops[i] > bgCanvas.height && Math.random() > 0.98) drops[i] = 0;
-    }
-    requestAnimationFrame(runScanner);
-}
-runScanner();
-
-// ═══ OSCILLOSCOPE ═══
-const scopeCanvas = document.getElementById('scope');
-const sctx = scopeCanvas.getContext('2d');
-function renderScope() {
-    requestAnimationFrame(renderScope);
-    if(!analyser) return;
-    const data = new Uint8Array(analyser.frequencyBinCount);
-    analyser.getByteTimeDomainData(data);
-    sctx.fillStyle = '#000'; sctx.fillRect(0,0,scopeCanvas.width,scopeCanvas.height);
+// ═══ LIVE OSCILLOSCOPE ═══
+const scvs = document.getElementById('scope');
+const sctx = scvs.getContext('2d');
+function drawScope() {
+    requestAnimationFrame(drawScope);
+    if(!ana) return;
+    const data = new Uint8Array(ana.frequencyBinCount);
+    ana.getByteTimeDomainData(data);
+    sctx.fillStyle = 'rgba(0,0,0,0.2)'; // Phosphor persistence
+    sctx.fillRect(0,0,scvs.width,scvs.height);
     sctx.lineWidth = 2; sctx.strokeStyle = '#39ff14';
     sctx.beginPath();
-    let x = 0; const step = scopeCanvas.width/data.length;
+    let x = 0; const step = scvs.width/data.length;
     for(let i=0; i<data.length; i++) {
-        let v = data[i]/128.0; let y = v * scopeCanvas.height/2;
+        let v = data[i]/128.0; let y = v * scvs.height/2;
         if(i===0) sctx.moveTo(x,y); else sctx.lineTo(x,y);
         x += step;
     }
     sctx.stroke();
 }
-renderScope();
+drawScope();
 
-// ═══ CORE LOGIC ═══
-async function connectLink(role) {
-    const channel = document.getElementById('freq').value;
+// ═══ CORE AUDIO & MQTT ═══
+function log(m, t="sysLog", c="") {
+    const el = document.getElementById(t);
+    const d = document.createElement('div');
+    if(c) d.style.color = c;
+    d.innerText = `> ${m}`;
+    el.appendChild(d); el.scrollTop = el.scrollHeight;
+    if(el.childNodes.length > 20) el.removeChild(el.firstChild);
+}
+
+async function startUplink(role) {
+    const channel = document.getElementById('ch').value;
     const pass = document.getElementById('key').value;
-    writeLog(`STARTING ${role.toUpperCase()}...`, "sysLog", "var(--g)");
+    log(`ESTABLISHING ${role.toUpperCase()}...`, "sysLog", "var(--g)");
 
     try {
-        micStream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation:true, noiseSuppression:true}});
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const src = audioCtx.createMediaStreamSource(micStream);
-        analyser = audioCtx.createAnalyser(); src.connect(analyser);
+        mic = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation:true}});
+        actx = new (window.AudioContext || window.webkitAudioContext)();
+        const src = actx.createMediaStreamSource(mic);
+        ana = actx.createAnalyser(); src.connect(ana);
 
-        const proc = audioCtx.createScriptProcessor(2048, 1, 1);
-        let txBuffer = [];
+        const proc = actx.createScriptProcessor(2048, 1, 1);
+        let txBuf = [];
         proc.onaudioprocess = (e) => {
-            if(!isTransmitting) return;
-            txBuffer.push(...e.inputBuffer.getChannelData(0));
-            if(txBuffer.length >= SAMPLE_RATE * 0.12) {
-                transmitChunk(txBuffer.splice(0, SAMPLE_RATE * 0.12), channel, role);
-            }
+            if(!isTx) return;
+            txBuf.push(...e.inputBuffer.getChannelData(0));
+            if(txBuf.length >= SR * 0.12) transmit(txBuf.splice(0, SR * 0.12), channel, role);
         };
-        analyser.connect(proc); proc.connect(audioCtx.destination);
-        outGain = audioCtx.createGain(); outGain.gain.value = 1.5; outGain.connect(audioCtx.destination);
+        ana.connect(proc); proc.connect(actx.destination);
+        pG = actx.createGain(); pG.gain.value = 1.6; pG.connect(actx.destination);
 
-        const encoder = new TextEncoder();
-        const keyMaterial = await crypto.subtle.importKey('raw', encoder.encode(pass), 'PBKDF2', false, ['deriveKey']);
-        cipherKey = await crypto.subtle.deriveKey({name:'PBKDF2', salt:encoder.encode('OMNI_SALT'), iterations:1000, hash:'SHA-256'}, keyMaterial, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
+        const enc = new TextEncoder();
+        const km = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
+        ck = await crypto.subtle.deriveKey({name:'PBKDF2', salt:enc.encode('X'), iterations:1000, hash:'SHA-256'}, km, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
 
-        mqttClient = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
-        mqttClient.on('connect', () => {
-            document.getElementById('linkStat').innerText = "ACTIVE";
-            document.getElementById('linkStat').style.color = "var(--g)";
+        mc = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
+        mc.on('connect', () => {
+            document.getElementById('lSt').innerText = "ACTIVE";
             document.getElementById('ptt').disabled = false;
-            mqttClient.subscribe(`${TOPIC_ROOT}${channel}/${role==='host'?'client':'host'}`);
-            setInterval(() => mqttClient.publish(`${TOPIC_ROOT}${channel}/ping`, JSON.stringify({t:Date.now(), r:role})), 3000);
+            mc.subscribe(`${TP}${channel}/${role==='host'?'client':'host'}`);
+            setInterval(() => mc.publish(`${TP}${channel}/ping`, JSON.stringify({t:Date.now(), r:role})), 3000);
         });
 
-        mqttClient.on('message', async (topic, payload) => {
+        mc.on('message', async (topic, pay) => {
             if(topic.includes('ping')) {
-                const data = JSON.parse(new TextDecoder().decode(payload));
-                if(data.r !== role) document.getElementById('latStat').innerText = (Date.now() - data.t) + "ms";
+                const d = JSON.parse(new TextDecoder().decode(pay));
+                if(d.r !== role) document.getElementById('tSt').innerText = (Date.now()-d.t)+"ms";
                 return;
             }
             try {
-                const iv = payload.slice(0, 12);
-                const decrypted = await crypto.subtle.decrypt({name:'AES-GCM', iv}, cipherKey, payload.slice(12));
-                writeLog(`IN: ${payload.byteLength}B`, "pktLog");
-                playAudio(decrypted);
-            } catch(e) { 
-                dropCount++; 
-                document.getElementById('dropStat').innerText = dropCount;
-                document.getElementById('dropStat').classList.add('alert');
-                setTimeout(()=>document.getElementById('dropStat').classList.remove('alert'), 400);
-            }
+                const iv = pay.slice(0, 12);
+                const dec = await crypto.subtle.decrypt({name:'AES-GCM', iv}, ck, pay.slice(12));
+                log(`IN: ${pay.byteLength}B`, "pktLog");
+                play(dec);
+            } catch(e) { drops++; document.getElementById('dSt').innerText = drops; }
         });
 
         const ptt = document.getElementById('ptt');
-        const press = () => { isTransmitting = true; writeLog("TX_UPLINK ACTIVE", "sysLog", "var(--r)"); };
-        const release = () => { isTransmitting = false; writeLog("STANDBY", "sysLog"); };
-        ptt.onmousedown = press; ptt.onmouseup = release;
-        ptt.ontouchstart = (e) => { e.preventDefault(); press(); };
-        ptt.ontouchend = (e) => { e.preventDefault(); release(); };
+        const down = () => { isTx=true; log("TX ACTIVE", "sysLog", "var(--r)"); };
+        const up = () => { isTx=false; log("STANDBY", "sysLog"); };
+        ptt.onmousedown = down; ptt.onmouseup = up;
+        ptt.ontouchstart = (e) => { e.preventDefault(); down(); };
+        ptt.ontouchend = (e) => { e.preventDefault(); up(); };
 
-    } catch(err) { writeLog("FAIL: " + err.message, "sysLog", "var(--r)"); }
+    } catch(err) { log("ERR: " + err.message, "sysLog", "var(--r)"); }
 }
 
-async function transmitChunk(samples, ch, role) {
-    const int16 = new Int16Array(samples.length);
-    for(let i=0; i<samples.length; i++) int16[i] = samples[i] * 32767;
+async function transmit(samples, ch, role) {
+    const i16 = new Int16Array(samples.length);
+    for(let i=0; i<samples.length; i++) i16[i] = samples[i] * 32767;
     const iv = crypto.getRandomValues(new Uint8Array(12));
-    const encrypted = await crypto.subtle.encrypt({name:'AES-GCM', iv}, cipherKey, int16.buffer);
-    const packet = new Uint8Array(12 + encrypted.byteLength);
-    packet.set(iv); packet.set(new Uint8Array(encrypted), 12);
-    mqttClient.publish(`${TOPIC_ROOT}${ch}/${role}`, packet, {qos:0});
-    writeLog(`OUT: ${packet.byteLength}B`, "pktLog", "#fff");
+    const enc = await crypto.subtle.encrypt({name:'AES-GCM', iv}, ck, i16.buffer);
+    const pkt = new Uint8Array(12 + enc.byteLength);
+    pkt.set(iv); pkt.set(new Uint8Array(enc), 12);
+    mc.publish(`${TP}${ch}/${role}`, pkt, {qos:0});
+    log(`OUT: ${pkt.byteLength}B`, "pktLog", "#fff");
 }
 
-function playAudio(data) {
-    const i16 = new Int16Array(data);
-    const f32 = new Float32Array(i16.length);
+function play(d) {
+    const i16 = new Int16Array(d); const f32 = new Float32Array(i16.length);
     for(let i=0; i<i16.length; i++) f32[i] = i16[i] / 32768;
-    const buffer = audioCtx.createBuffer(1, f32.length, SAMPLE_RATE);
-    buffer.getChannelData(0).set(f32);
-    const source = audioCtx.createBufferSource();
-    source.buffer = buffer; source.connect(outGain);
-    let start = Math.max(audioCtx.currentTime + 0.045, nextPlayTime); // 45ms Jitter Buffer
-    source.start(start);
-    nextPlayTime = start + buffer.duration;
+    const buf = actx.createBuffer(1, f32.length, SR);
+    buf.getChannelData(0).set(f32);
+    const src = actx.createBufferSource();
+    src.buffer = buf; src.connect(pG);
+    let start = Math.max(actx.currentTime + 0.05, nxt);
+    src.start(start);
+    nxt = start + buf.duration;
 }
 
-function triggerBurst() {
-    if(!audioCtx || !analyser) return;
-    const osc = audioCtx.createOscillator(); osc.type = 'sine';
-    osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
-    const g = audioCtx.createGain(); g.gain.value = 0.15;
-    osc.connect(g); g.connect(analyser);
-    osc.start(); osc.stop(audioCtx.currentTime + 0.08);
+function emitBurst() {
+    if(!actx || !ana) return;
+    const o = actx.createOscillator(); o.type = 'square';
+    o.frequency.setValueAtTime(1000, actx.currentTime);
+    const g = actx.createGain(); g.gain.value = 0.1;
+    o.connect(g); g.connect(ana);
+    o.start(); o.stop(actx.currentTime + 0.1);
 }
 </script>
 </body>
