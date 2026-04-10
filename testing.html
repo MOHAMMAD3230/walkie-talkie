@@ -3,77 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAC/COM v10.8 | PRO_TACTICAL</title>
+    <title>TAC/COM v11.4 | UNIVERSAL_MOBILE_FRIENDLY</title>
     <script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.4/dist/mqtt.min.js"></script>
     <style>
-        :root{--neon-g:#39ff14;--neon-b:#00d4ff;--neon-r:#ff3131;--neon-y:#ffcc00;--case:#111;--metal:#2a2a2a}
-        *{box-sizing: border-box; touch-action: manipulation;}
-        body{background:#000;color:var(--neon-g);font-family:'Courier New',monospace;margin:0;overflow:hidden;display:flex;justify-content:center;align-items:center;min-height:100vh}
+        :root {
+            --g: #39ff14; --b: #00d4ff; --r: #ff3131; --y: #ffcc00;
+            --case: #1a1a1a; --chassis-w: clamp(300px, 92vw, 360px);
+        }
+        * { box-sizing: border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+        body {
+            background: #000; color: var(--g); font-family: 'Courier New', monospace;
+            margin: 0; padding: 10px; min-height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            overflow-x: hidden;
+        }
         
-        #scannerCanvas{position:fixed;inset:0;z-index:-1;opacity:0.12}
+        #scannerCanvas { position: fixed; inset: 0; z-index: -1; opacity: 0.08; }
 
-        /* Rugged Industrial Chassis */
+        /* Responsive Chassis */
         .chassis {
-            width: 92vw; max-width: 320px; background: var(--case);
-            border: 8px solid #222; border-radius: 30px 30px 50px 50px;
-            padding: 15px; box-shadow: inset 0 0 40px #000, 0 30px 60px #000;
-            position: relative; border-bottom: 15px solid #0a0a0a;
+            width: var(--chassis-w);
+            min-height: 85vh; max-height: 95vh;
+            background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
+            border: 10px solid #252525; border-radius: 25px 25px 60px 60px;
+            padding: 20px; box-shadow: inset 0 0 50px #000, 0 30px 80px rgba(0,0,0,0.8);
+            position: relative; border-bottom: 25px solid #080808;
+            display: flex; flex-direction: column; gap: 10px;
         }
 
-        /* Hardware Details */
-        .antenna {position:absolute; top:-45px; left:30px; width:15px; height:60px; background:#111; border-radius:5px; border:2px solid #222}
-        .knob {position:absolute; top:-25px; right:40px; width:40px; height:35px; background:linear-gradient(90deg, #111, #333, #111); border-radius:5px; border:2px solid #222}
+        /* Top Hardware Detail - Scaled for Mobile */
+        .antenna { position: absolute; top: -50px; left: 15%; width: 18px; height: 70px; background: #111; border: 3px solid #333; border-radius: 4px; }
+        .knob { position: absolute; top: -35px; right: 15%; width: 50px; height: 45px; background: repeating-linear-gradient(90deg, #111, #111 4px, #222 4px, #222 8px); border: 2px solid #333; border-radius: 6px; }
 
-        /* LED Status Cluster */
-        .led-cluster {display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 10px;}
-        .led { width: 10px; height: 10px; border-radius: 50%; background: #1a0000; transition: 0.3s; }
-        .blink {animation: led-blink 0.6s infinite;}
-        @keyframes led-blink { 50% { opacity: 0.2; } }
-
-        /* Small Power Buttons */
-        .power-strip {display:flex; gap:8px; margin-bottom:12px; justify-content: center;}
-        .pwr-btn {
-            width: 80px; padding: 6px; font-family:inherit; font-weight:900; font-size:0.6rem;
-            cursor:pointer; border:2px solid #333; text-transform:uppercase; background:#050505;
-            transition: 0.2s; color: #444;
+        /* RF_RSSI Signal - Always visible top-left */
+        .net-monitor {
+            align-self: flex-start; display: flex; flex-direction: column; gap: 3px;
+            padding: 8px; background: #000; border: 1px solid #222; border-radius: 4px;
         }
-        .pwr-on.active { color: var(--neon-g); border-color: var(--neon-g); box-shadow: 0 0 10px var(--neon-g); }
-        .pwr-off.active { color: var(--neon-r); border-color: var(--neon-r); box-shadow: 0 0 10px var(--neon-r); }
+        .sig-bars { display: flex; gap: 3px; align-items: flex-end; height: 16px; }
+        .bar { width: 4px; background: #0a0a0a; transition: 0.3s; }
+        .bar:nth-child(1) { height: 4px; }
+        .bar:nth-child(2) { height: 7px; }
+        .bar:nth-child(3) { height: 10px; }
+        .bar:nth-child(4) { height: 13px; }
+        .bar:nth-child(5) { height: 16px; }
 
-        /* Constant Hardware Screen */
-        .screen-frame {
-            background: #050505; border: 5px solid #2a2a2a; border-radius: 8px; padding: 8px;
-            margin-bottom: 15px; position: relative; height: 140px;
-            box-shadow: inset 0 0 15px #000; transition: background 0.4s;
+        .sig-red .bar { background: var(--r); box-shadow: 0 0 8px var(--r); }
+        .sig-yellow .bar { background: var(--y); box-shadow: 0 0 8px var(--y); }
+        .sig-green .bar { background: var(--g); box-shadow: 0 0 8px var(--g); }
+
+        /* Mechanical Switches */
+        .pwr-strip { display: flex; gap: 10px; justify-content: center; }
+        .mech-btn {
+            flex: 1; padding: 12px 5px; background: #1a1a1a; color: #333; font-weight: 900; font-size: 0.65rem;
+            border: 1px solid #333; border-bottom: 5px solid #000; cursor: pointer; border-radius: 4px;
+            text-transform: uppercase; transition: 0.1s;
         }
-        .lit.screen-frame { background: #001200; border-color: #3a3a3a; box-shadow: inset 0 0 30px rgba(0,255,0,0.1); }
-        
-        #scope {width:100%; height:60px; opacity:0; transition: opacity 0.5s}
-        .lit #scope {opacity:1}
+        .mech-btn:active { transform: translateY(3px); border-bottom-width: 2px; }
+        .pwr-on.active { color: var(--g); border-color: var(--g); }
+        .pwr-off.active { color: var(--r); border-color: var(--r); }
 
-        .monitor {
-            height: 50px; overflow-y:auto; font-size:0.65rem; font-weight:bold; 
-            padding:5px; scrollbar-width:none; opacity:0; line-height:1.2;
+        /* LCD Field Screen */
+        .screen {
+            background: #050505; border: 4px solid #222; border-radius: 4px; padding: 10px;
+            height: 140px; position: relative; box-shadow: inset 0 0 25px #000;
         }
-        .lit .monitor {opacity:1}
+        .lit.screen { background: #000a00; border-color: #333; }
+        #scope { width: 100%; height: 60px; opacity: 0; }
+        .lit #scope { opacity: 1; }
 
-        /* Control Input Grid */
-        .input-grid {display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 12px;}
-        .field { background:#000; border:1px solid #333; color:var(--neon-b); padding:6px; font-family:inherit; font-size:0.8rem; font-weight:bold; text-align:center; width:100%; }
-        .link-btn { padding:8px; font-family:inherit; font-weight:900; font-size:0.65rem; cursor:pointer; border:1px solid #444; background:#0a0a0a; color:#555; text-transform:uppercase; }
-        .active-link { border-color: var(--neon-b); color: var(--neon-b); box-shadow: 0 0 8px var(--neon-b); }
+        /* Controls Grid */
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .field { background: #000; border: 2px solid #222; color: var(--b); padding: 10px; font-family: inherit; text-align: center; width: 100%; font-size: 0.9rem; font-weight: bold; border-radius: 4px; }
+        .field:focus { border-color: var(--b); outline: none; }
+        .link-btn.active-link { border-color: var(--b); color: var(--b); }
 
-        /* PTT Hardware Button */
-        .ptt-wrap { background: #111; padding: 10px; border-radius: 50%; width: 110px; height: 110px; margin: 0 auto; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px #000;}
-        .ptt-btn {
-            width:90px; height:90px; background:#1a0000; border:4px solid #300; 
-            border-radius:50%; color:#300; font-weight:900; font-size:1.1rem; 
-            cursor:pointer; transition: 0.1s;
+        /* PTT Lever - Central Action Area */
+        .ptt-box { flex-grow: 1; display: flex; align-items: center; justify-content: center; }
+        .ptt-lever {
+            width: 80%; height: 70px; background: #0a0a0a; border: 3px solid #1a1a1a;
+            border-bottom: 8px solid #000; border-radius: 12px; color: #1a1a1a; font-weight: 900;
+            font-size: 1.1rem; cursor: not-allowed; letter-spacing: 2px; transition: 0.1s;
+            pointer-events: none;
         }
-        .ptt-btn.ready { border-color: var(--neon-r); color: var(--neon-r); box-shadow: 0 0 15px rgba(255,0,0,0.2); }
-        .ptt-btn:active:not(:disabled) { background:var(--neon-r); color:#000; transform: scale(0.95); }
+        .ptt-lever.unlocked { background: #1a0000; border-color: #300; color: #300; cursor: pointer; pointer-events: auto; }
+        .ptt-lever.unlocked.ready { border-color: var(--r); color: var(--r); }
+        .ptt-lever.unlocked:active { transform: translateY(6px); border-bottom-width: 2px; background: var(--r); color: #000; }
 
-        .footer {margin-top:15px; font-size:0.5rem; font-weight:bold; display:flex; justify-content:space-between; color:#333; border-top: 1px solid #222; padding-top: 5px;}
+        /* Stats Footer */
+        .stats-footer { border-top: 2px solid #222; padding-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+        .stat { display: flex; justify-content: space-between; font-size: 0.6rem; font-weight: 900; color: #444; }
+        .val { color: #555; transition: 0.3s; }
+        .lit .val.con { color: var(--g); text-shadow: 0 0 8px var(--g); }
+
+        @media (max-height: 600px) {
+            .chassis { min-height: 95vh; padding: 10px; gap: 5px; }
+            .screen { height: 100px; }
+            .ptt-lever { height: 50px; }
+        }
     </style>
 </head>
 <body>
@@ -84,50 +111,51 @@
     <div class="antenna"></div>
     <div class="knob"></div>
 
-    <div class="led-cluster">
-        <span style="font-size:0.5rem; color:#444">LINK_STATE:</span>
-        <div id="statusLed" class="led"></div>
+    <div id="rssi" class="net-monitor">
+        <div style="font-size: 0.4rem; color: #222; font-weight: 900; margin-bottom: 2px;">RF_RSSI</div>
+        <div class="sig-bars">
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
     </div>
 
-    <div class="power-strip">
-        <button id="bOn" class="pwr-btn pwr-on" onclick="pwr(true)">ON</button>
-        <button id="bOff" class="pwr-btn pwr-off active" onclick="pwr(false)">OFF</button>
+    <div class="pwr-strip">
+        <button id="bOn" class="mech-btn pwr-on" onclick="pwr(true)">Pwr On</button>
+        <button id="bOff" class="mech-btn pwr-off active" onclick="pwr(false)">Pwr Off</button>
     </div>
 
-    <div class="screen-frame" id="scr">
-        <div style="font-size: 0.5rem; color: #222; margin-bottom: 2px;">V_OSCILLOSCOPE</div>
+    <div class="screen" id="scr">
         <canvas id="scope"></canvas>
-        <div id="sys" class="monitor" style="color:var(--neon-g)"></div>
+        <div id="sys" style="height:50px; overflow-y:auto; font-size:0.65rem; opacity:0; color:var(--g); padding:5px;"></div>
     </div>
 
     <div class="input-grid">
         <input type="number" id="ch" class="field" value="88">
         <input type="password" id="key" class="field" value="TAC">
-        <button id="hBtn" class="link-btn" onclick="conn('host')">Host</button>
-        <button id="jBtn" class="link-btn" onclick="conn('client')">Join</button>
+        <button id="hBtn" class="mech-btn link-btn" onclick="conn('host')">Host</button>
+        <button id="jBtn" class="mech-btn link-btn" onclick="conn('client')">Join</button>
     </div>
 
-    <div class="ptt-wrap">
-        <button id="ptt" class="ptt-btn" disabled>TALK</button>
+    <div class="ptt-box">
+        <button id="ptt" class="ptt-lever">LOCKED</button>
     </div>
 
-    <div class="footer">
-        <span>RF_LINK: <span id="mSt" style="color:#555">DISCONNECTED</span></span>
-        <span>DROP: <span id="dSt" style="color:#555">0</span></span>
+    <div class="stats-footer">
+        <div class="stat"><span>RF_LINK_STATE:</span><span id="rfSt" class="val">OFFLINE</span></div>
+        <div class="stat"><span>PKT_LATENCY:</span><span id="latSt" class="val">--</span></div>
     </div>
 </div>
 
 <script>
-let mc, mic, actx, ana, pG, ck, isTx=false, nxt=0, isPwr=false;
-const SR=12000, TP='tactical_v10_8/';
+let mc, mic, actx, ana, pG, ck, isTx=false, isPwr=false, isConn=false, nxt=0;
+const SR=12000, TP='uni_v11_4/';
 
-function setLed(mode) {
-    const led = document.getElementById('statusLed');
-    led.className = "led blink";
-    if(mode === 'red') led.style.background = "var(--neon-r)", led.style.boxShadow = "0 0 10px var(--neon-r)";
-    if(mode === 'orange') led.style.background = "var(--neon-y)", led.style.boxShadow = "0 0 10px var(--neon-y)";
-    if(mode === 'green') led.style.background = "var(--neon-g)", led.style.boxShadow = "0 0 10px var(--neon-g)";
-    if(mode === 'off') led.className = "led", led.style.background = "#1a0000", led.style.boxShadow = "none";
+function setRssiColor(ping) {
+    const rssi = document.getElementById('rssi');
+    rssi.classList.remove('sig-red', 'sig-yellow', 'sig-green');
+    if (!isConn) return; 
+    if (ping < 150) rssi.classList.add('sig-green');
+    else if (ping < 300) rssi.classList.add('sig-yellow');
+    else rssi.classList.add('sig-red');
 }
 
 function pwr(s) {
@@ -135,21 +163,12 @@ function pwr(s) {
     const scr = document.getElementById('scr');
     document.getElementById('bOn').classList.toggle('active', s);
     document.getElementById('bOff').classList.toggle('active', !s);
-    
     if(s) {
         scr.classList.add('lit');
-        setLed('red');
-        log("SYS_START...");
+        document.getElementById('sys').style.opacity = "1";
+        log("MOBILE_LINK_OK...");
     } else {
-        scr.classList.remove('lit');
-        setLed('off');
-        if(mc) mc.end(); if(mic) mic.getTracks().forEach(t=>t.stop());
-        document.getElementById('ptt').disabled = true;
-        document.getElementById('ptt').classList.remove('ready');
-        document.getElementById('hBtn').classList.remove('active-link');
-        document.getElementById('jBtn').classList.remove('active-link');
-        document.getElementById('mSt').innerText = "DISCONNECTED";
-        document.getElementById('mSt').style.color = "#555";
+        location.reload(); 
     }
 }
 
@@ -160,7 +179,6 @@ function log(m) {
     el.appendChild(d); el.scrollTop = el.scrollHeight;
 }
 
-// ═══ BG & SCOPE ═══
 const bcvs = document.getElementById('scannerCanvas');
 const bctx = bcvs.getContext('2d');
 let bgCols = [];
@@ -171,11 +189,11 @@ function initBg() {
 window.onresize = initBg; initBg();
 
 function draw() {
-    bctx.fillStyle = 'rgba(0,0,0,0.12)'; bctx.fillRect(0,0,bcvs.width,bcvs.height);
-    bctx.font = 'bold 12px monospace'; bctx.fillStyle = '#020';
+    bctx.fillStyle = 'rgba(0,0,0,0.1)'; bctx.fillRect(0,0,bcvs.width,bcvs.height);
+    bctx.font = 'bold 12px monospace'; bctx.fillStyle = '#010';
     bgCols.forEach((y, i) => {
         bctx.fillText(Math.random()>0.8?"1":"0", i*20, y);
-        bgCols[i] = y > bcvs.height ? 0 : y + 12;
+        bgCols[i] = y > bcvs.height ? 0 : y + 10;
     });
     
     if(ana && isPwr) {
@@ -184,7 +202,7 @@ function draw() {
         const data = new Uint8Array(ana.frequencyBinCount);
         ana.getByteTimeDomainData(data);
         sctx.clearRect(0,0,scvs.width,scvs.height);
-        sctx.lineWidth = 3; sctx.strokeStyle = '#39ff14';
+        sctx.lineWidth = 4; sctx.strokeStyle = '#39ff14';
         sctx.beginPath();
         let x = 0; const step = scvs.width/data.length;
         for(let i=0; i<data.length; i++) {
@@ -199,10 +217,9 @@ function draw() {
 draw();
 
 async function conn(role) {
-    if(!isPwr) return;
-    setLed('orange');
+    if(!isPwr || isConn) return;
     document.getElementById(role==='host'?'hBtn':'jBtn').classList.add('active-link');
-    const channel = document.getElementById('ch').value;
+    const ch = document.getElementById('ch').value;
     const pass = document.getElementById('key').value;
     
     try {
@@ -211,23 +228,28 @@ async function conn(role) {
         const src = actx.createMediaStreamSource(mic);
         ana = actx.createAnalyser(); src.connect(ana);
         const proc = actx.createScriptProcessor(2048, 1, 1);
-        proc.onaudioprocess = (e) => { if(isTx) transmit(e.inputBuffer.getChannelData(0), channel, role); };
+        proc.onaudioprocess = (e) => { if(isTx) transmit(e.inputBuffer.getChannelData(0), ch, role); };
         ana.connect(proc); proc.connect(actx.destination);
-        pG = actx.createGain(); pG.gain.value = 2.0; pG.connect(actx.destination);
+        pG = actx.createGain(); pG.gain.value = 2.5; pG.connect(actx.destination);
 
         const enc = new TextEncoder();
         const km = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
         ck = await crypto.subtle.deriveKey({name:'PBKDF2', salt:enc.encode('X'), iterations:1000, hash:'SHA-256'}, km, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
 
+        const start = Date.now();
         mc = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
         mc.on('connect', () => {
-            setLed('green');
-            document.getElementById('mSt').innerText = "SECURE_LINK";
-            document.getElementById('mSt').style.color = "var(--neon-g)";
-            document.getElementById('ptt').disabled = false;
-            document.getElementById('ptt').classList.add('ready');
-            mc.subscribe(`${TP}${channel}/${role==='host'?'client':'host'}`);
-            log("UPLINK_SUCCESS");
+            const lat = Date.now() - start;
+            isConn = true;
+            setRssiColor(lat);
+            document.getElementById('latSt').innerText = lat + "ms";
+            document.getElementById('rfSt').innerText = "SECURE_LINK";
+            document.getElementById('rfSt').className = "val con";
+            const ptt = document.getElementById('ptt');
+            ptt.innerText = "TALK";
+            ptt.classList.add('unlocked', 'ready');
+            mc.subscribe(`${TP}${ch}/${role==='host'?'client':'host'}`);
+            log("UPLINK_STABLE");
         });
 
         mc.on('message', async (t, pay) => {
@@ -235,16 +257,16 @@ async function conn(role) {
                 const iv = pay.slice(0, 12);
                 const dec = await crypto.subtle.decrypt({name:'AES-GCM', iv}, ck, pay.slice(12));
                 play(dec);
-            } catch(e) { }
+            } catch(e) {}
         });
 
         const ptt = document.getElementById('ptt');
-        const down = (e) => { e.preventDefault(); isTx = true; };
-        const up = (e) => { e.preventDefault(); isTx = false; };
+        const down = (e) => { if(isConn) { e.preventDefault(); isTx = true; } };
+        const up = (e) => { if(isConn) { e.preventDefault(); isTx = false; } };
         ptt.onmousedown = down; ptt.onmouseup = up;
         ptt.ontouchstart = down; ptt.ontouchend = up;
 
-    } catch(err) { setLed('red'); log("FAIL: ACCESS"); }
+    } catch(err) { log("MIC_DENIED"); }
 }
 
 async function transmit(samples, ch, role) {
