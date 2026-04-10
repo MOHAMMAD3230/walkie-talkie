@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAC/COM-04 | HOST-JOIN FIXED</title>
+    <title>TAC/COM-04 | AIRtel 5G FIXED</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root { --amber: #ffb000; --bg: #0d0900; --red: #8c3024; --blue: #00d4ff; --green: #39ff14; }
@@ -11,7 +11,7 @@
         .mainframe { width: 95%; max-width: 850px; background: #222; border: 6px solid #111; padding: 15px; display: flex; flex-direction: column; box-shadow: 0 0 60px #000; box-sizing: border-box; }
         @media (min-width: 768px) { .mainframe { display: grid; grid-template-columns: 1fr 320px; height: 700px; gap: 20px; } }
         .monitor { background: var(--bg); border: 10px solid #1a1a1a; border-radius: 15px; padding: 20px; flex-grow: 1; display: flex; flex-direction: column; box-shadow: inset 0 0 20px #000; }
-        #output { height: 360px; overflow-y: auto; font-size: 0.78rem; scrollbar-width: none; border-bottom: 1px solid #333; margin-bottom: 12px; color: var(--amber); }
+        #output { height: 380px; overflow-y: auto; font-size: 0.78rem; scrollbar-width: none; border-bottom: 1px solid #333; margin-bottom: 12px; color: var(--amber); }
         .module { background: #111; padding: 12px; border: 1px solid #333; margin-bottom: 10px; }
         .btn-ptt { width: 100%; height: 145px; background: var(--red); color: white; border: 5px solid #5e1e16; font-weight: bold; font-size: 1.35rem; cursor: pointer; transition: 0.1s; box-shadow: 0 6px 0 #401010; }
         .btn-ptt:active:not(:disabled) { background: #f00; transform: translateY(4px); box-shadow: 0 2px 0 #401010; }
@@ -33,7 +33,7 @@
             <span>FREQ: <span id="curFreq" style="color:var(--blue)">UNSET</span></span>
             <span>UPLINK: <span id="stat">OFFLINE</span></span>
         </div>
-        <div id="output"><div>> WiFi (Host) + Airtel 5G (Join) MODE</div></div>
+        <div id="output"><div>> Airtel 5G + WiFi OPTIMIZED</div></div>
         <div id="meter"><div id="meter-fill"></div></div>
     </div>
     <div class="side-panel">
@@ -44,7 +44,7 @@
             <input type="password" id="secretInput" value="tacsecure2026">
             
             <button class="btn-action" onclick="startAsHost()" style="border-color:var(--green); color:var(--green);">1. START AS HOST (WiFi)</button>
-            <button class="btn-action" onclick="startAsJoin()" style="background:#006600;">2. JOIN AS CLIENT (5G)</button>
+            <button class="btn-action" onclick="startAsJoin()" style="background:#006600;">2. JOIN AS CLIENT (Airtel 5G)</button>
         </div>
         <div class="module" style="text-align:center;">
             <button class="btn-ptt" id="pttBtn" disabled>HOLD TO TALK</button>
@@ -69,7 +69,7 @@
         div.style.color = color;
         out.appendChild(div);
         out.scrollTop = out.scrollHeight;
-        console.log(msg);
+        console.log("[TAC]", msg);
     }
 
     async function deriveKey(password) {
@@ -98,7 +98,7 @@
     async function startAsHost() {
         const chan = document.getElementById('chanInput').value.trim();
         const pass = document.getElementById('secretInput').value.trim();
-        if (!chan) return log("ENTER CHANNEL", "red");
+        if (!chan) return log("ENTER CHANNEL NUMBER", "red");
 
         try {
             await initAudio();
@@ -106,14 +106,18 @@
             const fullId = APP_PREFIX + chan;
 
             peer = new Peer(fullId, {
-                config: { iceServers: [
-                    { urls: "stun:stun.l.google.com:19302" },
-                    { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
-                    { urls: "turn:global.relay.metered.ca:443", username: "metered", credential: "metered" }
-                ]}
+                config: {
+                    iceServers: [
+                        { urls: "stun:stun.l.google.com:19302" },
+                        { urls: "stun:stun1.l.google.com:19302" },
+                        { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
+                        { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" },
+                        { urls: "turn:global.relay.metered.ca:443", username: "metered", credential: "metered" }
+                    ]
+                }
             });
 
-            peer.on('open', () => log("HOST STARTED SUCCESSFULLY - Waiting for Joiner on channel " + chan, "#39ff14"));
+            peer.on('open', () => log("HOST STARTED - Waiting for Joiner on channel " + chan, "#39ff14"));
             peer.on('connection', c => setupConnection(c));
             peer.on('error', err => log("HOST ERROR: " + err.type, "red"));
         } catch(e) {
@@ -124,7 +128,7 @@
     async function startAsJoin() {
         const chan = document.getElementById('chanInput').value.trim();
         const pass = document.getElementById('secretInput').value.trim();
-        if (!chan) return log("ENTER CHANNEL", "red");
+        if (!chan) return log("ENTER CHANNEL NUMBER", "red");
 
         try {
             await initAudio();
@@ -151,7 +155,7 @@
             document.getElementById('ledNet').classList.add('online');
             document.getElementById('pttBtn').disabled = false;
             document.getElementById('stat').innerText = "LINK ACTIVE (E2EE)";
-            log("✅ SUCCESS! SECURE LINK ESTABLISHED", "#39ff14");
+            log("✅ SUCCESS! SECURE LINK ESTABLISHED BETWEEN WiFi & 5G", "#39ff14");
         });
 
         conn.on('data', async data => {
@@ -168,7 +172,6 @@
         });
 
         conn.on('close', () => log("CONNECTION CLOSED", "red"));
-        conn.on('error', err => log("DATA ERROR: " + err, "red"));
     }
 
     function updateMeter() {
@@ -189,9 +192,8 @@
     pttBtn.ontouchstart = e => { e.preventDefault(); startPTT(); };
     pttBtn.ontouchend = e => { e.preventDefault(); stopPTT(); };
 
-    log("HOST = WiFi Device", "#39ff14");
-    log("JOIN = Airtel 5G Device", "#39ff14");
-    log("Click 1 on WiFi first, then click 2 on 5G", "#ffb000");
+    log("WiFi Device → Click 'START AS HOST'", "#39ff14");
+    log("Airtel 5G Device → Click 'JOIN AS CLIENT'", "#39ff14");
 </script>
 </body>
 </html>
