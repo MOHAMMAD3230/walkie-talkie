@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAC/COM-04 | RELAY</title>
+    <title>TAC/COM-04 | PCM DIRECT</title>
     <script async src="https://cdn.jsdelivr.net/npm/mqtt@5.10.4/dist/mqtt.min.js"></script>
     <style>
         :root{--amber:#ffb000;--bg:#0a0800;--red:#ff3333;--blue:#00d4ff;--green:#39ff14;--panel:#0c0c0c;--border:#1e1e1e;--muted:#444}
@@ -17,7 +17,7 @@
         .rx-ind.on{opacity:1}
         .topbar{font-size:.55rem;display:flex;justify-content:space-between;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid #1a1a1a;flex-wrap:wrap;gap:4px;position:relative;z-index:2}
         .topbar span{white-space:nowrap}
-        .badge{display:inline-block;padding:1px 5px;border-radius:2px;font-size:.5rem;font-weight:bold;letter-spacing:1px;background:#001a33;color:var(--blue);border:1px solid #003366}
+        .badge{display:inline-block;padding:1px 5px;border-radius:2px;font-size:.5rem;font-weight:bold;letter-spacing:1px;background:#001a00;color:var(--green);border:1px solid #003300}
         #log{flex:1;overflow-y:auto;font-size:.68rem;line-height:1.5;scrollbar-width:none;position:relative;z-index:2}
         #log::-webkit-scrollbar{display:none}
         .ln{padding:1px 0}.c-ok{color:var(--green)}.c-err{color:var(--red)}.c-warn{color:#ffaa00}.c-info{color:var(--blue)}.c-dim{color:#555}
@@ -35,10 +35,6 @@
         .abtn.h{border-color:#1a3a1a;color:var(--green)}.abtn.h:hover:not(:disabled){background:#0a150a}
         .abtn.j{background:#0a120a;border-color:#0a300a;color:var(--green)}.abtn.j:hover:not(:disabled){background:#0f1a0f}
         .abtn.r{background:#120505;color:#ff4444;border-color:#2a0000}
-        .info-box{background:#0a0a18;border:1px solid #151530;padding:10px;border-radius:3px;margin-top:4px}
-        .info-box .box-label{color:#3355aa}
-        .info-box p{font-size:.48rem;color:#445;line-height:1.5;margin:3px 0}
-        .info-box strong{color:#5577cc}
         .ptt-area{text-align:center}
         .ptt-btn{width:100%;height:130px;background:linear-gradient(180deg,#8c3024,#5a1c14);color:#fff;border:4px solid #3e1510;border-radius:8px;font-family:inherit;font-size:1.1rem;font-weight:bold;letter-spacing:2px;cursor:pointer;user-select:none;-webkit-user-select:none;box-shadow:0 5px 0 #220a06,inset 0 1px 0 rgba(255,255,255,.06);transition:all .06s}
         .ptt-btn:active:not(:disabled){transform:translateY(4px);box-shadow:0 1px 0 #220a06;background:linear-gradient(180deg,#cc3020,#882010)}
@@ -48,27 +44,26 @@
         .led-row{display:flex;justify-content:space-around;margin-top:10px;font-size:.45rem;text-transform:uppercase;letter-spacing:1px}
         .led-item{display:flex;align-items:center;gap:4px}
         .dot{width:8px;height:8px;border-radius:50%;background:#0f0505;border:1px solid #1a0505;transition:all .2s}
-        .dot.blue{background:var(--blue);box-shadow:0 0 6px var(--blue);border-color:var(--blue)}
         .dot.red{background:#f00;box-shadow:0 0 8px #f00;border-color:#f00;animation:bk .5s infinite}
         .dot.green{background:var(--green);box-shadow:0 0 6px var(--green);border-color:var(--green)}
         @keyframes bk{0%,100%{opacity:1}50%{opacity:.2}}
         .stats{font-size:.42rem;color:#333;margin-top:8px;padding-top:6px;border-top:1px solid #111;display:flex;justify-content:space-between}
-        .vol-row{display:flex;gap:4px;margin-top:6px;align-items:center}
-        .vol-row label{font-size:.42rem;color:#444;flex-shrink:0}
-        .vol-row input[type=range]{flex:1;accent-color:var(--amber);height:4px}
-        .vol-row span{font-size:.42rem;color:var(--amber);flex-shrink:0;width:24px;text-align:right}
+        .vol-row{display:flex;gap:6px;margin-top:8px;align-items:center}
+        .vol-row label{font-size:.45rem;color:#555;flex-shrink:0;letter-spacing:1px}
+        .vol-row input[type=range]{flex:1;accent-color:var(--amber);height:3px}
+        .vol-row span{font-size:.45rem;color:var(--amber);flex-shrink:0;width:28px;text-align:right}
         #libErr{display:none;position:fixed;inset:0;background:#0a0000;color:var(--red);font-family:'Courier New',monospace;font-size:.8rem;padding:40px 20px;z-index:9999;line-height:1.8;overflow-y:auto}
     </style>
 </head>
 <body>
-<div id="libErr">CRITICAL: MQTT library failed to load.<br><br>Check internet connection or disable ad blocker.</div>
+<div id="libErr">MQTT library failed to load. Check internet or disable ad blocker.</div>
 <div class="frame">
     <div class="screen">
         <div class="scanline"></div>
         <div class="rx-ind" id="rxInd">▶ RX</div>
         <div class="topbar">
             <span>CH: <span id="chD" style="color:var(--blue)">--</span></span>
-            <span class="badge">RELAY v4</span>
+            <span class="badge">RAW PCM</span>
             <span>LINK: <span id="lkD" style="color:#444">OFFLINE</span></span>
             <span>SRV: <span id="svD" style="color:#444">--</span></span>
         </div>
@@ -85,15 +80,10 @@
             <input type="password" class="field" id="fS" value="tacsecure2026">
             <button class="abtn h" id="bH" onclick="goHost()">1. HOST (WiFi device)</button>
             <button class="abtn j" id="bJ" onclick="goJoin()">2. JOIN (5G device)</button>
-            <div class="info-box">
-                <div class="box-label">Audio Tuning</div>
-                <div class="vol-row">
-                    <label>VOL</label>
-                    <input type="range" id="volSlider" min="0.5" max="4" step="0.1" value="2">
-                    <span id="volVal">2x</span>
-                </div>
-                <p><strong>Default 2x boost</strong> — adjust if too loud/quiet.</p>
-                <p>Chunk size: 250ms for reliable delivery.</p>
+            <div class="vol-row">
+                <label>VOL</label>
+                <input type="range" id="volSlider" min="0.5" max="5" step="0.1" value="3">
+                <span id="volVal">3.0x</span>
             </div>
         </div>
         <div class="box ptt-area">
@@ -106,7 +96,7 @@
             <div class="stats">
                 <span>TX: <span id="sT">0</span></span>
                 <span>RX: <span id="sR">0</span></span>
-                <span>Q: <span id="sQ">0</span></span>
+                <span>DRP: <span id="sD">0</span></span>
                 <span>LAT: <span id="sL">--</span></span>
             </div>
         </div>
@@ -119,30 +109,37 @@
 <script>
 /* Wait for MQTT library */
 (function(){
-    var errDiv=document.getElementById('libErr'),w=0;
+    var e=document.getElementById('libErr'),w=0;
     var t=setInterval(function(){
         w+=300;
-        if(typeof mqtt!=='undefined'&&mqtt.connect){clearInterval(t);errDiv.style.display='none';boot()}
-        else if(w>15000){clearInterval(t);errDiv.style.display='block'}
+        if(typeof mqtt!=='undefined'&&mqtt.connect){clearInterval(t);e.style.display='none';boot()}
+        else if(w>15000){clearInterval(t);e.style.display='block'}
     },300);
 })();
 
 /* Volume slider */
 document.getElementById('volSlider').addEventListener('input',function(){
-    document.getElementById('volVal').textContent=parseFloat(this.value).toFixed(1)+'x';
-    if(playGain)playGain.gain.value=parseFloat(this.value);
+    var v=parseFloat(this.value);
+    document.getElementById('volVal').textContent=v.toFixed(1)+'x';
+    if(playGain)playGain.gain.value=v;
 });
 
-/* ═══ STATE ═══ */
-var mc=null,micStr=null,micCtx=null,ana=null,rec=null;
-var plCtx=null,playGain=null,nxtPlay=0,ck=null;
-var role=null,isPTT=false,peerUp=false;
-var peerTmr=null,heartTmr=null,rxSilTmr=null,stopTmr=null;
-var txN=0,rxN=0,qLen=0;
-var TP='tac04v4/';
-var HB=2500,PD=8000,CHUNK_MS=250,MIN_CHUNK=80;
+/* ═══════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════ */
+var mc=null, micStr=null, micCtx=null, ana=null, scriptProc=null;
+var plCtx=null, playGain=null, nxtPlay=0, ck=null;
+var role=null, isPTT=false, peerUp=false;
+var peerTmr=null, heartTmr=null, rxSilTmr=null, sendTmr=null;
+var txN=0, rxN=0, dropN=0, lastRxSeq=-1, txSeq=0;
 
-/* Brokers ordered by reliability from India */
+/* PCM config: 16kHz mono 16-bit, 200ms chunks */
+var PCM_SR=16000, CHUNK_MS=200, CHUNK_SAMPS=PCM_SR*(CHUNK_MS/1000);
+var rawBuf=[]; /* accumulated float32 samples at native rate */
+
+var TP='tac05pcm/';
+var HB=2500, PD=8000;
+
 var BROKERS=[
     'wss://broker.emqx.io:8084/mqtt',
     'wss://broker.emqx.io:8083/mqtt',
@@ -151,22 +148,25 @@ var BROKERS=[
     'wss://broker.hivemq.com:8884/mqtt'
 ];
 
-/* ═══ LOG ═══ */
+/* ═══════════════════════════════════════
+   LOGGING
+   ═══════════════════════════════════════ */
 function L(m,c){
     c=c||'';
     var o=document.getElementById('log'),d=document.createElement('div');
     d.className='ln '+c;
-    var n=new Date();
-    var ts=(n.getHours()<10?'0':'')+n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes()+':'+(n.getSeconds()<10?'0':'')+n.getSeconds();
-    d.textContent='['+ts+'] '+m;
+    var n=new Date(),h=n.getHours(),mi=n.getMinutes(),s=n.getSeconds();
+    d.textContent='['+(h<10?'0':'')+h+':'+(mi<10?'0':'')+mi+':'+(s<10?'0':'')+s+'] '+m;
     o.appendChild(d);o.scrollTop=o.scrollHeight;
 }
 
-/* ═══ CRYPTO ═══ */
+/* ═══════════════════════════════════════
+   AES-256-GCM
+   ═══════════════════════════════════════ */
 async function dk(pw){
     var e=new TextEncoder();
     var b=await crypto.subtle.importKey('raw',e.encode(pw),'PBKDF2',false,['deriveKey']);
-    return crypto.subtle.deriveKey({name:'PBKDF2',salt:e.encode('TAC04-V4'),iterations:100000,hash:'SHA-256'},b,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+    return crypto.subtle.deriveKey({name:'PBKDF2',salt:e.encode('TAC05-PCM'),iterations:100000,hash:'SHA-256'},b,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
 }
 async function enc(buf){
     var iv=crypto.getRandomValues(new Uint8Array(12));
@@ -178,51 +178,52 @@ async function dec(d){
     return crypto.subtle.decrypt({name:'AES-GCM',iv:u.slice(0,12)},ck,u.slice(12));
 }
 
-/* ═══ MIC ═══ */
+/* ═══════════════════════════════════════
+   MICROPHONE — Raw PCM capture via ScriptProcessor
+   NO MediaRecorder, NO WebM, NO Opus, NO decodeAudioData
+   ═══════════════════════════════════════ */
 async function initMic(){
     if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)
         throw new Error('getUserMedia unavailable. Use HTTPS.');
     var s;
     try{
         s=await navigator.mediaDevices.getUserMedia({
-            audio:{
-                echoCancellation:true,
-                noiseSuppression:false,   /* OFF — preserves voice clarity */
-                autoGainControl:true,
-                /* Don't force sampleRate — let browser pick native */
-            }
+            audio:{echoCancellation:true, noiseSuppression:false, autoGainControl:true}
         });
     }catch(e){
-        var h={NotAllowedError:'Permission DENIED. Allow mic in browser settings.',NotFoundError:'No microphone found.',NotReadableError:'Mic in use by another app.',SecurityError:'HTTPS required.',OverconstrainedError:''};
-        if(e.name==='OverconstrainedError'){s=await navigator.mediaDevices.getUserMedia({audio:true})}
+        var h={NotAllowedError:'Permission DENIED. Allow mic in browser.',NotFoundError:'No mic found.',NotReadableError:'Mic in use by another app.',SecurityError:'HTTPS required.',OverconstrainedError:''};
+        if(e.name==='OverconstrainedError')s=await navigator.mediaDevices.getUserMedia({audio:true});
         else throw new Error(h[e.name]||(e.name+': '+e.message));
     }
     var tk=s.getAudioTracks();if(!tk.length)throw new Error('No audio tracks.');
-    var rate=tk[0].getSettings().sampleRate||'?';
-    L('Mic: '+tk[0].label+' ('+rate+'Hz)','c-dim');
-    micStr=s;micCtx=new(window.AudioContext||window.webkitAudioContext)();
-    ana=micCtx.createAnalyser();ana.fftSize=256;ana.smoothingTimeConstant=.4;
-    micCtx.createMediaStreamSource(micStr).connect(ana);
+    micStr=s;
+    micCtx=new(window.AudioContext||window.webkitAudioContext)();
 
-    /* Pick best codec — prefer opus */
-    var mm=['audio/webm;codecs=opus','audio/webm;codecs=pcm','audio/webm',''];
-    var mi='';for(var i=0;i<mm.length;i++){if(mm[i]===''||MediaRecorder.isTypeSupported(mm[i])){mi=mm[i];break}}
-    L('Codec: '+(mi||'browser default'),'c-dim');
+    var nativeSR=micCtx.sampleRate;
+    L('Native sample rate: '+nativeSR+'Hz','c-dim');
+    L('Downsampling to '+PCM_SR+'Hz for transmission','c-dim');
 
-    rec=new MediaRecorder(s,mi?{mimeType:mi}:{});
+    /* Analyser for meter display only */
+    ana=micCtx.createAnalyser();ana.fftSize=256;ana.smoothingTimeConstant=0.4;
+    var src=micCtx.createMediaStreamSource(micStr);
+    src.connect(ana);
 
-    /* On chunk ready — filter small chunks, encrypt, publish with QoS 1 */
-    rec.ondataavailable=function(e){
-        if(!mc||!mc.connected||!isPTT||!e.data||!e.data.size)return;
-        /* Skip tiny chunks — they fail to decode on the other end */
-        if(e.data.size<MIN_CHUNK)return;
-        e.data.arrayBuffer().then(function(buf){return enc(buf)}).then(function(d){
-            mc.publish(TP+document.getElementById('fC').value.trim()+'/'+role,d,{qos:1});
-            txN++;document.getElementById('sT').textContent=txN;
-        }).catch(function(er){L('TX: '+er.message,'c-err')});
+    /* ScriptProcessor captures raw float32 samples */
+    scriptProc=micCtx.createScriptProcessor(4096,1,1);
+    scriptProc.onaudioprocess=function(e){
+        if(!isPTT)return;
+        var inp=e.inputBuffer.getChannelData(0);
+        for(var i=0;i<inp.length;i++)rawBuf.push(inp[i]);
+        /* Safety cap: don't let buffer grow beyond 3 seconds */
+        if(rawBuf.length>nativeSR*3)rawBuf=rawBuf.slice(-nativeSR*2);
     };
+    src.connect(scriptProc);
+    /* ScriptProcessor MUST connect to destination to process, but output silence */
+    var silentGain=micCtx.createGain();silentGain.gain.value=0;
+    scriptProc.connect(silentGain);silentGain.connect(micCtx.destination);
 
-    mLoop();L('Audio ready ('+CHUNK_MS+'ms chunks, QoS 1)','c-ok');
+    mLoop();
+    L('PCM capture ready ('+CHUNK_MS+'ms chunks, ~'+(CHUNK_SAMPS*2/1024).toFixed(1)+'KB each)','c-ok');
 }
 
 function mLoop(){
@@ -234,7 +235,89 @@ function mLoop(){
     requestAnimationFrame(mLoop);
 }
 
-/* ═══ PLAYBACK — Queued with GainNode ═══ */
+/* ═══════════════════════════════════════
+   DOWNSAMPLE + SEND
+   Takes accumulated native-rate samples,
+   downsamples to 16kHz, converts to Int16,
+   adds sequence number, encrypts, publishes.
+   ═══════════════════════════════════════ */
+function sendChunk(){
+    if(!isPTT||!mc||!mc.connected)return;
+    var ratio=micCtx.sampleRate/PCM_SR;
+    var srcNeeded=Math.ceil(CHUNK_SAMPS*ratio);
+    if(rawBuf.length<srcNeeded)return; /* not enough yet */
+
+    /* Extract exactly what we need */
+    var srcSamples=rawBuf.splice(0,srcNeeded);
+
+    /* Downsample with linear interpolation */
+    var pcm=new Float32Array(CHUNK_SAMPS);
+    for(var i=0;i<CHUNK_SAMPS;i++){
+        var si=i*ratio,idx=Math.floor(si),frac=si-idx;
+        if(idx+1<srcSamples.length)pcm[i]=srcSamples[idx]*(1-frac)+srcSamples[idx+1]*frac;
+        else pcm[i]=srcSamples[idx]||0;
+    }
+
+    /* Float32 [-1,1] → Int16 [-32768,32767] */
+    var int16=new Int16Array(CHUNK_SAMPS);
+    for(var j=0;j<CHUNK_SAMPS;j++){
+        var v=pcm[j];if(v>1)v=1;if(v<-1)v=-1;
+        int16[j]=v<0?v*32768:v*32767;
+    }
+
+    /* 4-byte sequence number + PCM data */
+    txSeq++;
+    var hdr=new Uint8Array(4);
+    new DataView(hdr.buffer).setUint32(0,txSeq,true);
+    var pcmBytes=new Uint8Array(int16.buffer);
+    var combined=new Uint8Array(4+pcmBytes.length);
+    combined.set(hdr,0);combined.set(pcmBytes,4);
+
+    /* Encrypt and send */
+    enc(combined.buffer).then(function(encrypted){
+        mc.publish(TP+document.getElementById('fC').value.trim()+'/'+role,encrypted,{qos:1});
+        txN++;document.getElementById('sT').textContent=txN;
+    }).catch(function(er){L('TX: '+er.message,'c-err')});
+}
+
+/* Flush remaining samples when PTT released (may be shorter than normal chunk) */
+function flushRemaining(){
+    if(!mc||!mc.connected||rawBuf.length<100)return; /* skip if too little */
+    var ratio=micCtx.sampleRate/PCM_SR;
+    var outLen=Math.floor(rawBuf.length/ratio);
+    if(outLen<50)return;
+
+    var srcSamples=rawBuf.splice(0,rawBuf.length);
+    var pcm=new Float32Array(outLen);
+    for(var i=0;i<outLen;i++){
+        var si=i*ratio,idx=Math.floor(si),frac=si-idx;
+        if(idx+1<srcSamples.length)pcm[i]=srcSamples[idx]*(1-frac)+srcSamples[idx+1]*frac;
+        else pcm[i]=srcSamples[idx]||0;
+    }
+    var int16=new Int16Array(outLen);
+    for(var j=0;j<outLen;j++){
+        var v=pcm[j];if(v>1)v=1;if(v<-1)v=-1;
+        int16[j]=v<0?v*32768:v*32767;
+    }
+    txSeq++;
+    var hdr=new Uint8Array(4);new DataView(hdr.buffer).setUint32(0,txSeq,true);
+    var pcmBytes=new Uint8Array(int16.buffer);
+    var combined=new Uint8Array(4+pcmBytes.length);
+    combined.set(hdr,0);combined.set(pcmBytes,4);
+    enc(combined.buffer).then(function(encrypted){
+        mc.publish(TP+document.getElementById('fC').value.trim()+'/'+role,encrypted,{qos:1});
+        txN++;document.getElementById('sT').textContent=txN;
+    }).catch(function(){});
+    rawBuf=[];
+}
+
+/* ═══════════════════════════════════════
+   PLAYBACK — Direct PCM, ZERO decode
+   Receives encrypted Int16 PCM,
+   decrypts, converts to Float32,
+   writes directly into AudioBuffer.
+   NO decodeAudioData() called anywhere.
+   ═══════════════════════════════════════ */
 function initPlayback(){
     if(!plCtx)plCtx=new(window.AudioContext||window.webkitAudioContext)();
     if(plCtx.state==='suspended')plCtx.resume();
@@ -246,69 +329,67 @@ function initPlayback(){
     return plCtx;
 }
 
-var decodeQueue=[];
-var isDecoding=false;
+function playPCM(decryptedBuf){
+    var ctx=initPlayback();
 
-function queueChunk(arrayBuf){
-    decodeQueue.push(arrayBuf);
-    qLen=decodeQueue.length;
-    document.getElementById('sQ').textContent=qLen;
-    if(!isDecoding)processQueue();
-}
+    /* Extract sequence number (first 4 bytes) */
+    var view=new DataView(decryptedBuf);
+    var seq=view.getUint32(0,true);
 
-async function processQueue(){
-    if(isDecoding)return;
-    isDecoding=true;
+    /* Drop duplicates (QoS 1 can redeliver) */
+    if(seq<=lastRxSeq){dropN++;document.getElementById('sD').textContent=dropN;return}
+    lastRxSeq=seq;
 
-    while(decodeQueue.length>0){
-        var ab=decodeQueue.shift();
-        qLen=decodeQueue.length;
-        document.getElementById('sQ').textContent=qLen;
+    /* Remaining bytes = raw Int16 PCM */
+    var sampleCount=(decryptedBuf.byteLength-4)/2;
+    if(sampleCount<10)return; /* too small, skip */
 
-        /* Show RX indicator */
-        document.getElementById('rxInd').classList.add('on');
-        document.getElementById('dR').classList.add('green');
-        clearTimeout(rxSilTmr);
-
-        try{
-            var copy=ab.slice(0);
-            var audioBuf=await initPlayback().decodeAudioData(copy);
-            var src=plCtx.createBufferSource();
-            src.buffer=audioBuf;
-            src.connect(playGain); /* Through gain node for volume boost */
-
-            /* Schedule gapless */
-            var now=plCtx.currentTime;
-            var startTime=Math.max(now+0.01,nxtPlay);
-            src.start(startTime);
-            nxtPlay=startTime+audioBuf.duration;
-        }catch(e){
-            /* Decode failed — chunk was corrupt or too small */
-            if(rxN<5)L('Dropped bad chunk ('+ab.byteLength+' bytes)','c-warn');
-        }
+    /* Int16 → Float32 */
+    var float32=new Float32Array(sampleCount);
+    for(var i=0;i<sampleCount;i++){
+        float32[i]=view.getInt16(4+i*2,true)/32768.0;
     }
 
-    isDecoding=false;
+    /* Create AudioBuffer and schedule playback */
+    var audioBuf=ctx.createBuffer(1,sampleCount,PCM_SR);
+    audioBuf.getChannelData(0).set(float32);
+
+    var src=ctx.createBufferSource();
+    src.buffer=audioBuf;
+    src.connect(playGain);
+
+    /* Gapless scheduling */
+    var now=ctx.currentTime;
+    var startTime=Math.max(now+0.008,nxtPlay);
+    src.start(startTime);
+    nxtPlay=startTime+audioBuf.duration;
+
+    /* RX indicator */
+    document.getElementById('rxInd').classList.add('on');
+    document.getElementById('dR').classList.add('green');
+    clearTimeout(rxSilTmr);
     rxSilTmr=setTimeout(function(){
         document.getElementById('rxInd').classList.remove('on');
         document.getElementById('dR').classList.remove('green');
-        /* Reset timeline after silence so next PTT starts fresh */
-        setTimeout(function(){if(decodeQueue.length===0)nxtPlay=0},400);
+        setTimeout(function(){nxtPlay=0},350);
     },300);
 }
 
-/* ═══ PTT ═══ */
+/* ═══════════════════════════════════════
+   PTT
+   ═══════════════════════════════════════ */
 function pttDown(){
-    if(!mc||!mc.connected||!rec)return;
+    if(!mc||!mc.connected)return;
     if(micCtx&&micCtx.state==='suspended')micCtx.resume();
-    /* Reset playback timeline for new transmission */
-    nxtPlay=0;
-    /* Clear any stale queue from previous transmission */
-    if(decodeQueue.length>0){decodeQueue=[];qLen=0;document.getElementById('sQ').textContent='0'}
-    if(rec.state==='inactive')rec.start(CHUNK_MS);
+    nxtPlay=0; /* reset playback timeline for new transmission */
+    rawBuf=[]; /* clear stale samples */
+    txSeq=0;   /* reset sequence for new transmission */
+    lastRxSeq=-1; /* reset rx sequence too */
     isPTT=true;
     document.getElementById('dT').classList.add('red');
     document.getElementById('ptt').classList.add('active');
+    /* Send chunks every 80ms (faster than chunk duration for low latency) */
+    sendTmr=setInterval(sendChunk,80);
 }
 
 function pttUp(){
@@ -316,16 +397,9 @@ function pttUp(){
     isPTT=false;
     document.getElementById('dT').classList.remove('red');
     document.getElementById('ptt').classList.remove('active');
-
-    /* DON'T stop recorder immediately — wait 350ms to capture trailing audio */
-    clearTimeout(stopTmr);
-    stopTmr=setTimeout(function(){
-        if(rec&&rec.state==='recording'){
-            try{rec.stop()}catch(e){}
-            /* MediaRecorder needs time before restart */
-            setTimeout(function(){},80);
-        }
-    },350);
+    clearInterval(sendTmr);
+    /* Wait a tiny bit for final samples to accumulate, then flush */
+    setTimeout(function(){flushRemaining()},120);
 }
 
 var pe=document.getElementById('ptt');
@@ -336,7 +410,9 @@ pe.addEventListener('touchstart',function(e){e.preventDefault();pttDown()},{pass
 pe.addEventListener('touchend',function(e){e.preventDefault();pttUp()},{passive:false});
 pe.addEventListener('touchcancel',function(){if(isPTT)pttUp()});
 
-/* ═══ MQTT CONNECT ═══ */
+/* ═══════════════════════════════════════
+   MQTT
+   ═══════════════════════════════════════ */
 function connectMQTT(ch,myRole){
     return new Promise(function(resolve,reject){
         role=myRole;
@@ -347,16 +423,15 @@ function connectMQTT(ch,myRole){
 
         function tryNext(){
             if(done)return;
-            if(idx>=BROKERS.length){done=true;reject(new Error('All '+BROKERS.length+' brokers failed.'));return}
+            if(idx>=BROKERS.length){done=true;reject(new Error('All brokers failed.'));return}
             var url=BROKERS[idx];
             var short=new URL(url).hostname.split('.').slice(-2).join('.');
             L('['+(idx+1)+'/'+BROKERS.length+'] '+short+'...','c-dim');
 
             var client=mqtt.connect(url,{
-                clientId:'TAC04-'+Math.random().toString(36).substr(2,8),
+                clientId:'TAC05-'+Math.random().toString(36).substr(2,8),
                 clean:true,connectTimeout:18000,reconnectPeriod:0,keepalive:15
             });
-
             var hardTmr=setTimeout(function(){
                 L(short+': timeout','c-warn');
                 try{client.end(true)}catch(e){}
@@ -369,10 +444,8 @@ function connectMQTT(ch,myRole){
                 document.getElementById('svD').textContent=short;
                 document.getElementById('svD').style.color='var(--green)';
                 L('CONNECTED: '+short,'c-ok');
-
                 client.subscribe(pTopic,{qos:1});
                 client.subscribe(pingT,{qos:0});
-                L('Channel '+ch+' subscribed','c-dim');
 
                 client.on('message',function(topic,payload){
                     var data;
@@ -386,21 +459,19 @@ function connectMQTT(ch,myRole){
                             if(msg.r!==role){peerUp=true;setActive();clearTimeout(peerTmr);peerTmr=setTimeout(function(){peerUp=false;setDead()},PD);document.getElementById('sL').textContent=(Date.now()-msg.t)+'ms'}
                         }catch(e){}return;
                     }
+                    /* Audio: decrypt then play raw PCM */
                     if(topic===pTopic){
                         rxN++;document.getElementById('sR').textContent=rxN;
-                        dec(data).then(function(b){queueChunk(b)}).catch(function(){L('Decrypt fail — wrong secret?','c-err')});
+                        dec(data).then(function(buf){playPCM(buf)}).catch(function(){L('Decrypt fail — wrong secret?','c-err')});
                     }
                 });
-
                 client.on('close',function(){L('Disconnected','c-warn');setDead()});
                 client.on('error',function(er){L('MQTT: '+er.message,'c-err')});
                 heartTmr=setInterval(function(){if(mc&&mc.connected)mc.publish(pingT,myPing,{qos:0})},HB);
                 resolve();
             });
-
             client.on('error',function(err){
-                clearTimeout(hardTmr);
-                L(short+': '+err.message,'c-err');
+                clearTimeout(hardTmr);L(short+': '+err.message,'c-err');
                 if(!done){try{client.end(true)}catch(e){}idx++;tryNext()}
             });
             client.on('close',function(){clearTimeout(hardTmr);if(!done){idx++;tryNext()}});
@@ -409,7 +480,9 @@ function connectMQTT(ch,myRole){
     });
 }
 
-/* ═══ UI ═══ */
+/* ═══════════════════════════════════════
+   UI
+   ═══════════════════════════════════════ */
 function setActive(){
     if(document.getElementById('lkD').textContent==='ACTIVE')return;
     document.getElementById('lkD').textContent='ACTIVE';
@@ -433,7 +506,9 @@ function lockUI(l){
     document.getElementById('fC').disabled=l;document.getElementById('fS').disabled=l;
 }
 
-/* ═══ HOST / JOIN ═══ */
+/* ═══════════════════════════════════════
+   HOST / JOIN
+   ═══════════════════════════════════════ */
 async function goHost(){
     var ch=document.getElementById('fC').value.trim(),pw=document.getElementById('fS').value.trim();
     if(!ch||ch<1||ch>999)return L('Channel: 1-999','c-err');
@@ -453,37 +528,41 @@ async function goJoin(){
     catch(e){L('FAILED: '+e.message,'c-err');lockUI(false)}
 }
 
-/* ═══ RESET ═══ */
+/* ═══════════════════════════════════════
+   RESET
+   ═══════════════════════════════════════ */
 function doReset(){
-    clearInterval(heartTmr);clearTimeout(peerTmr);clearTimeout(rxSilTmr);clearTimeout(stopTmr);
+    clearInterval(heartTmr);clearTimeout(peerTmr);clearTimeout(rxSilTmr);clearTimeout(sendTmr);
     pttUp();
-    try{if(rec&&rec.state!=='inactive')rec.stop()}catch(e){}
     try{if(micStr)micStr.getTracks().forEach(function(t){t.stop()})}catch(e){}
     try{if(micCtx)micCtx.close()}catch(e){}
     try{if(plCtx)plCtx.close()}catch(e){}
     try{if(mc)mc.end(true)}catch(e){}
-    mc=null;micStr=null;micCtx=null;ana=null;rec=null;
+    mc=null;micStr=null;micCtx=null;ana=null;scriptProc=null;
     plCtx=null;playGain=null;ck=null;role=null;isPTT=false;peerUp=false;
-    txN=0;rxN=0;qLen=0;nxtPlay=0;decodeQueue=[];isDecoding=false;
+    txN=0;rxN=0;dropN=0;lastRxSeq=-1;txSeq=0;rawBuf=[];nxtPlay=0;
     ['dN','dT','dR'].forEach(function(id){document.getElementById(id).className='dot'});
     document.getElementById('ptt').disabled=true;document.getElementById('ptt').classList.remove('active');
     document.getElementById('lkD').textContent='OFFLINE';document.getElementById('lkD').style.color='#444';
     document.getElementById('svD').textContent='--';document.getElementById('svD').style.color='#444';
     document.getElementById('sT').textContent='0';document.getElementById('sR').textContent='0';
-    document.getElementById('sQ').textContent='0';document.getElementById('sL').textContent='--';
+    document.getElementById('sD').textContent='0';document.getElementById('sL').textContent='--';
     document.getElementById('mF').style.width='0%';document.getElementById('mP').textContent='0%';
     document.getElementById('chD').textContent='--';document.getElementById('rxInd').classList.remove('on');
     lockUI(false);document.getElementById('log').innerHTML='';
     L('SYSTEM RESET','c-dim');L('WiFi -> HOST  |  5G -> JOIN','c-info');
 }
 
-/* ═══ BOOT ═══ */
+/* ═══════════════════════════════════════
+   BOOT
+   ═══════════════════════════════════════ */
 function boot(){
     var sec=location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.hostname.indexOf('192.168.')===0;
     if(!sec){L('WARNING: Not HTTPS — mic blocked','c-warn');L('Upload to GitHub Pages for free HTTPS','c-warn')}
-    else{L('Secure context: OK','c-ok')}
-    L('','');L('TAC/COM-04 v4 — AUDIO OPTIMIZED','c-ok');
-    L('250ms chunks | QoS 1 | 2x gain | queue playback','c-dim');
+    else L('Secure context: OK','c-ok');
+    L('','');L('TAC/COM-05 — RAW PCM ENGINE','c-ok');
+    L('No WebM. No Opus. No decodeAudioData().','c-dim');
+    L('Raw 16kHz PCM → encrypt → send → play.','c-dim');
     L('','');L('WiFi  -> [HOST]','c-info');L('5G    -> [JOIN]','c-info');
 }
 </script>
