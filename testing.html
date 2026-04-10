@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAC/COM-04 | HOST/JOIN FIXED</title>
+    <title>TAC/COM-04 | HOST-JOIN FIXED</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root { --amber: #ffb000; --bg: #0d0900; --red: #8c3024; --blue: #00d4ff; --green: #39ff14; }
@@ -11,12 +11,12 @@
         .mainframe { width: 95%; max-width: 850px; background: #222; border: 6px solid #111; padding: 15px; display: flex; flex-direction: column; box-shadow: 0 0 60px #000; box-sizing: border-box; }
         @media (min-width: 768px) { .mainframe { display: grid; grid-template-columns: 1fr 320px; height: 700px; gap: 20px; } }
         .monitor { background: var(--bg); border: 10px solid #1a1a1a; border-radius: 15px; padding: 20px; flex-grow: 1; display: flex; flex-direction: column; box-shadow: inset 0 0 20px #000; }
-        #output { height: 340px; overflow-y: auto; font-size: 0.78rem; scrollbar-width: none; border-bottom: 1px solid #333; margin-bottom: 12px; color: var(--amber); }
+        #output { height: 360px; overflow-y: auto; font-size: 0.78rem; scrollbar-width: none; border-bottom: 1px solid #333; margin-bottom: 12px; color: var(--amber); }
         .module { background: #111; padding: 12px; border: 1px solid #333; margin-bottom: 10px; }
         .btn-ptt { width: 100%; height: 145px; background: var(--red); color: white; border: 5px solid #5e1e16; font-weight: bold; font-size: 1.35rem; cursor: pointer; transition: 0.1s; box-shadow: 0 6px 0 #401010; }
         .btn-ptt:active:not(:disabled) { background: #f00; transform: translateY(4px); box-shadow: 0 2px 0 #401010; }
         .btn-ptt:disabled { background: #333; opacity: 0.45; box-shadow: none; }
-        .btn-action { width: 100%; padding: 12px; background: #333; color: #fff; border: 1px solid #555; cursor: pointer; font-weight: bold; font-size: 0.75rem; text-transform: uppercase; margin: 6px 0; }
+        .btn-action { width: 100%; padding: 13px; background: #333; color: #fff; border: 1px solid #555; cursor: pointer; font-weight: bold; font-size: 0.75rem; text-transform: uppercase; margin: 6px 0; }
         input { width: 100%; background: #000; border: 1px solid #444; color: var(--amber); padding: 10px; box-sizing: border-box; outline: none; text-align: center; font-size: 1.2rem; letter-spacing: 2px; margin-bottom: 8px; }
         .status-led { width: 13px; height: 13px; border-radius: 50%; background: #200; display: inline-block; vertical-align: middle; }
         .online { background: var(--blue); box-shadow: 0 0 12px var(--blue); }
@@ -33,7 +33,7 @@
             <span>FREQ: <span id="curFreq" style="color:var(--blue)">UNSET</span></span>
             <span>UPLINK: <span id="stat">OFFLINE</span></span>
         </div>
-        <div id="output"><div>> HOST / JOIN MODE - WiFi + Airtel 5G</div></div>
+        <div id="output"><div>> WiFi (Host) + Airtel 5G (Join) MODE</div></div>
         <div id="meter"><div id="meter-fill"></div></div>
     </div>
     <div class="side-panel">
@@ -43,8 +43,8 @@
             <div style="font-size: 0.6rem; color: #555; margin: 8px 0 5px;">SHARED SECRET</div>
             <input type="password" id="secretInput" value="tacsecure2026">
             
-            <button class="btn-action" onclick="startAsHost()" style="border-color:var(--green); color:var(--green);">1. START AS HOST</button>
-            <button class="btn-action" onclick="startAsJoin()" style="background:#006600;">2. JOIN AS CLIENT</button>
+            <button class="btn-action" onclick="startAsHost()" style="border-color:var(--green); color:var(--green);">1. START AS HOST (WiFi)</button>
+            <button class="btn-action" onclick="startAsJoin()" style="background:#006600;">2. JOIN AS CLIENT (5G)</button>
         </div>
         <div class="module" style="text-align:center;">
             <button class="btn-ptt" id="pttBtn" disabled>HOLD TO TALK</button>
@@ -60,7 +60,6 @@
 <script>
     let peer, conn, localStream, audioCtx, recorder, analyser, streamSource, cryptoKey;
     let isPTTActive = false;
-    let myRole = "";
     const APP_PREFIX = "TAC-SECURE-V33-";
 
     function log(msg, color = "#ffb000") {
@@ -70,27 +69,13 @@
         div.style.color = color;
         out.appendChild(div);
         out.scrollTop = out.scrollHeight;
+        console.log(msg);
     }
 
     async function deriveKey(password) {
         const enc = new TextEncoder();
         const base = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
         return crypto.subtle.deriveKey({ name: "PBKDF2", salt: enc.encode("tac-salt"), iterations: 100000, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
-    }
-
-    async function encryptData(data) {
-        const iv = crypto.getRandomValues(new Uint8Array(12));
-        const enc = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, cryptoKey, data);
-        const combined = new Uint8Array(12 + enc.byteLength);
-        combined.set(iv); combined.set(new Uint8Array(enc), 12);
-        return combined.buffer;
-    }
-
-    async function decryptData(buffer) {
-        const data = new Uint8Array(buffer);
-        const iv = data.slice(0, 12);
-        const ct = data.slice(12);
-        return crypto.subtle.decrypt({ name: "AES-GCM", iv }, cryptoKey, ct);
     }
 
     async function initAudio() {
@@ -113,29 +98,24 @@
     async function startAsHost() {
         const chan = document.getElementById('chanInput').value.trim();
         const pass = document.getElementById('secretInput').value.trim();
-        if (!chan || chan < 1 || chan > 99) return log("INVALID CHANNEL", "red");
-        if (pass.length < 6) return log("SECRET TOO SHORT", "red");
-
-        myRole = "HOST";
-        const fullId = APP_PREFIX + chan;
+        if (!chan) return log("ENTER CHANNEL", "red");
 
         try {
             await initAudio();
             cryptoKey = await deriveKey(pass);
+            const fullId = APP_PREFIX + chan;
 
             peer = new Peer(fullId, {
-                config: {
-                    iceServers: [
-                        { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
-                        { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
-                        { urls: "turn:global.relay.metered.ca:443", username: "metered", credential: "metered" }
-                    ]
-                }
+                config: { iceServers: [
+                    { urls: "stun:stun.l.google.com:19302" },
+                    { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
+                    { urls: "turn:global.relay.metered.ca:443", username: "metered", credential: "metered" }
+                ]}
             });
 
-            peer.on('open', () => log("HOST STARTED - Waiting for Joiner...", "#39ff14"));
+            peer.on('open', () => log("HOST STARTED SUCCESSFULLY - Waiting for Joiner on channel " + chan, "#39ff14"));
             peer.on('connection', c => setupConnection(c));
-            peer.on('error', err => log("ERROR: " + err.type, "red"));
+            peer.on('error', err => log("HOST ERROR: " + err.type, "red"));
         } catch(e) {
             log("MIC ERROR - Allow permission", "red");
         }
@@ -144,25 +124,22 @@
     async function startAsJoin() {
         const chan = document.getElementById('chanInput').value.trim();
         const pass = document.getElementById('secretInput').value.trim();
-        if (!chan || chan < 1 || chan > 99) return log("INVALID CHANNEL", "red");
-        if (pass.length < 6) return log("SECRET TOO SHORT", "red");
-
-        myRole = "JOIN";
-        const fullId = APP_PREFIX + chan;
+        if (!chan) return log("ENTER CHANNEL", "red");
 
         try {
             await initAudio();
             cryptoKey = await deriveKey(pass);
+            const fullId = APP_PREFIX + chan;
 
-            peer = new Peer();   // No ID = random ID
+            peer = new Peer();
 
             peer.on('open', () => {
-                log("JOINER READY - Connecting to Host...", "#39ff14");
+                log("JOINER CONNECTING TO HOST...", "#ffb000");
                 const c = peer.connect(fullId, { reliable: true });
                 setupConnection(c);
             });
 
-            peer.on('error', err => log("ERROR: " + err.type, "red"));
+            peer.on('error', err => log("JOINER ERROR: " + err.type, "red"));
         } catch(e) {
             log("MIC ERROR", "red");
         }
@@ -174,7 +151,7 @@
             document.getElementById('ledNet').classList.add('online');
             document.getElementById('pttBtn').disabled = false;
             document.getElementById('stat').innerText = "LINK ACTIVE (E2EE)";
-            log("✅ CONNECTION SUCCESSFUL!", "#39ff14");
+            log("✅ SUCCESS! SECURE LINK ESTABLISHED", "#39ff14");
         });
 
         conn.on('data', async data => {
@@ -191,6 +168,7 @@
         });
 
         conn.on('close', () => log("CONNECTION CLOSED", "red"));
+        conn.on('error', err => log("DATA ERROR: " + err, "red"));
     }
 
     function updateMeter() {
@@ -211,9 +189,9 @@
     pttBtn.ontouchstart = e => { e.preventDefault(); startPTT(); };
     pttBtn.ontouchend = e => { e.preventDefault(); stopPTT(); };
 
-    log("WiFi + Airtel 5G MODE", "#39ff14");
-    log("→ One device: Click 'START AS HOST'", "#ffb000");
-    log("→ Other device: Click 'JOIN AS CLIENT'", "#ffb000");
+    log("HOST = WiFi Device", "#39ff14");
+    log("JOIN = Airtel 5G Device", "#39ff14");
+    log("Click 1 on WiFi first, then click 2 on 5G", "#ffb000");
 </script>
 </body>
 </html>
