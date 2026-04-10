@@ -3,779 +3,410 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAC/COM-04 | AIRtel 5G FIXED</title>
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <title>TAC/COM-04 | SECURE VOICE</title>
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <style>
-        :root {
-            --amber: #ffb000;
-            --bg: #0d0900;
-            --red: #8c3024;
-            --red-bright: #ff3333;
-            --blue: #00d4ff;
-            --green: #39ff14;
-            --panel: #111;
-            --border: #333;
-            --muted: #555;
-        }
-        *, *::before, *::after { box-sizing: border-box; }
-        body {
-            background: #050505;
-            color: var(--amber);
-            font-family: 'Courier New', monospace;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            touch-action: manipulation;
-            overflow: hidden;
-        }
-        .mainframe {
-            width: 95%; max-width: 880px;
-            background: #1a1a1a;
-            border: 6px solid #0a0a0a;
-            border-radius: 8px;
-            padding: 12px;
-            display: flex; flex-direction: column;
-            box-shadow: 0 0 80px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,0,0,0.3);
-        }
-        @media (min-width: 800px) {
-            .mainframe {
-                display: grid;
-                grid-template-columns: 1fr 310px;
-                height: 720px;
-                gap: 16px;
-                padding: 16px;
-            }
-        }
-        .monitor {
-            background: var(--bg);
-            border: 10px solid #1a1a1a;
-            border-radius: 14px;
-            padding: 16px;
-            flex-grow: 1;
-            display: flex; flex-direction: column;
-            box-shadow: inset 0 0 30px #000;
-            min-height: 0;
-        }
-        .header-bar {
-            font-size: 0.6rem;
-            display: flex; justify-content: space-between;
-            margin-bottom: 8px; padding-bottom: 8px;
-            border-bottom: 1px solid #222;
-            flex-wrap: wrap; gap: 4px;
-        }
-        .header-bar span { white-space: nowrap; }
-        #output {
-            flex: 1; min-height: 0;
-            overflow-y: auto;
-            font-size: 0.72rem;
-            scrollbar-width: none;
-            line-height: 1.5;
-            margin-bottom: 10px;
-        }
-        #output::-webkit-scrollbar { display: none; }
-        .log-line { padding: 1px 0; }
-        .log-ok { color: var(--green); }
-        .log-err { color: var(--red-bright); }
-        .log-warn { color: #ffaa00; }
-        .log-info { color: var(--blue); }
-        .log-sys { color: #888; }
-        .log-msg { color: var(--amber); font-weight: bold; }
-
-        .meter-wrap { margin-top: auto; }
-        .meter-label {
-            font-size: 0.5rem; color: var(--muted);
-            display: flex; justify-content: space-between;
-            margin-bottom: 3px;
-        }
-        #meter {
-            width: 100%; height: 10px;
-            background: #000; border: 1px solid #222;
-            border-radius: 2px; overflow: hidden;
-        }
-        #meter-fill {
-            width: 0%; height: 100%;
-            background: linear-gradient(90deg, var(--green) 0%, #aaff00 60%, var(--red-bright) 100%);
-            transition: width 0.06s linear;
-        }
-        .side-panel {
-            display: flex; flex-direction: column;
-            gap: 8px; min-height: 0;
-            overflow-y: auto;
-        }
-        @media (min-width: 800px) {
-            .side-panel { overflow-y: auto; }
-            .side-panel::-webkit-scrollbar { width: 3px; }
-            .side-panel::-webkit-scrollbar-thumb { background: #333; }
-        }
-        .module {
-            background: var(--panel);
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-        }
-        .module-title {
-            font-size: 0.5rem; color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 8px;
-        }
-        input {
-            width: 100%;
-            background: #000;
-            border: 1px solid #333;
-            color: var(--amber);
-            padding: 10px 8px;
-            outline: none;
-            text-align: center;
-            font-size: 1.15rem;
-            letter-spacing: 3px;
-            margin-bottom: 8px;
-            font-family: inherit;
-            border-radius: 2px;
-            transition: border-color 0.2s;
-        }
-        input:focus { border-color: var(--amber); }
-        input:disabled { opacity: 0.3; }
-
-        .btn-action {
-            width: 100%;
-            padding: 12px 8px;
-            background: #1a1a1a;
-            color: #ccc;
-            border: 1px solid #444;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.68rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin: 5px 0;
-            border-radius: 3px;
-            transition: all 0.15s;
-            font-family: inherit;
-        }
-        .btn-action:hover:not(:disabled) { background: #252525; }
-        .btn-action:active:not(:disabled) { transform: scale(0.98); }
-        .btn-action:disabled { opacity: 0.25; cursor: not-allowed; }
-        .btn-host { border-color: var(--green); color: var(--green); }
-        .btn-host:hover:not(:disabled) { background: #0a1a0a; }
-        .btn-join { background: #0a1a0a; border-color: #006600; color: var(--green); }
-        .btn-join:hover:not(:disabled) { background: #0f2a0f; }
-        .btn-danger { background: #1a0505; color: #ff6666; border-color: #440000; }
-
-        .ptt-wrap { text-align: center; }
-        .btn-ptt {
-            width: 100%; height: 140px;
-            background: linear-gradient(180deg, var(--red) 0%, #6e2018 100%);
-            color: white;
-            border: 4px solid #5e1e16;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: 0.08s;
-            box-shadow: 0 6px 0 #3a0e0e, inset 0 1px 0 rgba(255,255,255,0.1);
-            font-family: inherit;
-            letter-spacing: 2px;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        .btn-ptt:active:not(:disabled) {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 #3a0e0e;
-            background: linear-gradient(180deg, #ff4444 0%, #cc2020 100%);
-        }
-        .btn-ptt:disabled { background: #1a1a1a; color: #444; box-shadow: none; border-color: #222; }
-        .btn-ptt.transmitting {
-            background: linear-gradient(180deg, #ff2222 0%, #aa0000 100%);
-            animation: ptt-pulse 0.5s infinite;
-        }
-        @keyframes ptt-pulse {
-            0%,100% { box-shadow: 0 6px 0 #3a0e0e, 0 0 20px rgba(255,0,0,0.3); }
-            50% { box-shadow: 0 6px 0 #3a0e0e, 0 0 40px rgba(255,0,0,0.6); }
-        }
-
-        .led-row {
-            display: flex; justify-content: space-around;
-            margin-top: 12px; font-size: 0.5rem;
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-        .led-item { display: flex; align-items: center; gap: 5px; }
-        .led {
-            width: 10px; height: 10px;
-            border-radius: 50%;
-            background: #1a0505;
-            border: 1px solid #330000;
-            transition: all 0.3s;
-        }
-        .led.on-blue { background: var(--blue); box-shadow: 0 0 10px var(--blue); border-color: var(--blue); }
-        .led.on-red { background: #f00; box-shadow: 0 0 12px #f00; border-color: #f00; animation: led-blink 0.6s infinite; }
-        .led.on-green { background: var(--green); box-shadow: 0 0 10px var(--green); border-color: var(--green); }
-        @keyframes led-blink { 0%,100%{opacity:1}50%{opacity:0.3} }
-
-        .ice-debug {
-            font-size: 0.5rem;
-            color: #444;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid #1a1a1a;
-            max-height: 60px;
-            overflow-y: auto;
-            scrollbar-width: none;
-            word-break: break-all;
-        }
-        .ice-debug::-webkit-scrollbar { display: none; }
-
-        .scan-line {
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: rgba(255,176,0,0.03);
-            animation: scan 4s linear infinite;
-            pointer-events: none;
-        }
-        @keyframes scan { 0%{top:0}100%{top:100%} }
-        .monitor { position: relative; overflow: hidden; }
-
-        .rx-flash {
-            position: absolute;
-            top: 10px; right: 16px;
-            font-size: 0.65rem;
-            color: var(--green);
-            opacity: 0;
-            transition: opacity 0.15s;
-            pointer-events: none;
-            text-shadow: 0 0 10px var(--green);
-        }
-        .rx-flash.visible { opacity: 1; }
+        :root { --amber:#ffb000; --bg:#0d0900; --red:#ff3333; --blue:#00d4ff; --green:#39ff14; }
+        *,*::before,*::after{box-sizing:border-box}
+        body{background:#050505;color:var(--amber);font-family:'Courier New',monospace;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;touch-action:manipulation;overflow:hidden}
+        .mainframe{width:95%;max-width:880px;background:#1a1a1a;border:6px solid #0a0a0a;border-radius:8px;padding:12px;display:flex;flex-direction:column;box-shadow:0 0 80px #000}
+        @media(min-width:800px){.mainframe{display:grid;grid-template-columns:1fr 310px;height:720px;gap:16px;padding:16px}}
+        .monitor{background:var(--bg);border:10px solid #1a1a1a;border-radius:14px;padding:16px;flex-grow:1;display:flex;flex-direction:column;box-shadow:inset 0 0 30px #000;min-height:0;position:relative;overflow:hidden}
+        .scanline{position:absolute;top:0;left:0;right:0;height:2px;background:rgba(255,176,0,0.04);animation:scan 4s linear infinite;pointer-events:none;z-index:2}
+        @keyframes scan{0%{top:0}100%{top:100%}}
+        .rx-badge{position:absolute;top:12px;right:16px;font-size:.6rem;color:var(--green);opacity:0;transition:opacity .12s;pointer-events:none;text-shadow:0 0 8px var(--green);z-index:3}
+        .rx-badge.on{opacity:1}
+        .hbar{font-size:.58rem;display:flex;justify-content:space-between;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #1a1a1a;flex-wrap:wrap;gap:4px}
+        .hbar span{white-space:nowrap}
+        #output{flex:1;min-height:0;overflow-y:auto;font-size:.7rem;line-height:1.55;scrollbar-width:none}
+        #output::-webkit-scrollbar{display:none}
+        .lo{padding:1px 0}.lok{color:var(--green)}.ler{color:var(--red)}.lw{color:#ffaa00}.li{color:var(--blue)}.ls{color:#666}
+        .meter-w{margin-top:auto}.meter-lbl{font-size:.48rem;color:#444;display:flex;justify-content:space-between;margin-bottom:2px}
+        #meter{width:100%;height:9px;background:#000;border:1px solid #1a1a1a;border-radius:2px;overflow:hidden}
+        #meterFill{width:0;height:100%;background:linear-gradient(90deg,var(--green) 0%,#ccff00 70%,var(--red) 100%);transition:width .06s linear}
+        .side{display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#222 transparent}
+        .mod{background:#0e0e0e;padding:12px;border:1px solid #252525;border-radius:4px}
+        .mod-t{font-size:.48rem;color:#444;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
+        input{width:100%;background:#000;border:1px solid #2a2a2a;color:var(--amber);padding:10px 8px;outline:none;text-align:center;font-size:1.1rem;letter-spacing:3px;margin-bottom:8px;font-family:inherit;border-radius:2px;transition:border .2s}
+        input:focus{border-color:var(--amber)}input:disabled{opacity:.25}
+        .btn{width:100%;padding:12px 8px;background:#141414;color:#aaa;border:1px solid #333;cursor:pointer;font-weight:bold;font-size:.65rem;text-transform:uppercase;letter-spacing:1px;margin:5px 0;border-radius:3px;transition:all .12s;font-family:inherit}
+        .btn:hover:not(:disabled){background:#1e1e1e}.btn:active:not(:disabled){transform:scale(.98)}.btn:disabled{opacity:.2;cursor:not-allowed}
+        .btn-h{border-color:#1a4a1a;color:var(--green)}.btn-h:hover:not(:disabled){background:#0a1a0a}
+        .btn-j{background:#0a150a;border-color:#0a3a0a;color:var(--green)}.btn-j:hover:not(:disabled){background:#0f200f}
+        .btn-d{background:#150505;color:#ff5555;border-color:#300000}
+        .ptt{width:100%;height:135px;background:linear-gradient(180deg,#8c3024,#5e1e16);color:#fff;border:4px solid #4a1510;border-radius:8px;font-weight:bold;font-size:1.15rem;cursor:pointer;box-shadow:0 6px 0 #2a0a08,inset 0 1px 0 rgba(255,255,255,.08);font-family:inherit;letter-spacing:2px;user-select:none;-webkit-user-select:none;transition:all .08s}
+        .ptt:active:not(:disabled){transform:translateY(4px);box-shadow:0 2px 0 #2a0a08;background:linear-gradient(180deg,#cc3020,#882010)}
+        .ptt:disabled{background:#111;color:#333;box-shadow:none;border-color:#1a1a1a}
+        .ptt.tx{animation:pttx .5s infinite}
+        @keyframes pttx{0%,100%{box-shadow:0 6px 0 #2a0a08,0 0 15px rgba(255,0,0,.25)}50%{box-shadow:0 6px 0 #2a0a08,0 0 35px rgba(255,0,0,.5)}}
+        .leds{display:flex;justify-content:space-around;margin-top:10px;font-size:.48rem;text-transform:uppercase;letter-spacing:1px}
+        .led-i{display:flex;align-items:center;gap:4px}
+        .ld{width:9px;height:9px;border-radius:50%;background:#150505;border:1px solid #2a0000;transition:all .2s}
+        .ld.nb{background:var(--blue);box-shadow:0 0 8px var(--blue);border-color:var(--blue)}
+        .ld.nr{background:#f00;box-shadow:0 0 10px #f00;border-color:#f00;animation:lbp .5s infinite}
+        .ld.ng{background:var(--green);box-shadow:0 0 8px var(--green);border-color:var(--green)}
+        @keyframes lbp{0%,100%{opacity:1}50%{opacity:.25}}
+        .icedbg{font-size:.46rem;color:#333;margin-top:6px;padding-top:6px;border-top:1px solid #151515;max-height:50px;overflow-y:auto;scrollbar-width:none;word-break:break-all;line-height:1.4}
+        .icedbg::-webkit-scrollbar{display:none}
+        .vpn-box{background:#0a0a18;border:1px solid #1a1a3a;padding:10px;margin-top:6px;border-radius:3px}
+        .vpn-box .mod-t{color:#4466aa}
+        .vpn-box p{font-size:.52rem;color:#556;margin:4px 0;line-height:1.4}
+        .vpn-box strong{color:#6688cc}
+        .turn-row{display:flex;gap:4px;margin:4px 0}
+        .turn-row input{font-size:.6rem;padding:6px 4px;letter-spacing:0;margin:0;text-align:left}
     </style>
 </head>
 <body>
 <div class="mainframe">
     <div class="monitor">
-        <div class="scan-line"></div>
-        <div class="rx-flash" id="rxFlash">▶ RX</div>
-        <div class="header-bar">
-            <span>CH: <span id="curFreq" style="color:var(--blue)">--</span></span>
-            <span>UPLINK: <span id="stat" style="color:#666">OFFLINE</span></span>
-            <span>ICE: <span id="iceStat" style="color:#666">NONE</span></span>
+        <div class="scanline"></div>
+        <div class="rx-badge" id="rxBadge">▶ RX</div>
+        <div class="hbar">
+            <span>CH: <span id="curCh" style="color:var(--blue)">--</span></span>
+            <span>LINK: <span id="linkStat" style="color:#555">OFFLINE</span></span>
+            <span>ICE: <span id="iceStat" style="color:#555">--</span></span>
         </div>
         <div id="output"></div>
-        <div class="meter-wrap">
-            <div class="meter-label"><span>MIC LEVEL</span><span id="meterVal">0%</span></div>
-            <div id="meter"><div id="meter-fill"></div></div>
+        <div class="meter-w">
+            <div class="meter-lbl"><span>MIC INPUT</span><span id="meterPct">0%</span></div>
+            <div id="meter"><div id="meterFill"></div></div>
         </div>
     </div>
-
-    <div class="side-panel">
-        <div class="module">
-            <div class="module-title">Channel Configuration</div>
-            <input type="number" id="chanInput" value="42" min="1" max="99" placeholder="1-99">
-            <input type="password" id="secretInput" value="tacsecure2026" placeholder="SHARED SECRET">
-            <button class="btn-action btn-host" id="btnHost" onclick="startAsHost()">
-                1. START AS HOST (WiFi)
-            </button>
-            <button class="btn-action btn-join" id="btnJoin" onclick="startAsJoin()">
-                2. JOIN AS CLIENT (5G)
-            </button>
-        </div>
-
-        <div class="module ptt-wrap">
-            <button class="btn-ptt" id="pttBtn" disabled>HOLD TO TX</button>
-            <div class="led-row">
-                <div class="led-item"><div class="led" id="ledNet"></div><span>LINK</span></div>
-                <div class="led-item"><div class="led" id="ledTx"></div><span>TX</span></div>
-                <div class="led-item"><div class="led" id="ledRx"></div><span>RX</span></div>
+    <div class="side">
+        <div class="mod">
+            <div class="mod-t">Channel</div>
+            <input type="number" id="inChan" value="42" min="1" max="99">
+            <div class="mod-t" style="margin-top:2px">Secret</div>
+            <input type="password" id="inSec" value="tacsecure2026">
+            <button class="btn btn-h" id="bHost" onclick="goHost()">1. HOST (WiFi device)</button>
+            <button class="btn btn-j" id="bJoin" onclick="goJoin()">2. JOIN (5G device)</button>
+            <div class="vpn-box">
+                <div class="mod-t">5G Connection Required</div>
+                <p><strong>Airtel/Jio 5G uses CGNAT</strong> — P2P is blocked.</p>
+                <p><strong>Solution:</strong> Enable ANY VPN on the 5G phone, then tap JOIN. No extra config needed.</p>
             </div>
-            <div class="ice-debug" id="iceDebug"></div>
         </div>
-
-        <div class="module" style="padding:8px 12px;">
-            <button class="btn-action btn-danger" onclick="hardReset()" style="margin:0;">
-                HARD RESET
-            </button>
+        <div class="mod" style="text-align:center">
+            <button class="ptt" id="pttBtn" disabled>HOLD TO TX</button>
+            <div class="leds">
+                <div class="led-i"><div class="ld" id="ldNet"></div>LINK</div>
+                <div class="led-i"><div class="ld" id="ldTx"></div>TX</div>
+                <div class="led-i"><div class="ld" id="ldRx"></div>RX</div>
+            </div>
+            <div class="icedbg" id="iceDbg"></div>
+        </div>
+        <div class="mod" style="padding:8px 12px">
+            <button class="btn btn-d" onclick="doReset()" style="margin:0">HARD RESET</button>
         </div>
     </div>
 </div>
 
 <script>
-    /* ── State ── */
-    let peer, conn, localStream, audioCtx, recorder, analyser, streamSource, cryptoKey;
-    let isPTTActive = false;
-    let role = null; // 'host' | 'joiner'
-    let retryTimer = null;
-    const APP_PREFIX = "TAC04-";
-    const RX_FLASH_DURATION = 800;
+let peer=null, conn=null, localStream=null, audioCtx=null, recorder=null, analyser=null, cryptoKey=null;
+let isPTT=false, role=null, retryT=null, connTimeout=null, iceCheckT=null;
+const PFX="TAC04-";
 
-    /* ── ICE Servers (multi-provider for 5G NAT traversal) ── */
-    const ICE_SERVERS = [
-        { urls: "stun:stun.l.google.com:19302" },
-        { urls: "stun:stun1.l.google.com:19302" },
-        { urls: "stun:stun2.l.google.com:19302" },
-        { urls: "stun:stun3.l.google.com:19302" },
-        { urls: "stun:stun4.l.google.com:19302" },
-        {
-            urls: "turn:a.relay.metered.ca:443",
-            username: "e0f3b8e3e1a8e1c8e0f3b8e3e1a8e1c8",
-            credential: "e0f3b8e3e1a8e1c8e0f3b8e3e1a8e1c8"
-        },
-        {
-            urls: "turn:a.relay.metered.ca:443?transport=tcp",
-            username: "e0f3b8e3e1a8e1c8e0f3b8e3e1a8e1c8",
-            credential: "e0f3b8e3e1a8e1c8e0f3b8e3e1a8e1c8"
-        },
-        {
-            urls: "turn:global.relay.metered.ca:443",
-            username: "e0f3b8e3e1a8e1c8e0f3b8e3e1a8e1c8",
-            credential: "e0f3b8e3e1a8e1c8e0f3b8e3e1a8e1c8"
-        },
-        {
-            urls: "turn:global.relay.metered.ca:80?transport=tcp",
-            username: "e0f3b8e3e1a8e1c8e0f3b8e3e1a8e1c8",
-            credential: "e0f3b8e3e1a8e1c8e0f3b8e3e1a8e1c8"
+/* ── Logging ── */
+function L(m,c=''){
+    const o=document.getElementById('output'),d=document.createElement('div');
+    d.className='lo '+c;
+    const t=new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    d.textContent=`[${t}] ${m}`;
+    o.appendChild(d);o.scrollTop=o.scrollHeight;
+}
+function iceLog(m){
+    const el=document.getElementById('iceDbg');
+    const t=new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    el.textContent=`[${t}] ${m}`;
+}
+
+/* ── Crypto ── */
+async function deriveKey(pw){
+    const e=new TextEncoder();
+    const b=await crypto.subtle.importKey("raw",e.encode(pw),"PBKDF2",false,["deriveKey"]);
+    return crypto.subtle.deriveKey({name:"PBKDF2",salt:e.encode("TAC04-SALT"),iterations:100000,hash:"SHA-256"},b,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
+}
+async function enc(buf){
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},cryptoKey,buf);
+    const out=new Uint8Array(12+ct.byteLength);
+    out.set(iv,0);out.set(new Uint8Array(ct),12);
+    return out.buffer;
+}
+async function dec(buf){
+    const d=new Uint8Array(buf);
+    return crypto.subtle.decrypt({name:"AES-GCM",iv:d.slice(0,12)},cryptoKey,d.slice(12));
+}
+
+/* ── Audio ── */
+async function initAudio(){
+    localStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,sampleRate:48000}});
+    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    analyser=audioCtx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=0.5;
+    audioCtx.createMediaStreamSource(localStream).connect(analyser);
+    const mime=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';
+    recorder=new MediaRecorder(localStream,{mimeType:mime});
+    recorder.ondataavailable=async e=>{
+        if(!conn?.open||!isPTT||!e.data?.size)return;
+        try{conn.send(new Uint8Array(await enc(await e.data.arrayBuffer())))}catch(er){L("TX fail: "+er.message,"ler")}
+    };
+    meterLoop();
+    L("Mic OK (48kHz Opus)","ls");
+}
+function meterLoop(){
+    if(!analyser){requestAnimationFrame(meterLoop);return}
+    const d=new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(d);
+    const v=Math.min(100,d.reduce((a,b)=>a+b,0)/d.length*2.5);
+    document.getElementById('meterFill').style.width=v+'%';
+    document.getElementById('meterPct').textContent=Math.round(v)+'%';
+    requestAnimationFrame(meterLoop);
+}
+
+/* ── PTT ── */
+function pttOn(){
+    if(!conn?.open||!recorder)return;
+    if(audioCtx?.state==='suspended')audioCtx.resume();
+    if(recorder.state==='inactive')recorder.start(100);
+    isPTT=true;
+    document.getElementById('ldTx').classList.add('nr');
+    document.getElementById('pttBtn').classList.add('tx');
+}
+function pttOff(){
+    isPTT=false;
+    if(recorder?.state==='recording'){recorder.stop();setTimeout(()=>{},60)}
+    document.getElementById('ldTx').classList.remove('nr');
+    document.getElementById('pttBtn').classList.remove('tx');
+}
+const pb=document.getElementById('pttBtn');
+pb.addEventListener('mousedown',e=>{e.preventDefault();pttOn()});
+pb.addEventListener('mouseup',e=>{e.preventDefault();pttOff()});
+pb.addEventListener('mouseleave',()=>{if(isPTT)pttOff()});
+pb.addEventListener('touchstart',e=>{e.preventDefault();pttOn()},{passive:false});
+pb.addEventListener('touchend',e=>{e.preventDefault();pttOff()},{passive:false});
+pb.addEventListener('touchcancel',()=>{if(isPTT)pttOff()});
+
+/* ── ICE Servers (STUN only — VPN handles the rest) ── */
+const STUN_ONLY=[
+    {urls:"stun:stun.l.google.com:19302"},
+    {urls:"stun:stun1.l.google.com:19302"},
+    {urls:"stun:stun2.l.google.com:19302"},
+    {urls:"stun:stun3.l.google.com:19302"},
+    {urls:"stun:stun4.l.google.com:19302"},
+    {urls:"stun:stun.stunprotocol.org:3478"},
+    {urls:"stun:stun.voip.eutelia.it:3478"}
+];
+
+function getIceServers(){
+    /* If user provided custom TURN, add it */
+    const tu=document.getElementById('inTurn').value.trim();
+    const tuu=document.getElementById('inTurnU').value.trim();
+    const tuc=document.getElementById('inTurnC').value.trim();
+    const servers=[...STUN_ONLY];
+    if(tu&&tuu&&tuc){
+        servers.push({urls:tu,username:tuu,credential:tuc});
+        if(!tu.includes('transport=tcp')){
+            servers.push({urls:tu.replace(/:\d+/,'')+':443?transport=tcp',username:tuu,credential:tuc});
         }
-    ];
-
-    /* ── Logging ── */
-    function log(msg, cls = '') {
-        const out = document.getElementById('output');
-        const div = document.createElement('div');
-        div.className = 'log-line ' + cls;
-        const ts = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
-        div.textContent = `[${ts}] ${msg}`;
-        out.appendChild(div);
-        out.scrollTop = out.scrollHeight;
+        L("Custom TURN server added","li");
     }
+    return servers;
+}
 
-    function logICE(msg) {
-        const el = document.getElementById('iceDebug');
-        const ts = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
-        el.textContent = `[${ts}] ${msg}`;
-    }
+/* ── Connection handling ── */
+function wireConn(c){
+    conn=c;
+    clearTimeout(connTimeout);
 
-    /* ── Crypto ── */
-    async function deriveKey(password) {
-        const enc = new TextEncoder();
-        const base = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
-        return crypto.subtle.deriveKey(
-            { name: "PBKDF2", salt: enc.encode("TAC-COM-SALT-V4"), iterations: 100000, hash: "SHA-256" },
-            base,
-            { name: "AES-GCM", length: 256 },
-            false,
-            ["encrypt", "decrypt"]
-        );
-    }
-
-    async function encryptData(buf) {
-        const iv = crypto.getRandomValues(new Uint8Array(12));
-        const enc = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, cryptoKey, buf);
-        const out = new Uint8Array(12 + enc.byteLength);
-        out.set(iv, 0);
-        out.set(new Uint8Array(enc), 12);
-        return out.buffer;
-    }
-
-    async function decryptData(buf) {
-        const data = new Uint8Array(buf);
-        const iv = data.slice(0, 12);
-        const ct = data.slice(12);
-        return crypto.subtle.decrypt({ name: "AES-GCM", iv }, cryptoKey, ct);
-    }
-
-    /* ── Audio ── */
-    async function initAudio() {
-        localStream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true,
-                sampleRate: 48000
+    /* Monitor ICE */
+    iceCheckT=setInterval(()=>{
+        try{
+            const pc=conn._dc?.peerConnection;
+            if(!pc)return;
+            const s=pc.iceConnectionState;
+            const el=document.getElementById('iceStat');
+            if(s){el.textContent=s.toUpperCase();
+                if(s==='connected'||s==='completed'){el.style.color='var(--green)';clearInterval(iceCheckT);L("ICE connected ("+s+")","lok")}
+                else if(s==='failed'){el.style.color='var(--red)';clearInterval(iceCheckT);L("ICE FAILED — see diagnosis below","ler");L("If on 5G without VPN: enable VPN and retry","lw")}
+                else if(s==='checking'){el.style.color='#ffaa00'}
+                else{el.style.color='#888'}
             }
+            pc.oniceconnectionstatechange=()=>{iceLog("ICE→"+pc.iceConnectionState)};
+            pc.onicecandidate=ev=>{if(ev.candidate)iceLog(ev.candidate.type+': '+ev.candidate.address);else iceLog("ICE gathering done")};
+            clearInterval(iceCheckT);
+        }catch(e){}
+    },300);
+
+    conn.on('open',()=>{
+        clearTimeout(retryT);
+        document.getElementById('ldNet').classList.add('ng');
+        document.getElementById('pttBtn').disabled=false;
+        document.getElementById('linkStat').textContent='AES-256 ACTIVE';
+        document.getElementById('linkStat').style.color='var(--green)';
+        lockInputs(true);
+        L("╔══════════════════════════════════╗","lok");
+        L("║  SECURE LINK ESTABLISHED         ║","lok");
+        L("║  AES-256-GCM E2EE ACTIVE         ║","lok");
+        L("║  Hold red button to transmit     ║","lok");
+        L("╚══════════════════════════════════╝","lok");
+    });
+
+    conn.on('data',async raw=>{
+        if(!(raw instanceof ArrayBuffer))return;
+        const rx=document.getElementById('ldRx'),rb=document.getElementById('rxBadge');
+        rx.classList.add('ng');rb.classList.add('on');
+        setTimeout(()=>{rx.classList.remove('ng');rb.classList.remove('on')},700);
+        try{
+            const blob=new Blob([await dec(raw)],{type:'audio/webm'});
+            const a=new Audio(URL.createObjectURL(blob));
+            a.onended=()=>URL.revokeObjectURL(a.src);
+            a.onerror=()=>{URL.revokeObjectURL(a.src);L("Audio playback error","ler")};
+            await a.play();
+        }catch(e){L("Decrypt failed — wrong secret?","ler")}
+    });
+
+    conn.on('close',()=>{L("Link closed by remote","ler");resetUI()});
+    conn.on('error',err=>{
+        const m=err?.message||err?.type||typeof err==='string'?err:JSON.stringify(err);
+        L("Connection error: "+m,"ler");
+        if(m.includes('serialization')||m.includes('binary')||m.includes('ArrayBuffer'))
+            L("Serialization error — ensure both devices use same code version","lw");
+        else if(m.includes('timeout'))
+            L("Connection timed out — check network, try VPN on 5G","lw");
+        else
+            L("If on 5G: enable VPN, then retry JOIN","lw");
+    });
+
+    /* Hard timeout */
+    connTimeout=setTimeout(()=>{
+        if(conn&&!conn.open){
+            L("Connection timeout (20s)","ler");
+            L("Diagnosis:","lw");
+            L("  • WiFi↔WiFi: check same channel number","ls");
+            L("  • 5G device: YOU MUST ENABLE VPN FIRST","lw");
+            L("  • Both: check same secret key","ls");
+            try{conn.close()}catch(e){}
+            resetUI();
+        }
+    },20000);
+}
+
+function lockInputs(lock){
+    document.getElementById('bHost').disabled=lock;
+    document.getElementById('bJoin').disabled=lock;
+    document.getElementById('inChan').disabled=lock;
+    document.getElementById('inSec').disabled=lock;
+}
+function resetUI(){
+    clearTimeout(retryT);clearTimeout(connTimeout);clearInterval(iceCheckT);
+    ['ldNet','ldTx','ldRx'].forEach(id=>document.getElementById(id).className='ld');
+    document.getElementById('pttBtn').disabled=true;
+    document.getElementById('pttBtn').classList.remove('tx');
+    document.getElementById('linkStat').textContent='OFFLINE';
+    document.getElementById('linkStat').style.color='#555';
+    document.getElementById('iceStat').textContent='--';
+    document.getElementById('iceStat').style.color='#555';
+    document.getElementById('iceDbg').textContent='';
+    lockInputs(false);
+}
+
+/* ── Host ── */
+async function goHost(){
+    const ch=document.getElementById('inChan').value.trim();
+    const pw=document.getElementById('inSec').value.trim();
+    if(!ch||ch<1||ch>99)return L("Channel: enter 1-99","ler");
+    if(pw.length<4)return L("Secret: min 4 characters","ler");
+    role='host';
+    const id=PFX+ch;
+    document.getElementById('curCh').textContent=id;
+    lockInputs(true);
+    L("Starting HOST on WiFi...","li");
+    try{
+        await initAudio();
+        cryptoKey=await deriveKey(pw);
+        peer=new Peer(id,{config:{iceServers:getIceServers()},debug:0});
+        peer.on('open',()=>{L("Host online: "+id,"lok");L("Waiting for client to join...","ls");document.getElementById('linkStat').textContent='LISTENING';document.getElementById('linkStat').style.color='var(--blue)'});
+        peer.on('connection',c=>{L("Incoming connection!","li");wireConn(c)});
+        peer.on('error',err=>{
+            if(err.type==='unavailable-id'){L("Channel "+ch+" occupied — pick different number","ler");lockInputs(false)}
+            else{L("Peer error: "+err.type,"ler");if(err.type==='network'||err.type==='server-error'){L("Retrying in 5s...","ls");clearTimeout(retryT);retryT=setTimeout(()=>{peer.destroy();goHost()},5000)}}
         });
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 256;
-        analyser.smoothingTimeConstant = 0.5;
-        streamSource = audioCtx.createMediaStreamSource(localStream);
-        streamSource.connect(analyser);
+        peer.on('disconnected',()=>{L("Server lost, reconnecting...","lw");if(peer&&!peer.destroyed)peer.reconnect()});
+    }catch(e){L("Mic error: "+e.message,"ler");lockInputs(false)}
+}
 
-        let pendingChunks = [];
-        recorder = new MediaRecorder(localStream, {
-            mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-                ? 'audio/webm;codecs=opus'
-                : 'audio/webm'
+/* ── Joiner ── */
+async function goJoin(){
+    const ch=document.getElementById('inChan').value.trim();
+    const pw=document.getElementById('inSec').value.trim();
+    if(!ch||ch<1||ch>99)return L("Channel: enter 1-99","ler");
+    if(pw.length<4)return L("Secret: min 4 characters","ler");
+    role='joiner';
+    const target=PFX+ch;
+    document.getElementById('curCh').textContent=target;
+    lockInputs(true);
+    L("Starting CLIENT on mobile...","li");
+    L("Target: "+target,"ls");
+    try{
+        await initAudio();
+        cryptoKey=await deriveKey(pw);
+        peer=new Peer(undefined,{config:{iceServers:getIceServers()},debug:0});
+        peer.on('open',myId=>{
+            L("My ID: "+myId,"ls");
+            L("Connecting to host...","li");
+            L("STUN-only mode — VPN required for 5G CGNAT","lw");
+            const c=peer.connect(target,{reliable:true,serialization:'binary'});
+            wireConn(c);
         });
-
-        recorder.ondataavailable = async (e) => {
-            if (!conn?.open || !isPTTActive || !e.data?.size) {
-                pendingChunks = [];
-                return;
-            }
-            pendingChunks.push(e.data);
-            const blob = new Blob(pendingChunks, { type: recorder.mimeType });
-            pendingChunks = [];
-            try {
-                const buf = await blob.arrayBuffer();
-                conn.send(await encryptData(buf));
-            } catch(err) {
-                log("TX encrypt fail: " + err.message, "log-err");
-            }
-        };
-        updateMeter();
-        log("Microphone initialized (48kHz Opus)", "log-sys");
-    }
-
-    function updateMeter() {
-        if (!analyser) { requestAnimationFrame(updateMeter); return; }
-        const data = new Uint8Array(analyser.frequencyBinCount);
-        analyser.getByteFrequencyData(data);
-        const avg = data.reduce((a, b) => a + b, 0) / data.length;
-        const pct = Math.min(100, avg * 2.5);
-        document.getElementById('meter-fill').style.width = pct + "%";
-        document.getElementById('meterVal').textContent = Math.round(pct) + "%";
-        requestAnimationFrame(updateMeter);
-    }
-
-    /* ── PTT ── */
-    function startPTT() {
-        if (!conn?.open || !recorder) return;
-        if (audioCtx?.state === 'suspended') audioCtx.resume();
-        if (recorder.state === 'inactive') recorder.start(120);
-        isPTTActive = true;
-        document.getElementById('ledTx').classList.add('on-red');
-        document.getElementById('pttBtn').classList.add('transmitting');
-    }
-
-    function stopPTT() {
-        isPTTActive = false;
-        if (recorder?.state === 'recording') {
-            recorder.stop();
-            /* MediaRecorder needs a tick before it can restart */
-            setTimeout(() => {
-                if (recorder && recorder.state === 'inactive') {
-                    /* ready for next PTT */
+        peer.on('error',err=>{
+            if(err.type==='peer-unavailable'){
+                L("Host NOT FOUND on channel "+ch,"ler");
+                L("Is the WiFi device running HOST?","lw");
+                L("Retrying in 5s...","ls");
+                clearTimeout(retryT);
+                retryT=setTimeout(()=>{if(peer&&!peer.destroyed){peer.destroy();goJoin()}},5000);
+            }else{
+                L("Peer error: "+err.type+(err.message?' — '+err.message:''),"ler");
+                if(err.type==='network'||err.type==='server-error'){
+                    L("Retrying in 5s...","ls");
+                    clearTimeout(retryT);
+                    retryT=setTimeout(()=>{if(peer&&!peer.destroyed){peer.destroy();goJoin()}},5000);
                 }
-            }, 50);
-        }
-        document.getElementById('ledTx').classList.remove('on-red');
-        document.getElementById('pttBtn').classList.remove('transmitting');
-    }
-
-    const pttBtn = document.getElementById('pttBtn');
-    pttBtn.addEventListener('mousedown', e => { e.preventDefault(); startPTT(); });
-    pttBtn.addEventListener('mouseup', e => { e.preventDefault(); stopPTT(); });
-    pttBtn.addEventListener('mouseleave', e => { if(isPTTActive) stopPTT(); });
-    pttBtn.addEventListener('touchstart', e => { e.preventDefault(); startPTT(); }, { passive: false });
-    pttBtn.addEventListener('touchend', e => { e.preventDefault(); stopPTT(); }, { passive: false });
-    pttBtn.addEventListener('touchcancel', e => { if(isPTTActive) stopPTT(); });
-
-    /* ── Connection Setup ── */
-    function setupConnection(c) {
-        conn = c;
-
-        /* Monitor ICE state from the underlying RTCPeerConnection */
-        const checkIce = () => {
-            if (conn._dc && conn._dc.peerConnection) {
-                const pc = conn._dc.peerConnection;
-                if (pc.iceConnectionState) {
-                    const prev = document.getElementById('iceStat').textContent;
-                    document.getElementById('iceStat').textContent = pc.iceConnectionState.toUpperCase();
-                    if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
-                        document.getElementById('iceStat').style.color = 'var(--green)';
-                        logICE("ICE: " + pc.iceConnectionState);
-                        /* Log ICE candidate types used */
-                        pc.getReceivers().forEach(r => {
-                            if (r.track) logICE("Track: " + r.track.kind);
-                        });
-                    } else if (pc.iceConnectionState === 'failed') {
-                        document.getElementById('iceStat').style.color = 'var(--red-bright)';
-                        logICE("ICE FAILED — TURN relay may be unreachable on 5G");
-                        log("ICE connection FAILED. If on mobile data, TURN relay is blocked.", "log-err");
-                        log("Try: switch to WiFi temporarily, or use a VPN on the 5G device.", "log-warn");
-                    } else {
-                        document.getElementById('iceStat').style.color = '#ffaa00';
-                    }
-                    pc.oniceconnectionstatechange = () => {
-                        document.getElementById('iceStat').textContent = pc.iceConnectionState.toUpperCase();
-                        logICE("ICE → " + pc.iceConnectionState);
-                        if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
-                            document.getElementById('iceStat').style.color = 'var(--green)';
-                        } else if (pc.iceConnectionState === 'failed') {
-                            document.getElementById('iceStat').style.color = 'var(--red-bright)';
-                            log("ICE FAILED. Mobile network may block TURN relays.", "log-err");
-                            log("SOLUTION: Enable VPN on 5G device, then retry join.", "log-warn");
-                        } else {
-                            document.getElementById('iceStat').style.color = '#ffaa00';
-                        }
-                    };
-                    pc.onicecandidate = (ev) => {
-                        if (ev.candidate) {
-                            const t = ev.candidate.type;
-                            logICE("Local candidate: " + t + " " + (ev.candidate.address || ''));
-                        } else {
-                            logICE("ICE gathering complete");
-                        }
-                    };
-                    return;
-                }
-            }
-            setTimeout(checkIce, 200);
-        };
-        checkIce();
-
-        conn.on('open', () => {
-            clearTimeout(retryTimer);
-            document.getElementById('ledNet').classList.add('on-green');
-            document.getElementById('pttBtn').disabled = false;
-            document.getElementById('stat').textContent = "LINKED (AES-256)";
-            document.getElementById('stat').style.color = 'var(--green)';
-            document.getElementById('btnHost').disabled = true;
-            document.getElementById('btnJoin').disabled = true;
-            document.getElementById('chanInput').disabled = true;
-            document.getElementById('secretInput').disabled = true;
-            log("SECURE LINK ESTABLISHED — AES-256-GCM E2EE ACTIVE", "log-ok");
-            log("Press and hold the red button to transmit.", "log-info");
-        });
-
-        conn.on('data', async (data) => {
-            if (!(data instanceof ArrayBuffer)) return;
-            const ledRx = document.getElementById('ledRx');
-            const rxFlash = document.getElementById('rxFlash');
-            ledRx.classList.add('on-green');
-            rxFlash.classList.add('visible');
-            setTimeout(() => { ledRx.classList.remove('on-green'); rxFlash.classList.remove('visible'); }, RX_FLASH_DURATION);
-
-            try {
-                const dec = await decryptData(data);
-                const blob = new Blob([dec], { type: 'audio/webm' });
-                const audio = new Audio();
-                audio.src = URL.createObjectURL(blob);
-                audio.onended = () => URL.revokeObjectURL(audio.src);
-                audio.onerror = () => { URL.revokeObjectURL(audio.src); log("Playback error", "log-err"); };
-                await audio.play();
-            } catch(e) {
-                log("Decrypt fail: wrong secret?", "log-err");
             }
         });
+        peer.on('disconnected',()=>{L("Server lost, reconnecting...","lw");if(peer&&!peer.destroyed)peer.reconnect()});
+    }catch(e){L("Mic error: "+e.message,"ler");lockInputs(false)}
+}
 
-        conn.on('close', () => {
-            log("LINK LOST — connection closed by remote", "log-err");
-            resetLinkState();
-        });
+/* ── Reset ── */
+function doReset(){
+    clearTimeout(retryT);clearTimeout(connTimeout);clearInterval(iceCheckT);
+    pttOff();
+    try{if(recorder?.state!=='inactive')recorder.stop()}catch(e){}
+    try{localStream?.getTracks().forEach(t=>t.stop())}catch(e){}
+    try{audioCtx?.close()}catch(e){}
+    try{conn?.close()}catch(e){}
+    if(peer&&!peer.destroyed)peer.destroy();
+    peer=null;conn=null;localStream=null;audioCtx=null;recorder=null;analyser=null;cryptoKey=null;isPTT=false;role=null;
+    resetUI();
+    document.getElementById('output').innerHTML='';
+    document.getElementById('meterFill').style.width='0%';
+    document.getElementById('meterPct').textContent='0%';
+    document.getElementById('curCh').textContent='--';
+    L("SYSTEM RESET","ls");
+    L("WiFi → HOST | 5G → JOIN (VPN first!)","li");
+}
 
-        conn.on('error', (err) => {
-            log("CONN ERROR: " + err, "log-err");
-        });
-
-        /* Timeout: if no 'open' within 15s, warn */
-        setTimeout(() => {
-            if (conn && !conn.open) {
-                log("Still connecting... if on 5G, this may take longer.", "log-warn");
-            }
-        }, 8000);
-
-        setTimeout(() => {
-            if (conn && !conn.open) {
-                log("Connection timeout (15s). Check: same channel, same secret, TURN reachable.", "log-err");
-                log("5G networks often block TURN. Try VPN on the 5G device.", "log-warn");
-            }
-        }, 15000);
-    }
-
-    function resetLinkState() {
-        document.getElementById('ledNet').className = 'led';
-        document.getElementById('ledTx').className = 'led';
-        document.getElementById('ledRx').className = 'led';
-        document.getElementById('pttBtn').disabled = true;
-        document.getElementById('pttBtn').classList.remove('transmitting');
-        document.getElementById('stat').textContent = 'OFFLINE';
-        document.getElementById('stat').style.color = '#666';
-        document.getElementById('iceStat').textContent = 'NONE';
-        document.getElementById('iceStat').style.color = '#666';
-        document.getElementById('btnHost').disabled = false;
-        document.getElementById('btnJoin').disabled = false;
-        document.getElementById('chanInput').disabled = false;
-        document.getElementById('secretInput').disabled = false;
-        document.getElementById('iceDebug').textContent = '';
-    }
-
-    /* ── Host Mode ── */
-    async function startAsHost() {
-        const chan = document.getElementById('chanInput').value.trim();
-        const pass = document.getElementById('secretInput').value.trim();
-        if (!chan || chan < 1 || chan > 99) return log("Channel must be 1-99", "log-err");
-        if (pass.length < 4) return log("Secret too short (min 4 chars)", "log-err");
-
-        role = 'host';
-        const fullId = APP_PREFIX + chan;
-        document.getElementById('curFreq').textContent = fullId;
-        document.getElementById('btnHost').disabled = true;
-        document.getElementById('btnJoin').disabled = true;
-        log("Initializing HOST mode on WiFi...", "log-info");
-
-        try {
-            await initAudio();
-            cryptoKey = await deriveKey(pass);
-
-            peer = new Peer(fullId, {
-                config: { iceServers: ICE_SERVERS },
-                debug: 0
-            });
-
-            peer.on('open', (id) => {
-                log("HOST ONLINE — Peer ID: " + id, "log-ok");
-                log("Waiting for client to join on channel " + chan + "...", "log-sys");
-                document.getElementById('stat').textContent = 'LISTENING';
-                document.getElementById('stat').style.color = 'var(--blue)';
-            });
-
-            peer.on('connection', (c) => {
-                log("Incoming connection from joiner!", "log-info");
-                setupConnection(c);
-            });
-
-            peer.on('error', (err) => {
-                if (err.type === 'unavailable-id') {
-                    log("Channel " + chan + " already in use! Pick a different number.", "log-err");
-                    document.getElementById('btnHost').disabled = false;
-                    document.getElementById('btnJoin').disabled = false;
-                } else if (err.type === 'network' || err.type === 'server-error') {
-                    log("PeerJS server error: " + err.type + ". Retrying in 5s...", "log-err");
-                    clearTimeout(retryTimer);
-                    retryTimer = setTimeout(() => { peer.destroy(); startAsHost(); }, 5000);
-                } else {
-                    log("HOST ERROR: " + err.type + " — " + (err.message || ''), "log-err");
-                }
-            });
-
-            peer.on('disconnected', () => {
-                log("Disconnected from PeerJS server. Reconnecting...", "log-warn");
-                if (peer && !peer.destroyed) peer.reconnect();
-            });
-
-        } catch(e) {
-            log("MIC ERROR: " + e.message, "log-err");
-            log("Allow microphone permission and retry.", "log-warn");
-            document.getElementById('btnHost').disabled = false;
-            document.getElementById('btnJoin').disabled = false;
-        }
-    }
-
-    /* ── Joiner Mode ── */
-    async function startAsJoin() {
-        const chan = document.getElementById('chanInput').value.trim();
-        const pass = document.getElementById('secretInput').value.trim();
-        if (!chan || chan < 1 || chan > 99) return log("Channel must be 1-99", "log-err");
-        if (pass.length < 4) return log("Secret too short (min 4 chars)", "log-err");
-
-        role = 'joiner';
-        const targetId = APP_PREFIX + chan;
-        document.getElementById('curFreq').textContent = targetId;
-        document.getElementById('btnHost').disabled = true;
-        document.getElementById('btnJoin').disabled = true;
-        log("Initializing CLIENT mode on Airtel 5G...", "log-info");
-        log("Target: " + targetId, "log-sys");
-
-        try {
-            await initAudio();
-            cryptoKey = await deriveKey(pass);
-
-            peer = new Peer(undefined, {
-                config: { iceServers: ICE_SERVERS },
-                debug: 0
-            });
-
-            peer.on('open', (myId) => {
-                log("My Peer ID: " + myId, "log-sys");
-                log("Connecting to host " + targetId + "...", "log-info");
-                log("(5G CGNAT traversal via TURN relay — may take 10-20s)", "log-warn");
-
-                const c = peer.connect(targetId, { reliable: true });
-                setupConnection(c);
-            });
-
-            peer.on('error', (err) => {
-                if (err.type === 'peer-unavailable') {
-                    log("HOST NOT FOUND on channel " + chan, "log-err");
-                    log("Make sure the WiFi device started HOST first.", "log-warn");
-                    log("Retrying in 5s...", "log-sys");
-                    clearTimeout(retryTimer);
-                    retryTimer = setTimeout(() => {
-                        if (peer && !peer.destroyed) {
-                            peer.destroy();
-                            startAsJoin();
-                        }
-                    }, 5000);
-                } else if (err.type === 'network' || err.type === 'server-error') {
-                    log("Network error: " + err.type + ". Retrying in 5s...", "log-err");
-                    clearTimeout(retryTimer);
-                    retryTimer = setTimeout(() => {
-                        if (peer && !peer.destroyed) {
-                            peer.destroy();
-                            startAsJoin();
-                        }
-                    }, 5000);
-                } else {
-                    log("JOINER ERROR: " + err.type + " — " + (err.message || ''), "log-err");
-                }
-            });
-
-            peer.on('disconnected', () => {
-                log("Disconnected from PeerJS server. Reconnecting...", "log-warn");
-                if (peer && !peer.destroyed) peer.reconnect();
-            });
-
-        } catch(e) {
-            log("MIC ERROR: " + e.message, "log-err");
-            document.getElementById('btnHost').disabled = false;
-            document.getElementById('btnJoin').disabled = false;
-        }
-    }
-
-    /* ── Reset ── */
-    function hardReset() {
-        clearTimeout(retryTimer);
-        stopPTT();
-        if (recorder && recorder.state !== 'inactive') {
-            try { recorder.stop(); } catch(e) {}
-        }
-        if (localStream) {
-            localStream.getTracks().forEach(t => t.stop());
-        }
-        if (audioCtx) {
-            try { audioCtx.close(); } catch(e) {}
-        }
-        if (conn) {
-            try { conn.close(); } catch(e) {}
-        }
-        if (peer && !peer.destroyed) {
-            peer.destroy();
-        }
-        peer = null; conn = null; localStream = null;
-        audioCtx = null; recorder = null; analyser = null;
-        streamSource = null; cryptoKey = null;
-        isPTTActive = false; role = null;
-        resetLinkState();
-        document.getElementById('output').innerHTML = '';
-        document.getElementById('meter-fill').style.width = '0%';
-        document.getElementById('meterVal').textContent = '0%';
-        document.getElementById('curFreq').textContent = '--';
-        log("SYSTEM RESET — All connections terminated", "log-sys");
-        log("WiFi Device → START AS HOST", "log-info");
-        log("Airtel 5G Device → JOIN AS CLIENT", "log-info");
-    }
-
-    /* ── Init ── */
-    log("TAC/COM-04 SECURE VOICE TERMINAL", "log-ok");
-    log("Protocol: WebRTC + PeerJS + AES-256-GCM", "log-sys");
-    log("Optimized for: WiFi ↔ Airtel 5G cross-network", "log-sys");
-    log("", "");
-    log("WiFi Device → Click [START AS HOST]", "log-info");
-    log("Airtel 5G Device → Click [JOIN AS CLIENT]", "log-info");
-    log("", "");
-    log("IMPORTANT: Both devices must use the SAME channel number", "log-warn");
-    log("and the SAME shared secret. On 5G, if ICE fails, enable VPN.", "log-warn");
+/* ── Boot ── */
+L("TAC/COM-04 SECURE VOICE TERMINAL","lok");
+L("WebRTC + PeerJS + AES-256-GCM","ls");
+L("","ls");
+L("SETUP:","li");
+L("  1. WiFi device → [HOST]","li");
+L("  2. 5G device → enable VPN → [JOIN]","li");
+L("  3. Same channel + same secret on both","li");
+L("","ls");
+L("WARNING: 5G WILL NOT WORK WITHOUT VPN","lw");
 </script>
 </body>
 </html>
