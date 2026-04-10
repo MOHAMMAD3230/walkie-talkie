@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAC/COM v11.4 | UNIVERSAL_MOBILE_FRIENDLY</title>
+    <title>TAC/COM v11.6 | GLOW_SYNC</title>
     <script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.4/dist/mqtt.min.js"></script>
     <style>
         :root {
@@ -20,10 +20,8 @@
         
         #scannerCanvas { position: fixed; inset: 0; z-index: -1; opacity: 0.08; }
 
-        /* Responsive Chassis */
         .chassis {
-            width: var(--chassis-w);
-            min-height: 85vh; max-height: 95vh;
+            width: var(--chassis-w); min-height: 85vh; max-height: 95vh;
             background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
             border: 10px solid #252525; border-radius: 25px 25px 60px 60px;
             padding: 20px; box-shadow: inset 0 0 50px #000, 0 30px 80px rgba(0,0,0,0.8);
@@ -31,76 +29,61 @@
             display: flex; flex-direction: column; gap: 10px;
         }
 
-        /* Top Hardware Detail - Scaled for Mobile */
+        /* Top Hardware */
         .antenna { position: absolute; top: -50px; left: 15%; width: 18px; height: 70px; background: #111; border: 3px solid #333; border-radius: 4px; }
-        .knob { position: absolute; top: -35px; right: 15%; width: 50px; height: 45px; background: repeating-linear-gradient(90deg, #111, #111 4px, #222 4px, #222 8px); border: 2px solid #333; border-radius: 6px; }
+        .knob { position: absolute; top: -35px; right: 25%; width: 50px; height: 45px; background: repeating-linear-gradient(90deg, #111, #111 4px, #222 4px, #222 8px); border: 2px solid #333; border-radius: 6px; }
 
-        /* RF_RSSI Signal - Always visible top-left */
-        .net-monitor {
-            align-self: flex-start; display: flex; flex-direction: column; gap: 3px;
-            padding: 8px; background: #000; border: 1px solid #222; border-radius: 4px;
+        /* Top Right Indicator */
+        .status-led {
+            position: absolute; top: 15px; right: 20px;
+            width: 14px; height: 14px; background: #000;
+            border-radius: 50%; border: 2px solid #333;
         }
+
+        /* Blinking Keyframes */
+        @keyframes blink-red { 0%, 100% { color: #500; text-shadow: none; background: #300; } 50% { color: var(--r); text-shadow: 0 0 10px var(--r); background: var(--r); box-shadow: 0 0 12px var(--r); } }
+        @keyframes blink-orange { 0%, 100% { color: #530; text-shadow: none; background: #320; } 50% { color: var(--y); text-shadow: 0 0 10px var(--y); background: var(--y); box-shadow: 0 0 12px var(--y); } }
+        @keyframes blink-green { 0%, 100% { color: #040; text-shadow: none; background: #020; } 50% { color: var(--g); text-shadow: 0 0 10px var(--g); background: var(--g); box-shadow: 0 0 12px var(--g); } }
+
+        /* Logic Classes */
+        .state-off { animation: blink-red 1s infinite; }
+        .state-wait { animation: blink-orange 1s infinite; }
+        .state-on { animation: blink-green 1s infinite; }
+
+        /* RF_RSSI Monitor */
+        .net-monitor { align-self: flex-start; display: flex; flex-direction: column; gap: 3px; padding: 8px; background: #000; border: 1px solid #222; border-radius: 4px; }
         .sig-bars { display: flex; gap: 3px; align-items: flex-end; height: 16px; }
         .bar { width: 4px; background: #0a0a0a; transition: 0.3s; }
-        .bar:nth-child(1) { height: 4px; }
-        .bar:nth-child(2) { height: 7px; }
-        .bar:nth-child(3) { height: 10px; }
-        .bar:nth-child(4) { height: 13px; }
-        .bar:nth-child(5) { height: 16px; }
-
+        .bar:nth-child(1) { height: 4px; } .bar:nth-child(2) { height: 7px; } .bar:nth-child(3) { height: 10px; } .bar:nth-child(4) { height: 13px; } .bar:nth-child(5) { height: 16px; }
+        
         .sig-red .bar { background: var(--r); box-shadow: 0 0 8px var(--r); }
         .sig-yellow .bar { background: var(--y); box-shadow: 0 0 8px var(--y); }
         .sig-green .bar { background: var(--g); box-shadow: 0 0 8px var(--g); }
 
-        /* Mechanical Switches */
-        .pwr-strip { display: flex; gap: 10px; justify-content: center; }
-        .mech-btn {
-            flex: 1; padding: 12px 5px; background: #1a1a1a; color: #333; font-weight: 900; font-size: 0.65rem;
-            border: 1px solid #333; border-bottom: 5px solid #000; cursor: pointer; border-radius: 4px;
-            text-transform: uppercase; transition: 0.1s;
-        }
-        .mech-btn:active { transform: translateY(3px); border-bottom-width: 2px; }
+        /* Controls */
+        .pwr-strip { display: flex; gap: 10px; }
+        .mech-btn { flex: 1; padding: 12px; background: #1a1a1a; color: #333; font-weight: 900; font-size: 0.65rem; border: 1px solid #333; border-bottom: 5px solid #000; cursor: pointer; border-radius: 4px; text-transform: uppercase; }
         .pwr-on.active { color: var(--g); border-color: var(--g); }
         .pwr-off.active { color: var(--r); border-color: var(--r); }
 
-        /* LCD Field Screen */
-        .screen {
-            background: #050505; border: 4px solid #222; border-radius: 4px; padding: 10px;
-            height: 140px; position: relative; box-shadow: inset 0 0 25px #000;
-        }
+        .screen { background: #050505; border: 4px solid #222; border-radius: 4px; height: 140px; position: relative; box-shadow: inset 0 0 25px #000; padding: 10px; }
         .lit.screen { background: #000a00; border-color: #333; }
         #scope { width: 100%; height: 60px; opacity: 0; }
         .lit #scope { opacity: 1; }
 
-        /* Controls Grid */
         .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .field { background: #000; border: 2px solid #222; color: var(--b); padding: 10px; font-family: inherit; text-align: center; width: 100%; font-size: 0.9rem; font-weight: bold; border-radius: 4px; }
-        .field:focus { border-color: var(--b); outline: none; }
-        .link-btn.active-link { border-color: var(--b); color: var(--b); }
-
-        /* PTT Lever - Central Action Area */
+        .field { background: #000; border: 2px solid #222; color: var(--b); padding: 10px; font-family: inherit; text-align: center; width: 100%; font-weight: bold; border-radius: 4px; }
+        
         .ptt-box { flex-grow: 1; display: flex; align-items: center; justify-content: center; }
-        .ptt-lever {
-            width: 80%; height: 70px; background: #0a0a0a; border: 3px solid #1a1a1a;
-            border-bottom: 8px solid #000; border-radius: 12px; color: #1a1a1a; font-weight: 900;
-            font-size: 1.1rem; cursor: not-allowed; letter-spacing: 2px; transition: 0.1s;
-            pointer-events: none;
-        }
+        .ptt-lever { width: 80%; height: 70px; background: #0a0a0a; border: 3px solid #1a1a1a; border-bottom: 8px solid #000; border-radius: 12px; color: #1a1a1a; font-weight: 900; font-size: 1.1rem; cursor: not-allowed; pointer-events: none; transition: 0.1s; }
         .ptt-lever.unlocked { background: #1a0000; border-color: #300; color: #300; cursor: pointer; pointer-events: auto; }
         .ptt-lever.unlocked.ready { border-color: var(--r); color: var(--r); }
         .ptt-lever.unlocked:active { transform: translateY(6px); border-bottom-width: 2px; background: var(--r); color: #000; }
 
-        /* Stats Footer */
-        .stats-footer { border-top: 2px solid #222; padding-top: 10px; display: flex; flex-direction: column; gap: 4px; }
-        .stat { display: flex; justify-content: space-between; font-size: 0.6rem; font-weight: 900; color: #444; }
-        .val { color: #555; transition: 0.3s; }
-        .lit .val.con { color: var(--g); text-shadow: 0 0 8px var(--g); }
-
-        @media (max-height: 600px) {
-            .chassis { min-height: 95vh; padding: 10px; gap: 5px; }
-            .screen { height: 100px; }
-            .ptt-lever { height: 50px; }
-        }
+        /* Glow Footer */
+        .stats-footer { border-top: 2px solid #222; padding-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+        .stat-label { font-size: 0.6rem; font-weight: 900; color: #444; margin-bottom: -2px; }
+        .glow-val { font-size: 0.8rem; font-weight: 900; letter-spacing: 1px; transition: 0.3s; }
     </style>
 </head>
 <body>
@@ -110,6 +93,7 @@
 <div class="chassis">
     <div class="antenna"></div>
     <div class="knob"></div>
+    <div id="led" class="status-led"></div>
 
     <div id="rssi" class="net-monitor">
         <div style="font-size: 0.4rem; color: #222; font-weight: 900; margin-bottom: 2px;">RF_RSSI</div>
@@ -131,8 +115,8 @@
     <div class="input-grid">
         <input type="number" id="ch" class="field" value="88">
         <input type="password" id="key" class="field" value="TAC">
-        <button id="hBtn" class="mech-btn link-btn" onclick="conn('host')">Host</button>
-        <button id="jBtn" class="mech-btn link-btn" onclick="conn('client')">Join</button>
+        <button id="hBtn" class="mech-btn" onclick="conn('host')">Host</button>
+        <button id="jBtn" class="mech-btn" onclick="conn('client')">Join</button>
     </div>
 
     <div class="ptt-box">
@@ -140,22 +124,56 @@
     </div>
 
     <div class="stats-footer">
-        <div class="stat"><span>RF_LINK_STATE:</span><span id="rfSt" class="val">OFFLINE</span></div>
-        <div class="stat"><span>PKT_LATENCY:</span><span id="latSt" class="val">--</span></div>
+        <div>
+            <div class="stat-label">RF_LINK_STATE:</div>
+            <div id="rfSt" class="glow-val">---</div>
+        </div>
+        <div>
+            <div class="stat-label">PKT_LATENCY:</div>
+            <div id="latSt" class="glow-val">---</div>
+        </div>
     </div>
 </div>
 
 <script>
 let mc, mic, actx, ana, pG, ck, isTx=false, isPwr=false, isConn=false, nxt=0;
-const SR=12000, TP='uni_v11_4/';
+const SR=12000, TP='glow_v11_6/';
 
-function setRssiColor(ping) {
+function updateGlow(mode, ping = 0) {
+    const led = document.getElementById('led');
+    const rfText = document.getElementById('rfSt');
+    const latText = document.getElementById('latSt');
     const rssi = document.getElementById('rssi');
+
+    // Reset
+    led.className = "status-led";
+    rfText.className = "glow-val";
+    latText.className = "glow-val";
     rssi.classList.remove('sig-red', 'sig-yellow', 'sig-green');
-    if (!isConn) return; 
-    if (ping < 150) rssi.classList.add('sig-green');
-    else if (ping < 300) rssi.classList.add('sig-yellow');
-    else rssi.classList.add('sig-red');
+
+    if (!isPwr) return;
+
+    if (mode === 'off') {
+        led.classList.add('state-off');
+        rfText.classList.add('state-off');
+        rfText.innerText = "OFFLINE";
+        latText.innerText = "NO_SIGNAL";
+    } else if (mode === 'wait') {
+        led.classList.add('state-wait');
+        rfText.classList.add('state-wait');
+        rfText.innerText = "UPLINKING...";
+        latText.innerText = "CALCULATING";
+    } else if (mode === 'on') {
+        led.classList.add('state-on');
+        rfText.classList.add('state-on');
+        latText.classList.add('state-on');
+        rfText.innerText = "SECURE_LINK";
+        latText.innerText = ping + "ms";
+        
+        if (ping < 150) rssi.classList.add('sig-green');
+        else if (ping < 300) rssi.classList.add('sig-yellow');
+        else rssi.classList.add('sig-red');
+    }
 }
 
 function pwr(s) {
@@ -166,7 +184,8 @@ function pwr(s) {
     if(s) {
         scr.classList.add('lit');
         document.getElementById('sys').style.opacity = "1";
-        log("MOBILE_LINK_OK...");
+        updateGlow('off');
+        log("HARDWARE_INIT_OK");
     } else {
         location.reload(); 
     }
@@ -218,7 +237,7 @@ draw();
 
 async function conn(role) {
     if(!isPwr || isConn) return;
-    document.getElementById(role==='host'?'hBtn':'jBtn').classList.add('active-link');
+    updateGlow('wait');
     const ch = document.getElementById('ch').value;
     const pass = document.getElementById('key').value;
     
@@ -241,15 +260,12 @@ async function conn(role) {
         mc.on('connect', () => {
             const lat = Date.now() - start;
             isConn = true;
-            setRssiColor(lat);
-            document.getElementById('latSt').innerText = lat + "ms";
-            document.getElementById('rfSt').innerText = "SECURE_LINK";
-            document.getElementById('rfSt').className = "val con";
+            updateGlow('on', lat);
             const ptt = document.getElementById('ptt');
             ptt.innerText = "TALK";
             ptt.classList.add('unlocked', 'ready');
             mc.subscribe(`${TP}${ch}/${role==='host'?'client':'host'}`);
-            log("UPLINK_STABLE");
+            log("UPLINK_SUCCESS");
         });
 
         mc.on('message', async (t, pay) => {
@@ -266,7 +282,7 @@ async function conn(role) {
         ptt.onmousedown = down; ptt.onmouseup = up;
         ptt.ontouchstart = down; ptt.ontouchend = up;
 
-    } catch(err) { log("MIC_DENIED"); }
+    } catch(err) { log("MIC_FAIL"); updateGlow('off'); }
 }
 
 async function transmit(samples, ch, role) {
