@@ -6,13 +6,13 @@
     <title>TAC/COM-04 | SECURE VOICE</title>
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <style>
-        :root { --amber:#ffb000; --bg:#0d0900; --red:#ff3333; --blue:#00d4ff; --green:#39ff14; }
+        :root{--amber:#ffb000;--bg:#0d0900;--red:#ff3333;--blue:#00d4ff;--green:#39ff14}
         *,*::before,*::after{box-sizing:border-box}
         body{background:#050505;color:var(--amber);font-family:'Courier New',monospace;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;touch-action:manipulation;overflow:hidden}
         .mainframe{width:95%;max-width:880px;background:#1a1a1a;border:6px solid #0a0a0a;border-radius:8px;padding:12px;display:flex;flex-direction:column;box-shadow:0 0 80px #000}
         @media(min-width:800px){.mainframe{display:grid;grid-template-columns:1fr 310px;height:720px;gap:16px;padding:16px}}
         .monitor{background:var(--bg);border:10px solid #1a1a1a;border-radius:14px;padding:16px;flex-grow:1;display:flex;flex-direction:column;box-shadow:inset 0 0 30px #000;min-height:0;position:relative;overflow:hidden}
-        .scanline{position:absolute;top:0;left:0;right:0;height:2px;background:rgba(255,176,0,0.04);animation:scan 4s linear infinite;pointer-events:none;z-index:2}
+        .scanline{position:absolute;top:0;left:0;right:0;height:2px;background:rgba(255,176,0,.04);animation:scan 4s linear infinite;pointer-events:none;z-index:2}
         @keyframes scan{0%{top:0}100%{top:100%}}
         .rx-badge{position:absolute;top:12px;right:16px;font-size:.6rem;color:var(--green);opacity:0;transition:opacity .12s;pointer-events:none;text-shadow:0 0 8px var(--green);z-index:3}
         .rx-badge.on{opacity:1}
@@ -52,8 +52,11 @@
         .vpn-box .mod-t{color:#4466aa}
         .vpn-box p{font-size:.52rem;color:#556;margin:4px 0;line-height:1.4}
         .vpn-box strong{color:#6688cc}
-        .turn-row{display:flex;gap:4px;margin:4px 0}
-        .turn-row input{font-size:.6rem;padding:6px 4px;letter-spacing:0;margin:0;text-align:left}
+        .https-warn{background:#1a1000;border:1px solid #3a2a00;padding:10px;margin-top:6px;border-radius:3px;display:none}
+        .https-warn.show{display:block}
+        .https-warn .mod-t{color:#aa6600}
+        .https-warn p{font-size:.52rem;color:#886622;margin:3px 0;line-height:1.4}
+        .https-warn code{color:var(--amber);background:#1a1000;padding:1px 4px;border-radius:2px}
     </style>
 </head>
 <body>
@@ -80,10 +83,21 @@
             <input type="password" id="inSec" value="tacsecure2026">
             <button class="btn btn-h" id="bHost" onclick="goHost()">1. HOST (WiFi device)</button>
             <button class="btn btn-j" id="bJoin" onclick="goJoin()">2. JOIN (5G device)</button>
+
+            <div class="https-warn" id="httpsWarn">
+                <div class="mod-t">⚠ HTTPS REQUIRED</div>
+                <p>Microphone access is blocked on <code>file://</code> and <code>http://</code></p>
+                <p><strong>Fix:</strong> Serve this file over HTTPS. Options:</p>
+                <p>• Upload to <strong>GitHub Pages</strong> (free, auto-HTTPS)</p>
+                <p>• Use <code>npx serve-ssl</code> on your computer</p>
+                <p>• Use <code>python -m http.server 8000</code> then open <code>https://localhost:8000</code></p>
+                <p>• Some browsers allow <code>chrome://flags/#unsafely-treat-insecure-origin-as-secure</code></p>
+            </div>
+
             <div class="vpn-box">
                 <div class="mod-t">5G Connection Required</div>
-                <p><strong>Airtel/Jio 5G uses CGNAT</strong> — P2P is blocked.</p>
-                <p><strong>Solution:</strong> Enable ANY VPN on the 5G phone, then tap JOIN. No extra config needed.</p>
+                <p><strong>Airtel/Jio 5G uses CGNAT</strong> — P2P blocked.</p>
+                <p><strong>Solution:</strong> Enable ANY VPN on the 5G phone, then tap JOIN.</p>
             </div>
         </div>
         <div class="mod" style="text-align:center">
@@ -102,9 +116,20 @@
 </div>
 
 <script>
-let peer=null, conn=null, localStream=null, audioCtx=null, recorder=null, analyser=null, cryptoKey=null;
-let isPTT=false, role=null, retryT=null, connTimeout=null, iceCheckT=null;
+let peer=null,conn=null,localStream=null,audioCtx=null,recorder=null,analyser=null,cryptoKey=null;
+let isPTT=false,role=null,retryT=null,connTimeout=null,iceCheckT=null;
 const PFX="TAC04-";
+
+/* ── HTTPS Check ── */
+(function checkSecure(){
+    const isSecure=location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.hostname.startsWith('192.168.')||location.hostname.startsWith('10.')||location.hostname.startsWith('172.');
+    if(!isSecure){
+        document.getElementById('httpsWarn').classList.add('show');
+        L("WARNING: Not on HTTPS — mic will be blocked","lw");
+        L("Current: "+location.protocol+"//"+location.hostname,"ls");
+        L("See yellow panel on the right for fix →","lw");
+    }
+})();
 
 /* ── Logging ── */
 function L(m,c=''){
@@ -140,19 +165,77 @@ async function dec(buf){
 
 /* ── Audio ── */
 async function initAudio(){
-    localStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,sampleRate:48000}});
+    /* Pre-check: is getUserMedia even available? */
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+        throw new Error("getUserMedia not available — use HTTPS or a modern browser");
+    }
+
+    /* Try to get mic with detailed error handling */
+    let stream;
+    try{
+        stream=await navigator.mediaDevices.getUserMedia({
+            audio:{
+                echoCancellation:true,
+                noiseSuppression:true,
+                autoGainControl:true,
+                /* Don't force sampleRate — let the browser choose what works */
+            }
+        });
+    }catch(err){
+        let hint='';
+        if(err.name==='NotAllowedError'||err.name==='PermissionDeniedError'){
+            hint='Microphone permission was DENIED. Tap the lock/info icon in your browser address bar and allow mic.';
+        }else if(err.name==='NotFoundError'||err.name==='DevicesNotFoundError'){
+            hint='No microphone found. Connect a mic/headset and retry.';
+        }else if(err.name==='NotReadableError'||err.name==='TrackStartError'){
+            hint='Mic is in use by another app. Close other apps using the mic and retry.';
+        }else if(err.name==='OverconstrainedError'){
+            hint='Mic constraint not supported. Retrying with minimal constraints...';
+            /* Retry with bare minimum constraints */
+            stream=await navigator.mediaDevices.getUserMedia({audio:true});
+            hint='[OK] Worked with fallback constraints.';
+        }else if(err.name==='TypeError'){
+            hint='Invalid audio constraints. This is a bug — report it.';
+        }else if(err.name==='SecurityError'){
+            hint='Secure context required. Open via HTTPS, not file://';
+        }else{
+            hint='Unknown error: '+err.name+' — '+err.message;
+        }
+        throw new Error(hint);
+    }
+
+    /* Verify we actually got audio tracks */
+    const audioTracks=stream.getAudioTracks();
+    if(!audioTracks.length) throw new Error("Stream has no audio tracks — mic may be broken");
+    L("Mic track: "+audioTracks[0].label+" ("+audioTracks[0].getSettings().sampleRate+"Hz)","ls");
+
+    localStream=stream;
     audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-    analyser=audioCtx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=0.5;
+    analyser=audioCtx.createAnalyser();
+    analyser.fftSize=256;
+    analyser.smoothingTimeConstant=0.5;
     audioCtx.createMediaStreamSource(localStream).connect(analyser);
-    const mime=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';
-    recorder=new MediaRecorder(localStream,{mimeType:mime});
+
+    /* Pick best available MIME type */
+    const mimes=['audio/webm;codecs=opus','audio/webm;codecs=pcm','audio/webm','audio/ogg;codecs=opus',''];
+    let mime='';
+    for(const m of mimes){
+        if(m===''||MediaRecorder.isTypeSupported(m)){mime=m===' '?'':m;break}
+    }
+    L("Recorder codec: "+(mime||'default'),"ls");
+
+    recorder=new MediaRecorder(localStream,mime?{mimeType:mime}:{});
     recorder.ondataavailable=async e=>{
         if(!conn?.open||!isPTT||!e.data?.size)return;
-        try{conn.send(new Uint8Array(await enc(await e.data.arrayBuffer())))}catch(er){L("TX fail: "+er.message,"ler")}
+        try{
+            const encrypted=await enc(await e.data.arrayBuffer());
+            conn.send(new Uint8Array(encrypted));
+        }catch(er){L("TX fail: "+er.message,"ler")}
     };
     meterLoop();
-    L("Mic OK (48kHz Opus)","ls");
+    L("Audio system READY","lok");
 }
+
 function meterLoop(){
     if(!analyser){requestAnimationFrame(meterLoop);return}
     const d=new Uint8Array(analyser.frequencyBinCount);
@@ -174,7 +257,10 @@ function pttOn(){
 }
 function pttOff(){
     isPTT=false;
-    if(recorder?.state==='recording'){recorder.stop();setTimeout(()=>{},60)}
+    if(recorder?.state==='recording'){
+        try{recorder.stop()}catch(e){}
+        setTimeout(()=>{},60);
+    }
     document.getElementById('ldTx').classList.remove('nr');
     document.getElementById('pttBtn').classList.remove('tx');
 }
@@ -187,7 +273,7 @@ pb.addEventListener('touchend',e=>{e.preventDefault();pttOff()},{passive:false})
 pb.addEventListener('touchcancel',()=>{if(isPTT)pttOff()});
 
 /* ── ICE Servers (STUN only — VPN handles the rest) ── */
-const STUN_ONLY=[
+const ICE=[
     {urls:"stun:stun.l.google.com:19302"},
     {urls:"stun:stun1.l.google.com:19302"},
     {urls:"stun:stun2.l.google.com:19302"},
@@ -197,42 +283,26 @@ const STUN_ONLY=[
     {urls:"stun:stun.voip.eutelia.it:3478"}
 ];
 
-function getIceServers(){
-    /* If user provided custom TURN, add it */
-    const tu=document.getElementById('inTurn').value.trim();
-    const tuu=document.getElementById('inTurnU').value.trim();
-    const tuc=document.getElementById('inTurnC').value.trim();
-    const servers=[...STUN_ONLY];
-    if(tu&&tuu&&tuc){
-        servers.push({urls:tu,username:tuu,credential:tuc});
-        if(!tu.includes('transport=tcp')){
-            servers.push({urls:tu.replace(/:\d+/,'')+':443?transport=tcp',username:tuu,credential:tuc});
-        }
-        L("Custom TURN server added","li");
-    }
-    return servers;
-}
-
-/* ── Connection handling ── */
+/* ── Connection ── */
 function wireConn(c){
     conn=c;
     clearTimeout(connTimeout);
 
-    /* Monitor ICE */
     iceCheckT=setInterval(()=>{
         try{
             const pc=conn._dc?.peerConnection;
             if(!pc)return;
             const s=pc.iceConnectionState;
             const el=document.getElementById('iceStat');
-            if(s){el.textContent=s.toUpperCase();
-                if(s==='connected'||s==='completed'){el.style.color='var(--green)';clearInterval(iceCheckT);L("ICE connected ("+s+")","lok")}
-                else if(s==='failed'){el.style.color='var(--red)';clearInterval(iceCheckT);L("ICE FAILED — see diagnosis below","ler");L("If on 5G without VPN: enable VPN and retry","lw")}
+            if(s){
+                el.textContent=s.toUpperCase();
+                if(s==='connected'||s==='completed'){el.style.color='var(--green)';clearInterval(iceCheckT);L("ICE: "+s,"lok")}
+                else if(s==='failed'){el.style.color='var(--red)';clearInterval(iceCheckT);L("ICE FAILED","ler");L("5G without VPN = impossible. Enable VPN.","lw")}
                 else if(s==='checking'){el.style.color='#ffaa00'}
                 else{el.style.color='#888'}
             }
             pc.oniceconnectionstatechange=()=>{iceLog("ICE→"+pc.iceConnectionState)};
-            pc.onicecandidate=ev=>{if(ev.candidate)iceLog(ev.candidate.type+': '+ev.candidate.address);else iceLog("ICE gathering done")};
+            pc.onicecandidate=ev=>{if(ev.candidate)iceLog(ev.candidate.type+': '+(ev.candidate.address||''));else iceLog("ICE done")};
             clearInterval(iceCheckT);
         }catch(e){}
     },300);
@@ -243,7 +313,7 @@ function wireConn(c){
         document.getElementById('pttBtn').disabled=false;
         document.getElementById('linkStat').textContent='AES-256 ACTIVE';
         document.getElementById('linkStat').style.color='var(--green)';
-        lockInputs(true);
+        lockUI(true);
         L("╔══════════════════════════════════╗","lok");
         L("║  SECURE LINK ESTABLISHED         ║","lok");
         L("║  AES-256-GCM E2EE ACTIVE         ║","lok");
@@ -260,38 +330,32 @@ function wireConn(c){
             const blob=new Blob([await dec(raw)],{type:'audio/webm'});
             const a=new Audio(URL.createObjectURL(blob));
             a.onended=()=>URL.revokeObjectURL(a.src);
-            a.onerror=()=>{URL.revokeObjectURL(a.src);L("Audio playback error","ler")};
+            a.onerror=()=>{URL.revokeObjectURL(a.src);L("Playback error","ler")};
             await a.play();
         }catch(e){L("Decrypt failed — wrong secret?","ler")}
     });
 
     conn.on('close',()=>{L("Link closed by remote","ler");resetUI()});
     conn.on('error',err=>{
-        const m=err?.message||err?.type||typeof err==='string'?err:JSON.stringify(err);
-        L("Connection error: "+m,"ler");
-        if(m.includes('serialization')||m.includes('binary')||m.includes('ArrayBuffer'))
-            L("Serialization error — ensure both devices use same code version","lw");
-        else if(m.includes('timeout'))
-            L("Connection timed out — check network, try VPN on 5G","lw");
-        else
-            L("If on 5G: enable VPN, then retry JOIN","lw");
+        const m=err?.message||err?.type||String(err);
+        L("Conn error: "+m,"ler");
+        if(m.includes('timeout'))L("Timed out — VPN on 5G?","lw");
+        else L("VPN on 5G device, then retry","lw");
     });
 
-    /* Hard timeout */
     connTimeout=setTimeout(()=>{
         if(conn&&!conn.open){
-            L("Connection timeout (20s)","ler");
+            L("Timeout (20s) — link never opened","ler");
             L("Diagnosis:","lw");
-            L("  • WiFi↔WiFi: check same channel number","ls");
-            L("  • 5G device: YOU MUST ENABLE VPN FIRST","lw");
-            L("  • Both: check same secret key","ls");
+            L("  WiFi↔WiFi: check same channel+secret","ls");
+            L("  5G device: ENABLE VPN FIRST","lw");
             try{conn.close()}catch(e){}
             resetUI();
         }
     },20000);
 }
 
-function lockInputs(lock){
+function lockUI(lock){
     document.getElementById('bHost').disabled=lock;
     document.getElementById('bJoin').disabled=lock;
     document.getElementById('inChan').disabled=lock;
@@ -307,7 +371,7 @@ function resetUI(){
     document.getElementById('iceStat').textContent='--';
     document.getElementById('iceStat').style.color='#555';
     document.getElementById('iceDbg').textContent='';
-    lockInputs(false);
+    lockUI(false);
 }
 
 /* ── Host ── */
@@ -315,24 +379,32 @@ async function goHost(){
     const ch=document.getElementById('inChan').value.trim();
     const pw=document.getElementById('inSec').value.trim();
     if(!ch||ch<1||ch>99)return L("Channel: enter 1-99","ler");
-    if(pw.length<4)return L("Secret: min 4 characters","ler");
+    if(pw.length<4)return L("Secret: min 4 chars","ler");
     role='host';
     const id=PFX+ch;
     document.getElementById('curCh').textContent=id;
-    lockInputs(true);
-    L("Starting HOST on WiFi...","li");
+    lockUI(true);
+    L("Starting HOST...","li");
     try{
         await initAudio();
         cryptoKey=await deriveKey(pw);
-        peer=new Peer(id,{config:{iceServers:getIceServers()},debug:0});
-        peer.on('open',()=>{L("Host online: "+id,"lok");L("Waiting for client to join...","ls");document.getElementById('linkStat').textContent='LISTENING';document.getElementById('linkStat').style.color='var(--blue)'});
+        peer=new Peer(id,{config:{iceServers:ICE},debug:0});
+        peer.on('open',()=>{
+            L("Host online: "+id,"lok");
+            L("Waiting for client...","ls");
+            document.getElementById('linkStat').textContent='LISTENING';
+            document.getElementById('linkStat').style.color='var(--blue)';
+        });
         peer.on('connection',c=>{L("Incoming connection!","li");wireConn(c)});
         peer.on('error',err=>{
-            if(err.type==='unavailable-id'){L("Channel "+ch+" occupied — pick different number","ler");lockInputs(false)}
-            else{L("Peer error: "+err.type,"ler");if(err.type==='network'||err.type==='server-error'){L("Retrying in 5s...","ls");clearTimeout(retryT);retryT=setTimeout(()=>{peer.destroy();goHost()},5000)}}
+            if(err.type==='unavailable-id'){L("Channel "+ch+" occupied — pick different number","ler");lockUI(false)}
+            else{L("Peer: "+err.type,"ler");if(err.type==='network'||err.type==='server-error'){L("Retry in 5s...","ls");clearTimeout(retryT);retryT=setTimeout(()=>{peer.destroy();goHost()},5000)}}
         });
         peer.on('disconnected',()=>{L("Server lost, reconnecting...","lw");if(peer&&!peer.destroyed)peer.reconnect()});
-    }catch(e){L("Mic error: "+e.message,"ler");lockInputs(false)}
+    }catch(e){
+        L("MIC FAILED: "+e.message,"ler");
+        lockUI(false);
+    }
 }
 
 /* ── Joiner ── */
@@ -340,42 +412,40 @@ async function goJoin(){
     const ch=document.getElementById('inChan').value.trim();
     const pw=document.getElementById('inSec').value.trim();
     if(!ch||ch<1||ch>99)return L("Channel: enter 1-99","ler");
-    if(pw.length<4)return L("Secret: min 4 characters","ler");
+    if(pw.length<4)return L("Secret: min 4 chars","ler");
     role='joiner';
     const target=PFX+ch;
     document.getElementById('curCh').textContent=target;
-    lockInputs(true);
-    L("Starting CLIENT on mobile...","li");
+    lockUI(true);
+    L("Starting CLIENT...","li");
     L("Target: "+target,"ls");
     try{
         await initAudio();
         cryptoKey=await deriveKey(pw);
-        peer=new Peer(undefined,{config:{iceServers:getIceServers()},debug:0});
+        peer=new Peer(undefined,{config:{iceServers:ICE},debug:0});
         peer.on('open',myId=>{
             L("My ID: "+myId,"ls");
             L("Connecting to host...","li");
-            L("STUN-only mode — VPN required for 5G CGNAT","lw");
             const c=peer.connect(target,{reliable:true,serialization:'binary'});
             wireConn(c);
         });
         peer.on('error',err=>{
             if(err.type==='peer-unavailable'){
-                L("Host NOT FOUND on channel "+ch,"ler");
-                L("Is the WiFi device running HOST?","lw");
-                L("Retrying in 5s...","ls");
+                L("Host NOT FOUND on ch "+ch,"ler");
+                L("Is WiFi device running HOST?","lw");
+                L("Retry in 5s...","ls");
                 clearTimeout(retryT);
                 retryT=setTimeout(()=>{if(peer&&!peer.destroyed){peer.destroy();goJoin()}},5000);
             }else{
-                L("Peer error: "+err.type+(err.message?' — '+err.message:''),"ler");
-                if(err.type==='network'||err.type==='server-error'){
-                    L("Retrying in 5s...","ls");
-                    clearTimeout(retryT);
-                    retryT=setTimeout(()=>{if(peer&&!peer.destroyed){peer.destroy();goJoin()}},5000);
-                }
+                L("Peer: "+err.type,"ler");
+                if(err.type==='network'||err.type==='server-error'){L("Retry in 5s...","ls");clearTimeout(retryT);retryT=setTimeout(()=>{if(peer&&!peer.destroyed){peer.destroy();goJoin()}},5000)}
             }
         });
         peer.on('disconnected',()=>{L("Server lost, reconnecting...","lw");if(peer&&!peer.destroyed)peer.reconnect()});
-    }catch(e){L("Mic error: "+e.message,"ler");lockInputs(false)}
+    }catch(e){
+        L("MIC FAILED: "+e.message,"ler");
+        lockUI(false);
+    }
 }
 
 /* ── Reset ── */
@@ -399,14 +469,19 @@ function doReset(){
 
 /* ── Boot ── */
 L("TAC/COM-04 SECURE VOICE TERMINAL","lok");
-L("WebRTC + PeerJS + AES-256-GCM","ls");
 L("","ls");
 L("SETUP:","li");
 L("  1. WiFi device → [HOST]","li");
 L("  2. 5G device → enable VPN → [JOIN]","li");
 L("  3. Same channel + same secret on both","li");
 L("","ls");
-L("WARNING: 5G WILL NOT WORK WITHOUT VPN","lw");
+if(location.protocol!=='https:'&&location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'){
+    L("⚠ NOT ON HTTPS — MIC WILL FAIL","lw");
+    L("See yellow panel → upload to GitHub Pages","lw");
+}else{
+    L("Secure context: OK","lok");
+}
+L("5G WITHOUT VPN = IMPOSSIBLE","lw");
 </script>
 </body>
 </html>
