@@ -3,40 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAC/COM CHANNEL-SYNC</title>
+    <title>TAC/COM v3.4 | CHANNEL-SYNC</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        :root { --amber: #ffb000; --bg: #0d0900; --red: #8c3024; --green: #39ff14; }
+        :root { --amber: #ffb000; --bg: #0d0900; --red: #8c3024; --green: #39ff14; --blue: #00d4ff; }
         body { background: #050505; color: var(--amber); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow: hidden; }
-        .mainframe { width: 90%; max-width: 400px; background: #1a1a1a; border: 4px solid #333; padding: 20px; box-shadow: 0 0 40px #000; }
-        .display { background: var(--bg); border: 2px solid #222; padding: 15px; height: 200px; overflow-y: auto; font-size: 0.8rem; margin-bottom: 20px; color: var(--amber); }
-        input { width: 100%; background: #000; border: 1px solid var(--amber); color: var(--amber); padding: 10px; margin: 5px 0; box-sizing: border-box; text-align: center; }
-        .btn { width: 100%; padding: 12px; margin: 5px 0; cursor: pointer; font-weight: bold; border: none; text-transform: uppercase; }
+        .mainframe { width: 95%; max-width: 420px; background: #1a1a1a; border: 4px solid #333; padding: 15px; box-shadow: 0 0 40px #000; box-sizing: border-box; }
+        .display { background: var(--bg); border: 2px solid #222; padding: 12px; height: 220px; overflow-y: auto; font-size: 0.75rem; margin-bottom: 15px; color: var(--amber); border-radius: 4px; }
+        .input-group { margin-bottom: 10px; }
+        label { font-size: 0.6rem; color: #777; text-transform: uppercase; display: block; margin-bottom: 2px; }
+        input { width: 100%; background: #000; border: 1px solid #444; color: var(--amber); padding: 8px; box-sizing: border-box; text-align: center; font-size: 1rem; }
+        .btn { width: 100%; padding: 12px; margin: 4px 0; cursor: pointer; font-weight: bold; border: none; text-transform: uppercase; border-radius: 2px; transition: 0.2s; }
         .btn-host { background: var(--green); color: #000; }
-        .btn-join { background: #0055ff; color: #fff; }
-        .btn-ptt { background: var(--red); color: #fff; height: 80px; font-size: 1.2rem; display: none; }
-        .btn-ptt:active { background: #f00; }
-        .status { font-size: 0.7rem; display: flex; justify-content: space-between; margin-top: 10px; }
-        .led { width: 10px; height: 10px; border-radius: 50%; background: #300; display: inline-block; }
-        .active-led { background: var(--green); box-shadow: 0 0 8px var(--green); }
+        .btn-join { background: var(--blue); color: #000; }
+        .btn-ptt { background: var(--red); color: #fff; height: 100px; font-size: 1.4rem; display: none; box-shadow: 0 5px 0 #5e1e16; }
+        .btn-ptt:active { background: #f00; transform: translateY(3px); box-shadow: 0 2px 0 #5e1e16; }
+        .status-bar { font-size: 0.65rem; display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid #333; }
+        .led { width: 10px; height: 10px; border-radius: 50%; background: #200; display: inline-block; margin-right: 5px; }
+        .led-active { background: var(--green); box-shadow: 0 0 10px var(--green); }
+        .led-tx { background: #f00; animation: blink 0.5s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
 <body>
 
 <div class="mainframe">
-    <div id="log" class="display">> SELECT CHANNEL & MODE</div>
+    <div id="log" class="display">> SYSTEM READY. SELECT CH.</div>
     
-    <input type="number" id="chan" value="42" placeholder="CHANNEL NO.">
-    <input type="password" id="key" value="secure123" placeholder="ENCRYPTION KEY">
+    <div class="input-group">
+        <label>Operational Channel</label>
+        <input type="number" id="chan" value="42">
+    </div>
     
-    <button id="hostBtn" class="btn btn-host" onclick="init('host')">Start Channel Host</button>
-    <button id="joinBtn" class="btn btn-join" onclick="init('join')">Join Channel</button>
+    <div class="input-group">
+        <label>E2EE Secret Key</label>
+        <input type="password" id="key" value="tacsecure2026">
+    </div>
+    
+    <button id="hostBtn" class="btn btn-host" onclick="init('host')">1. Start as Host (WiFi)</button>
+    <button id="joinBtn" class="btn btn-join" onclick="init('join')">2. Join Channel (5G)</button>
     
     <button id="ptt" class="btn btn-ptt">PUSH TO TALK</button>
 
-    <div class="status">
-        <span>LINK: <span id="linkStat">OFF</span></span>
-        <div id="led" class="led"></div>
+    <div class="status-bar">
+        <span>LINK: <span id="linkStat" style="color:#555">OFFLINE</span></span>
+        <div>
+            <span id="txLabel" style="display:none; color:red; margin-right:10px;">TX</span>
+            <div id="led" class="led"></div>
+            <span>SYNC</span>
+        </div>
     </div>
 </div>
 
@@ -44,85 +59,131 @@
     let peer, conn, localStream, audioCtx, recorder, cryptoKey;
     const logEl = document.getElementById('log');
     const ptt = document.getElementById('ptt');
+    
+    // High-Compatibility ICE Servers for Mobile 5G Traversal
+    const iceConfig = {
+        config: {
+            'iceServers': [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'turn:relay.metered.ca:80', username: 'metered', credential: 'metered' },
+                { urls: 'turn:relay.metered.ca:443', username: 'metered', credential: 'metered' },
+                { urls: 'turn:relay.metered.ca:443?transport=tcp', username: 'metered', credential: 'metered' }
+            ]
+        }
+    };
 
-    function log(m) { logEl.innerHTML += `<div>> ${m}</div>`; logEl.scrollTop = logEl.scrollHeight; }
+    function log(m, col = "#ffb000") { 
+        logEl.innerHTML += `<div style="color:${col}">> ${m}</div>`; 
+        logEl.scrollTop = logEl.scrollHeight; 
+    }
 
     async function getCryptoKey(pass) {
         const enc = new TextEncoder();
-        const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(pass), "PBKDF2", false, ["deriveKey"]);
-        return crypto.subtle.deriveKey({ name: "PBKDF2", salt: enc.encode("static-salt"), iterations: 100000, hash: "SHA-256" }, keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+        const material = await crypto.subtle.importKey("raw", enc.encode(pass), "PBKDF2", false, ["deriveKey"]);
+        return crypto.subtle.deriveKey({ name: "PBKDF2", salt: enc.encode("tac-salt-v3"), iterations: 100000, hash: "SHA-256" }, material, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
     }
 
     async function init(mode) {
         const channel = document.getElementById('chan').value;
         const pass = document.getElementById('key').value;
-        const channelID = `TAC-CH-${channel}`;
+        const channelID = `TAC-CHANNEL-ID-${channel}`;
 
         try {
-            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            log("REQ MIC PERMISSION...");
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
             cryptoKey = await getCryptoKey(pass);
             
-            // Peer Config with global STUN for 5G/WiFi traversal
-            const config = { config: { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] } };
-            
             if (mode === 'host') {
-                peer = new Peer(channelID, config);
-                log(`OPENING CH: ${channel}`);
+                peer = new Peer(channelID, iceConfig);
+                log(`HOSTING CH: ${channel}...`, "#39ff14");
             } else {
-                peer = new Peer(config);
-                log(`SEARCHING CH: ${channel}`);
+                peer = new Peer(iceConfig);
+                log(`JOINING CH: ${channel}...`, "#00d4ff");
             }
 
             peer.on('open', (id) => {
-                if (mode === 'host') log("WAITING FOR CLIENT...");
+                if (mode === 'host') log("WAITING FOR REMOTE...");
                 else {
-                    const c = peer.connect(channelID);
+                    log("HANDSHAKING...");
+                    const c = peer.connect(channelID, { reliable: true });
                     handleConn(c);
                 }
             });
 
             peer.on('connection', handleConn);
-            peer.on('error', e => log(`ERR: ${e.type}`));
+            peer.on('error', e => {
+                log(`ERR: ${e.type}`, "red");
+                if(e.type === 'peer-unavailable') log("HOST NOT FOUND. RETRYING...");
+            });
 
-        } catch (e) { log("MIC REQ. FAILED"); }
+        } catch (e) { log("MIC ERROR: PLEASE ALLOW ACCESS", "red"); }
     }
 
     function handleConn(c) {
         conn = c;
         conn.on('open', () => {
-            log("CHANNEL SYNCED");
-            document.getElementById('led').classList.add('active-led');
+            log("SECURE LINK ACTIVE", "#39ff14");
+            document.getElementById('led').classList.add('led-active');
             document.getElementById('linkStat').innerText = "ONLINE";
+            document.getElementById('linkStat').style.color = "#39ff14";
+            
             document.getElementById('hostBtn').style.display = 'none';
             document.getElementById('joinBtn').style.display = 'none';
             ptt.style.display = 'block';
-            setupAudio();
+            
+            setupAudioLogic();
+            
+            // Keep-alive heartbeat to prevent 5G timeout
+            setInterval(() => { if(conn.open) conn.send('ping'); }, 15000);
         });
 
         conn.on('data', async (data) => {
-            const iv = data.slice(0, 12);
-            const body = data.slice(12);
-            const dec = await crypto.subtle.decrypt({ name: "AES-GCM", iv: new Uint8Array(iv) }, cryptoKey, body);
-            const audio = new Audio(URL.createObjectURL(new Blob([dec], { type: 'audio/webm' })));
-            audio.play();
+            if(data === 'ping') return;
+            document.getElementById('led').classList.add('led-tx');
+            try {
+                const iv = data.slice(0, 12);
+                const body = data.slice(12);
+                const dec = await crypto.subtle.decrypt({ name: "AES-GCM", iv: new Uint8Array(iv) }, cryptoKey, body);
+                const audio = new Audio(URL.createObjectURL(new Blob([dec], { type: 'audio/webm' })));
+                await audio.play();
+            } catch (e) { console.error("Decryption failed"); }
+            setTimeout(() => document.getElementById('led').classList.remove('led-tx'), 400);
+        });
+
+        conn.on('close', () => {
+            log("LINK TERMINATED", "red");
+            location.reload();
         });
     }
 
-    function setupAudio() {
+    function setupAudioLogic() {
         recorder = new MediaRecorder(localStream);
+        
         recorder.ondataavailable = async (e) => {
             if (conn.open && e.data.size > 0) {
                 const buf = await e.data.arrayBuffer();
                 const iv = crypto.getRandomValues(new Uint8Array(12));
                 const enc = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, cryptoKey, buf);
                 const packet = new Uint8Array(iv.length + enc.byteLength);
-                packet.set(iv); packet.set(new Uint8Array(enc), 12);
+                packet.set(iv); 
+                packet.set(new Uint8Array(enc), 12);
                 conn.send(packet.buffer);
             }
         };
 
-        const start = () => { if(recorder.state === 'inactive') recorder.start(); };
-        const stop = () => { if(recorder.state === 'recording') recorder.stop(); };
+        const start = () => { 
+            if(recorder.state === 'inactive') {
+                recorder.start(); 
+                document.getElementById('txLabel').style.display = 'inline';
+            }
+        };
+        const stop = () => { 
+            if(recorder.state === 'recording') {
+                recorder.stop(); 
+                document.getElementById('txLabel').style.display = 'none';
+            }
+        };
 
         ptt.onmousedown = start; ptt.onmouseup = stop;
         ptt.ontouchstart = (e) => { e.preventDefault(); start(); };
