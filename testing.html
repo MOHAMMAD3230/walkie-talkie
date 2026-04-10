@@ -3,192 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAC/COM v3.4 | CHANNEL-SYNC</title>
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <title>TAC/COM-04 | RELAY MODE</title>
+    <script src="https://unpkg.com/mqtt@5.3.5/dist/mqtt.min.js"></script>
     <style>
-        :root { --amber: #ffb000; --bg: #0d0900; --red: #8c3024; --green: #39ff14; --blue: #00d4ff; }
-        body { background: #050505; color: var(--amber); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow: hidden; }
-        .mainframe { width: 95%; max-width: 420px; background: #1a1a1a; border: 4px solid #333; padding: 15px; box-shadow: 0 0 40px #000; box-sizing: border-box; }
-        .display { background: var(--bg); border: 2px solid #222; padding: 12px; height: 220px; overflow-y: auto; font-size: 0.75rem; margin-bottom: 15px; color: var(--amber); border-radius: 4px; }
-        .input-group { margin-bottom: 10px; }
-        label { font-size: 0.6rem; color: #777; text-transform: uppercase; display: block; margin-bottom: 2px; }
-        input { width: 100%; background: #000; border: 1px solid #444; color: var(--amber); padding: 8px; box-sizing: border-box; text-align: center; font-size: 1rem; }
-        .btn { width: 100%; padding: 12px; margin: 4px 0; cursor: pointer; font-weight: bold; border: none; text-transform: uppercase; border-radius: 2px; transition: 0.2s; }
-        .btn-host { background: var(--green); color: #000; }
-        .btn-join { background: var(--blue); color: #000; }
-        .btn-ptt { background: var(--red); color: #fff; height: 100px; font-size: 1.4rem; display: none; box-shadow: 0 5px 0 #5e1e16; }
-        .btn-ptt:active { background: #f00; transform: translateY(3px); box-shadow: 0 2px 0 #5e1e16; }
-        .status-bar { font-size: 0.65rem; display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid #333; }
-        .led { width: 10px; height: 10px; border-radius: 50%; background: #200; display: inline-block; margin-right: 5px; }
-        .led-active { background: var(--green); box-shadow: 0 0 10px var(--green); }
-        .led-tx { background: #f00; animation: blink 0.5s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } }
+        :root{--amber:#ffb000;--bg:#0a0800;--red:#ff3333;--blue:#00d4ff;--green:#39ff14;--panel:#0c0c0c;--border:#1e1e1e;--muted:#444}
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        body{background:#030303;color:var(--amber);font-family:'Courier New',Courier,monospace;display:flex;justify-content:center;align-items:center;min-height:100vh;overflow:hidden;touch-action:manipulation}
+        .frame{width:96%;max-width:860px;background:#151515;border:5px solid #0a0a0a;border-radius:6px;padding:10px;display:flex;flex-direction:column;box-shadow:0 0 100px rgba(0,0,0,.8)}
+        @media(min-width:780px){.frame{grid-template-columns:1fr 300px;height:700px;gap:14px;display:grid;padding:14px}}
+        .screen{background:var(--bg);border:8px solid #111;border-radius:12px;padding:14px;flex:1;display:flex;flex-direction:column;min-height:400px;position:relative;overflow:hidden;box-shadow:inset 0 0 40px rgba(0,0,0,.6)}
+        .scanline{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,176,0,.008) 2px,rgba(255,176,0,.008) 4px);pointer-events:none;z-index:1}
+        .rx-ind{position:absolute;top:12px;right:14px;font-size:.6rem;color:var(--green);opacity:0;transition:opacity .1s;text-shadow:0 0 8px var(--green);z-index:2;pointer-events:none}
+        .rx-ind.on{opacity:1}
+        .topbar{font-size:.55rem;display:flex;justify-content:space-between;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid #1a1a1a;flex-wrap:wrap;gap:4px;position:relative;z-index:2}
+        .topbar span{white-space:nowrap}
+        .badge{display:inline-block;padding:1px 5px;border-radius:2px;font-size:.5rem;font-weight:bold;letter-spacing:1px;background:#001a33;color:var(--blue);border:1px solid #003366}
+        #log{flex:1;overflow-y:auto;font-size:.68rem;line-height:1.5;scrollbar-width:none;position:relative;z-index:2}
+        #log::-webkit-scrollbar{display:none}
+        .ln{padding:1px 0}.c-ok{color:var(--green)}.c-err{color:var(--red)}.c-warn{color:#ffaa00}.c-info{color:var(--blue)}.c-dim{color:#555}
+        .meter-area{margin-top:auto;position:relative;z-index:2}
+        .meter-label{font-size:.45rem;color:#333;display:flex;justify-content:space-between;margin-bottom:2px}
+        .meter-bar{width:100%;height:8px;background:#000;border:1px solid #111;border-radius:2px;overflow:hidden}
+        .meter-fill{height:100%;width:0;background:linear-gradient(90deg,var(--green),#ccff00 70%,var(--red));transition:width .05s linear}
+        .panel{display:flex;flex-direction:column;gap:8px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#111 transparent}
+        .box{background:var(--panel);padding:12px;border:1px solid var(--border);border-radius:4px}
+        .box-label{font-size:.45rem;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
+        .field{width:100%;background:#000;border:1px solid #222;color:var(--amber);padding:10px 6px;font-family:inherit;font-size:1.1rem;text-align:center;letter-spacing:3px;outline:none;border-radius:2px;margin-bottom:8px;transition:border-color .2s}
+        .field:focus{border-color:var(--amber)}.field:disabled{opacity:.2}
+        .abtn{width:100%;padding:11px 6px;font-family:inherit;font-size:.62rem;font-weight:bold;text-transform:uppercase;letter-spacing:1px;border:1px solid #333;border-radius:3px;cursor:pointer;transition:all .1s;margin:4px 0;background:#111;color:#888}
+        .abtn:hover:not(:disabled){background:#1a1a1a}.abtn:active:not(:disabled){transform:scale(.98)}.abtn:disabled{opacity:.15;cursor:not-allowed}
+        .abtn.h{border-color:#1a3a1a;color:var(--green)}.abtn.h:hover:not(:disabled){background:#0a150a}
+        .abtn.j{background:#0a120a;border-color:#0a300a;color:var(--green)}.abtn.j:hover:not(:disabled){background:#0f1a0f}
+        .abtn.r{background:#120505;color:#ff4444;border-color:#2a0000}
+        .info-box{background:#0a0a18;border:1px solid #151530;padding:10px;border-radius:3px;margin-top:4px}
+        .info-box .box-label{color:#3355aa}
+        .info-box p{font-size:.48rem;color:#445;line-height:1.5;margin:3px 0}
+        .info-box strong{color:#5577cc}
+        .ptt-area{text-align:center}
+        .ptt-btn{width:100%;height:130px;background:linear-gradient(180deg,#8c3024,#5a1c14);color:#fff;border:4px solid #3e1510;border-radius:8px;font-family:inherit;font-size:1.1rem;font-weight:bold;letter-spacing:2px;cursor:pointer;user-select:none;-webkit-user-select:none;box-shadow:0 5px 0 #220a06,inset 0 1px 0 rgba(255,255,255,.06);transition:all .06s}
+        .ptt-btn:active:not(:disabled){transform:translateY(4px);box-shadow:0 1px 0 #220a06;background:linear-gradient(180deg,#cc3020,#882010)}
+        .ptt-btn:disabled{background:#0a0a0a;color:#222;box-shadow:none;border-color:#151515}
+        .ptt-btn.active{animation:pg .4s infinite}
+        @keyframes pg{0%,100%{box-shadow:0 5px 0 #220a06,0 0 20px rgba(255,0,0,.2)}50%{box-shadow:0 5px 0 #220a06,0 0 40px rgba(255,0,0,.5)}}
+        .led-row{display:flex;justify-content:space-around;margin-top:10px;font-size:.45rem;text-transform:uppercase;letter-spacing:1px}
+        .led-item{display:flex;align-items:center;gap:4px}
+        .dot{width:8px;height:8px;border-radius:50%;background:#0f0505;border:1px solid #1a0505;transition:all .2s}
+        .dot.blue{background:var(--blue);box-shadow:0 0 6px var(--blue);border-color:var(--blue)}
+        .dot.red{background:#f00;box-shadow:0 0 8px #f00;border-color:#f00;animation:bk .5s infinite}
+        .dot.green{background:var(--green);box-shadow:0 0 6px var(--green);border-color:var(--green)}
+        @keyframes bk{0%,100%{opacity:1}50%{opacity:.2}}
+        .stats{font-size:.42rem;color:#333;margin-top:8px;padding-top:6px;border-top:1px solid #111;display:flex;justify-content:space-between}
     </style>
 </head>
 <body>
-
-<div class="mainframe">
-    <div id="log" class="display">> SYSTEM READY. SELECT CH.</div>
-    
-    <div class="input-group">
-        <label>Operational Channel</label>
-        <input type="number" id="chan" value="42">
+<div class="frame">
+    <div class="screen">
+        <div class="scanline"></div>
+        <div class="rx-ind" id="rxInd">▶ RX</div>
+        <div class="topbar">
+            <span>CH: <span id="chD" style="color:var(--blue)">--</span></span>
+            <span class="badge">RELAY MODE</span>
+            <span>LINK: <span id="lkD" style="color:#444">OFFLINE</span></span>
+            <span>SRV: <span id="svD" style="color:#444">--</span></span>
+        </div>
+        <div id="log"></div>
+        <div class="meter-area">
+            <div class="meter-label"><span>MIC INPUT</span><span id="mP">0%</span></div>
+            <div class="meter-bar"><div class="meter-fill" id="mF"></div></div>
+        </div>
     </div>
-    
-    <div class="input-group">
-        <label>E2EE Secret Key</label>
-        <input type="password" id="key" value="tacsecure2026">
-    </div>
-    
-    <button id="hostBtn" class="btn btn-host" onclick="init('host')">1. Start as Host (WiFi)</button>
-    <button id="joinBtn" class="btn btn-join" onclick="init('join')">2. Join Channel (5G)</button>
-    
-    <button id="ptt" class="btn btn-ptt">PUSH TO TALK</button>
-
-    <div class="status-bar">
-        <span>LINK: <span id="linkStat" style="color:#555">OFFLINE</span></span>
-        <div>
-            <span id="txLabel" style="display:none; color:red; margin-right:10px;">TX</span>
-            <div id="led" class="led"></div>
-            <span>SYNC</span>
+    <div class="panel">
+        <div class="box">
+            <div class="box-label">Configuration</div>
+            <input type="number" class="field" id="fC" value="42" min="1" max="999">
+            <input type="password" class="field" id="fS" value="tacsecure2026">
+            <button class="abtn h" id="bH" onclick="goHost()">1. HOST (WiFi device)</button>
+            <button class="abtn j" id="bJ" onclick="goJoin()">2. JOIN (5G device)</button>
+            <div class="info-box">
+                <div class="box-label">How This Works</div>
+                <p><strong>Relay mode</strong> — audio routes through a server, NOT direct P2P.</p>
+                <p><strong>No VPN needed.</strong> Works on any network including 5G CGNAT.</p>
+                <p><strong>E2E encrypted.</strong> Server sees only ciphertext (AES-256-GCM).</p>
+                <p><strong>Same channel + same secret</strong> on both devices.</p>
+            </div>
+        </div>
+        <div class="box ptt-area">
+            <button class="ptt-btn" id="ptt" disabled>HOLD TO TX</button>
+            <div class="led-row">
+                <div class="led-item"><div class="dot" id="dN"></div>LINK</div>
+                <div class="led-item"><div class="dot" id="dT"></div>TX</div>
+                <div class="led-item"><div class="dot" id="dR"></div>RX</div>
+            </div>
+            <div class="stats">
+                <span>TX: <span id="sT">0</span></span>
+                <span>RX: <span id="sR">0</span></span>
+                <span>LAT: <span id="sL">--</span></span>
+            </div>
+        </div>
+        <div class="box" style="padding:6px 12px">
+            <button class="abtn r" onclick="doReset()" style="margin:0">HARD RESET</button>
         </div>
     </div>
 </div>
 
 <script>
-    let peer, conn, localStream, audioCtx, recorder, cryptoKey;
-    const logEl = document.getElementById('log');
-    const ptt = document.getElementById('ptt');
-    
-    // High-Compatibility ICE Servers for Mobile 5G Traversal
-    const iceConfig = {
-        config: {
-            'iceServers': [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'turn:relay.metered.ca:80', username: 'metered', credential: 'metered' },
-                { urls: 'turn:relay.metered.ca:443', username: 'metered', credential: 'metered' },
-                { urls: 'turn:relay.metered.ca:443?transport=tcp', username: 'metered', credential: 'metered' }
-            ]
+/* ═══ STATE ═══ */
+let mc=null,micStr=null,micCtx=null,ana=null,rec=null,plCtx=null,nxtPlay=0,ck=null;
+let role=null,isPTT=false,peerUp=false,peerTmr=null,heartTmr=null,rxSil=null;
+let txN=0,rxN=0;
+const TP='tac04/',HB=2500,PD=8000;
+const BK=['wss://broker.hivemq.com:8884/mqtt','wss://broker.emqx.io:8084/mqtt','wss://test.mosquitto.org:8081'];
+
+/* ═══ LOG ═══ */
+function L(m,c=''){const o=document.getElementById('log'),d=document.createElement('div');d.className='ln '+c;const t=new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});d.textContent=`[${t}] ${m}`;o.appendChild(d);o.scrollTop=o.scrollHeight}
+
+/* ═══ CRYPTO ═══ */
+async function dk(pw){const e=new TextEncoder(),b=await crypto.subtle.importKey('raw',e.encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:e.encode('TAC04-V2'),iterations:100000,hash:'SHA-256'},b,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function enc(buf){const iv=crypto.getRandomValues(new Uint8Array(12)),ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},ck,buf),o=new Uint8Array(12+ct.byteLength);o.set(iv,0);o.set(new Uint8Array(ct),12);return o}
+async function dec(d){const u=new Uint8Array(d);return crypto.subtle.decrypt({name:'AES-GCM',iv:u.slice(0,12)},ck,u.slice(12))}
+
+/* ═══ MIC ═══ */
+async function initMic(){
+    if(!navigator.mediaDevices?.getUserMedia)throw new Error('getUserMedia unavailable — use HTTPS');
+    let s;
+    try{s=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}})}
+    catch(e){
+        const h={NotAllowedError:'Permission DENIED. Tap 🔒 in address bar → allow mic.',NotFoundError:'No microphone found. Connect headset/mic.',NotReadableError:'Mic in use by another app. Close other apps and retry.',OverconstrainedError:'',SecurityError:'HTTPS required. Not file://.'};
+        if(e.name==='OverconstrainedError'){s=await navigator.mediaDevices.getUserMedia({audio:true})}
+        else throw new Error(h[e.name]||e.name+': '+e.message)
+    }
+    const tk=s.getAudioTracks();if(!tk.length)throw new Error('No audio tracks.');
+    L('Mic: '+tk[0].label+' ('+( tk[0].getSettings().sampleRate||'?')+'Hz)','c-dim');
+    micStr=s;micCtx=new(window.AudioContext||window.webkitAudioContext)();
+    ana=micCtx.createAnalyser();ana.fftSize=256;ana.smoothingTimeConstant=.4;
+    micCtx.createMediaStreamSource(micStr).connect(ana);
+    const mm=['audio/webm;codecs=opus','audio/webm;codecs=pcm','audio/webm',''];let mi='';
+    for(const m of mm)if(m===''||MediaRecorder.isTypeSupported(m)){mi=m;break}
+    rec=new MediaRecorder(micStr,mi?{mimeType:mi}:{});
+    rec.ondataavailable=onChunk;mLoop();L('Audio ready','c-ok')
+}
+function onChunk(e){if(!mc?.connected||!isPTT||!e.data?.size)return;e.data.arrayBuffer().then(b=>enc(b)).then(d=>{mc.publish(TP+document.getElementById('fC').value+'/'++role,d,{qos:0});txN++;document.getElementById('sT').textContent=txN}).catch(er=>L('TX: '+er.message,'c-err'))}
+function mLoop(){if(!ana){requestAnimationFrame(mLoop);return}const d=new Uint8Array(ana.frequencyBinCount);ana.getByteFrequencyData(d);const v=Math.min(100,d.reduce((a,b)=>a+b,0)/d.length*2.5);document.getElementById('mF').style.width=v+'%';document.getElementById('mP').textContent=Math.round(v)+'%';requestAnimationFrame(mLoop)}
+
+/* ═══ PLAYBACK ═══ */
+function ePlCtx(){if(!plCtx)plCtx=new(window.AudioContext||window.webkitAudioContext)();if(plCtx.state==='suspended')plCtx.resume();return plCtx}
+async function playCh(ab){
+    clearTimeout(rxSil);const ctx=ePlCtx();
+    document.getElementById('rxInd').classList.add('on');document.getElementById('dR').classList.add('green');
+    try{const af=await ctx.decodeAudioData(ab.slice(0)),src=ctx.createBufferSource();src.buffer=af;src.connect(ctx.destination);const st=Math.max(ctx.currentTime+.005,nxtPlay);src.start(st);nxtPlay=st+af.duration}catch(e){}
+    rxSil=setTimeout(()=>{document.getElementById('rxInd').classList.remove('on');document.getElementById('dR').classList.remove('green');nxtPlay=0},200)
+}
+
+/* ═══ PTT ═══ */
+function pD(){if(!mc?.connected||!rec)return;if(micCtx?.state==='suspended')micCtx.resume();if(rec.state==='inactive')rec.start(80);isPTT=true;document.getElementById('dT').classList.add('red');document.getElementById('ptt').classList.add('active')}
+function pU(){isPTT=false;if(rec?.state==='recording'){try{rec.stop()}catch(e){}setTimeout(()=>{},50)}document.getElementById('dT').classList.remove('red');document.getElementById('ptt').classList.remove('active')}
+const pe=document.getElementById('ptt');
+pe.addEventListener('mousedown',e=>{e.preventDefault();pD()});pe.addEventListener('mouseup',e=>{e.preventDefault();pU()});pe.addEventListener('mouseleave',()=>{if(isPTT)pU()});
+pe.addEventListener('touchstart',e=>{e.preventDefault();pD()},{passive:false});pe.addEventListener('touchend',e=>{e.preventDefault();pU()},{passive:false});pe.addEventListener('touchcancel',()=>{if(isPTT)pU()});
+
+/* ═══ MQTT ═══ */
+async function mqConnect(ch,myRole){
+    role=myRole;
+    const aT=TP+ch+'/'+role,pT=TP+ch+'/'+(role==='host'?'client':'host'),piT=TP+ch+'/ping';
+    const myPing=JSON.stringify({r:role,t:Date.now()});
+    let ok=false;
+    for(const url of BK){
+        const nm=new URL(url).hostname.split('.').slice(-2).join('.');
+        L('Trying '+nm+'...','c-dim');
+        try{
+            mc=mqtt.connect(url,{clientId:'TAC04-'+Math.random().toString(36).substr(2,8),clean:true,connectTimeout:6000,reconnectPeriod:0,keepalive:10});
+            await new Promise((y,n)=>{const tm=setTimeout(()=>{mc.end(true);n(new Error('timeout'))},8000);mc.on('connect',()=>{clearTimeout(tm);y()});mc.on('error',er=>{clearTimeout(tm);mc.end(true);n(er)})});
+            document.getElementById('svD').textContent=nm;document.getElementById('svD').style.color='var(--green)';L('Connected: '+nm,'c-ok');ok=true;break
+        }catch(e){L(nm+' failed: '+e.message,'c-err')}
+    }
+    if(!ok)throw new Error('All brokers failed. Check internet.');
+    mc.subscribe(pT,{qos:0});mc.subscribe(piT,{qos:0});L('Listening channel '+ch,'c-dim');
+    mc.on('message',(topic,payload)=>{
+        const data=payload instanceof Uint8Array?payload:new Uint8Array(payload);
+        if(topic===piT){
+            try{const msg=JSON.parse(new TextDecoder().decode(data));if(msg.r!==role){peerUp=true;setActive();clearTimeout(peerTmr);peerTmr=setTimeout(()=>{peerUp=false;setDead()},PD);document.getElementById('sL').textContent=(Date.now()-msg.t)+'ms'}}catch(e){}return
         }
-    };
+        if(topic===pT){rxN++;document.getElementById('sR').textContent=rxN;dec(data).then(b=>playCh(b)).catch(()=>L('Decrypt fail — wrong secret?','c-err'))}
+    });
+    heartTmr=setInterval(()=>{if(mc?.connected)mc.publish(piT,myPing,{qos:0})},HB);
+    mc.on('close',()=>{L('Broker disconnected','c-warn');setDead()});
+    mc.on('error',er=>L('MQTT: '+er.message,'c-err'))
+}
 
-    function log(m, col = "#ffb000") { 
-        logEl.innerHTML += `<div style="color:${col}">> ${m}</div>`; 
-        logEl.scrollTop = logEl.scrollHeight; 
-    }
+/* ═══ UI STATE ═══ */
+function setActive(){if(document.getElementById('lkD').textContent==='ACTIVE')return;document.getElementById('lkD').textContent='ACTIVE';document.getElementById('lkD').style.color='var(--green)';document.getElementById('dN').classList.add('green');document.getElementById('ptt').disabled=false;L('╔══════════════════════════════════╗','c-ok');L('║  PEER FOUND — LINK ACTIVE        ║','c-ok');L('║  Hold red button to transmit     ║','c-ok');L('╚══════════════════════════════════╝','c-ok')}
+function setDead(){document.getElementById('lkD').textContent='WAITING';document.getElementById('lkD').style.color='#ffaa00';document.getElementById('dN').className='dot';document.getElementById('ptt').disabled=true}
+function lockUI(l){document.getElementById('bH').disabled=l;document.getElementById('bJ').disabled=l;document.getElementById('fC').disabled=l;document.getElementById('fS').disabled=l}
 
-    async function getCryptoKey(pass) {
-        const enc = new TextEncoder();
-        const material = await crypto.subtle.importKey("raw", enc.encode(pass), "PBKDF2", false, ["deriveKey"]);
-        return crypto.subtle.deriveKey({ name: "PBKDF2", salt: enc.encode("tac-salt-v3"), iterations: 100000, hash: "SHA-256" }, material, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
-    }
+/* ═══ HOST ═══ */
+async function goHost(){
+    const ch=document.getElementById('fC').value.trim(),pw=document.getElementById('fS').value.trim();
+    if(!ch||ch<1||ch>999)return L('Channel: 1-999','c-err');if(pw.length<4)return L('Secret: min 4 chars','c-err');
+    lockUI(true);document.getElementById('chD').textContent=TP+ch;L('Starting HOST...','c-info');
+    try{await initMic();ck=await dk(pw);await mqConnect(ch,'host');L('Host ready — waiting for client','c-dim');document.getElementById('lkD').textContent='WAITING';document.getElementById('lkD').style.color='#ffaa00'}
+    catch(e){L('ERROR: '+e.message,'c-err');lockUI(false)}
+}
 
-    async function init(mode) {
-        const channel = document.getElementById('chan').value;
-        const pass = document.getElementById('key').value;
-        const channelID = `TAC-CHANNEL-ID-${channel}`;
+/* ═══ JOIN ═══ */
+async function goJoin(){
+    const ch=document.getElementById('fC').value.trim(),pw=document.getElementById('fS').value.trim();
+    if(!ch||ch<1||ch>999)return L('Channel: 1-999','c-err');if(pw.length<4)return L('Secret: min 4 chars','c-err');
+    lockUI(true);document.getElementById('chD').textContent=TP+ch;L('Starting CLIENT on 5G...','c-info');
+    try{await initMic();ck=await dk(pw);await mqConnect(ch,'client');L('Client ready — waiting for host','c-dim');document.getElementById('lkD').textContent='WAITING';document.getElementById('lkD').style.color='#ffaa00'}
+    catch(e){L('ERROR: '+e.message,'c-err');lockUI(false)}
+}
 
-        try {
-            log("REQ MIC PERMISSION...");
-            localStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
-            cryptoKey = await getCryptoKey(pass);
-            
-            if (mode === 'host') {
-                peer = new Peer(channelID, iceConfig);
-                log(`HOSTING CH: ${channel}...`, "#39ff14");
-            } else {
-                peer = new Peer(iceConfig);
-                log(`JOINING CH: ${channel}...`, "#00d4ff");
-            }
+/* ═══ RESET ═══ */
+function doReset(){
+    clearInterval(heartTmr);clearTimeout(peerTmr);clearTimeout(rxSil);pU();
+    try{if(rec?.state!=='inactive')rec.stop()}catch(e){}try{micStr?.getTracks().forEach(t=>t.stop())}catch(e){}try{micCtx?.close()}catch(e){}try{plCtx?.close()}catch(e){}try{if(mc)mc.end(true)}catch(e){}
+    mc=null;micStr=null;micCtx=null;ana=null;rec=null;plCtx=null;ck=null;role=null;isPTT=false;peerUp=false;txN=0;rxN=0;nxtPlay=0;
+    ['dN','dT','dR'].forEach(id=>document.getElementById(id).className='dot');
+    document.getElementById('ptt').disabled=true;document.getElementById('ptt').classList.remove('active');
+    document.getElementById('lkD').textContent='OFFLINE';document.getElementById('lkD').style.color='#444';
+    document.getElementById('svD').textContent='--';document.getElementById('svD').style.color='#444';
+    document.getElementById('sT').textContent='0';document.getElementById('sR').textContent='0';document.getElementById('sL').textContent='--';
+    document.getElementById('mF').style.width='0%';document.getElementById('mP').textContent='0%';
+    document.getElementById('chD').textContent='--';document.getElementById('rxInd').classList.remove('on');lockUI(false);
+    document.getElementById('log').innerHTML='';L('SYSTEM RESET','c-dim');L('WiFi → HOST  |  5G → JOIN','c-info');L('No VPN needed — relay mode','c-dim')
+}
 
-            peer.on('open', (id) => {
-                if (mode === 'host') log("WAITING FOR REMOTE...");
-                else {
-                    log("HANDSHAKING...");
-                    const c = peer.connect(channelID, { reliable: true });
-                    handleConn(c);
-                }
-            });
-
-            peer.on('connection', handleConn);
-            peer.on('error', e => {
-                log(`ERR: ${e.type}`, "red");
-                if(e.type === 'peer-unavailable') log("HOST NOT FOUND. RETRYING...");
-            });
-
-        } catch (e) { log("MIC ERROR: PLEASE ALLOW ACCESS", "red"); }
-    }
-
-    function handleConn(c) {
-        conn = c;
-        conn.on('open', () => {
-            log("SECURE LINK ACTIVE", "#39ff14");
-            document.getElementById('led').classList.add('led-active');
-            document.getElementById('linkStat').innerText = "ONLINE";
-            document.getElementById('linkStat').style.color = "#39ff14";
-            
-            document.getElementById('hostBtn').style.display = 'none';
-            document.getElementById('joinBtn').style.display = 'none';
-            ptt.style.display = 'block';
-            
-            setupAudioLogic();
-            
-            // Keep-alive heartbeat to prevent 5G timeout
-            setInterval(() => { if(conn.open) conn.send('ping'); }, 15000);
-        });
-
-        conn.on('data', async (data) => {
-            if(data === 'ping') return;
-            document.getElementById('led').classList.add('led-tx');
-            try {
-                const iv = data.slice(0, 12);
-                const body = data.slice(12);
-                const dec = await crypto.subtle.decrypt({ name: "AES-GCM", iv: new Uint8Array(iv) }, cryptoKey, body);
-                const audio = new Audio(URL.createObjectURL(new Blob([dec], { type: 'audio/webm' })));
-                await audio.play();
-            } catch (e) { console.error("Decryption failed"); }
-            setTimeout(() => document.getElementById('led').classList.remove('led-tx'), 400);
-        });
-
-        conn.on('close', () => {
-            log("LINK TERMINATED", "red");
-            location.reload();
-        });
-    }
-
-    function setupAudioLogic() {
-        recorder = new MediaRecorder(localStream);
-        
-        recorder.ondataavailable = async (e) => {
-            if (conn.open && e.data.size > 0) {
-                const buf = await e.data.arrayBuffer();
-                const iv = crypto.getRandomValues(new Uint8Array(12));
-                const enc = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, cryptoKey, buf);
-                const packet = new Uint8Array(iv.length + enc.byteLength);
-                packet.set(iv); 
-                packet.set(new Uint8Array(enc), 12);
-                conn.send(packet.buffer);
-            }
-        };
-
-        const start = () => { 
-            if(recorder.state === 'inactive') {
-                recorder.start(); 
-                document.getElementById('txLabel').style.display = 'inline';
-            }
-        };
-        const stop = () => { 
-            if(recorder.state === 'recording') {
-                recorder.stop(); 
-                document.getElementById('txLabel').style.display = 'none';
-            }
-        };
-
-        ptt.onmousedown = start; ptt.onmouseup = stop;
-        ptt.ontouchstart = (e) => { e.preventDefault(); start(); };
-        ptt.ontouchend = (e) => { e.preventDefault(); stop(); };
-    }
+/* ═══ BOOT ═══ */
+(function(){
+    if(typeof mqtt==='undefined'||!mqtt.connect){L('FATAL: MQTT library failed to load','c-err');L('Check internet connection','c-err');return}
+    const ok=location.protocol==='https:'||['localhost','127.0.0.1'].includes(location.hostname)||location.hostname.startsWith('192.168.');
+    if(!ok){L('⚠ NOT HTTPS — mic will be blocked','c-warn');L('Fix: upload to GitHub Pages (free, auto-HTTPS)','c-warn');L('Or: chrome://flags → insecure-treat-as-secure','c-dim')}
+    L('TAC/COM-04 — RELAY MODE','c-ok');L('Architecture: MQTT relay + AES-256-GCM','c-dim');L('No WebRTC, no TURN, no VPN needed','c-dim');L('','c-dim');
+    L('WiFi device → [HOST]','c-info');L('5G device  → [JOIN]','c-info');L('Same channel + same secret on both','c-dim')
+})();
 </script>
 </body>
 </html>
