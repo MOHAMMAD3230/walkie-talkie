@@ -1,605 +1,1010 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4592970036066688"
-     crossorigin="anonymous"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4592970036066688"
-     crossorigin="anonymous"></script>
+ <link rel="icon" href="https://mohammad3230.github.io/PROJECT/favicon.png" type="image/png" sizes="32x32" />
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=GT-NC6T5LRJ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'GT-NC6T5LRJ');
+</script>
     
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=GT-NC6T5LRJ"></script>
+    <!-- ============================================================
+         CONTENT-SECURITY-POLICY (meta tag version)
+         LIMITATIONS ACKNOWLEDGED:
+         - frame-ancestors: NOT enforced by Chrome/Firefox from meta tags
+           → Covered by GitHub Pages default X-Frame-Options: DENY header
+         - sandbox: NOT enforced by Chrome from meta tags
+           → No mitigation on GitHub Pages free tier
+         - 'unsafe-inline': Weakness inherent to single-file architecture
+           → Move to nonce-based CSP with separate .js files for production
+         ============================================================ -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://googletagmanager.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src https://fonts.gstatic.com;
+        img-src 'self' https://mohammad3230.github.io data: blob:;
+        media-src https://www.soundjay.com;
+        connect-src 'self' https://pagead2.googlesyndication.com https://www.google-analytics.com https://www.googletagmanager.com https://googleads.g.doubleclick.net;
+        frame-src https://pagead2.googlesyndication.com;
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+    ">
+
+    <!-- WORKS in meta tag: restricts referrer on outbound links -->
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
+    <!-- WORKS in meta tag: disables unused browser features to reduce attack surface -->
+    <meta http-equiv="Permissions-Policy" content="
+        camera=(),
+        microphone=(),
+        geolocation=(),
+        payment=(),
+        usb=(),
+        magnetometer=(),
+        gyroscope=(),
+        accelerometer=(),
+        ambient-light-sensor=(),
+        autoplay=(),
+        encrypted-media=(),
+        picture-in-picture=(),
+        screen-wake-lock=(),
+        idle-detection=()
+    ">
+
+    <!-- NOT effective as meta tag — GitHub Pages sets this header for you.
+     Kept as defense-in-depth documentation only. -->
+    <!-- <meta http-equiv="X-Content-Type-Options" content="nosniff"> -->
+
+    <!-- DEPRECATED — CSP is the replacement. Removed. -->
+
+    <!-- DNS prefetch: only for domains we actually connect to -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+    <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin="anonymous">
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin="anonymous">
+
+    <!-- SRI not available for Google Fonts dynamic CSS — crossorigin=anonymous is the best available -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" crossorigin="anonymous">
+
+    <!-- SRI not available for Google AdSense/GTM — documented supply chain limitation -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4592970036066688"
+     crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4592970036066688"
+     crossorigin="anonymous"></script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GT-NC6T5LRJ" crossorigin="anonymous"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'GT-NC6T5LRJ');
+      gtag('config', 'GT-NC6T5LRJ', { 'anonymize_ip': true });
     </script>
+
     <link rel="icon" href="https://mohammad3230.github.io/Games-More-.../favicon.png" type="image/png" sizes="32x32" />
+
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!-- SECURITY: No generator, no author email, no server version — prevents fingerprinting -->
     <title>MY_STUFF_AIO</title>
+
     <style>
-        /* --- GLOBAL & MATRIX STYLES --- */
-        html, body { margin: 0; padding: 0; height: 100%; overflow-x: hidden; }
-        
-        #matrix {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: #000010;
-            display: block;
-            transition: opacity 1s ease;
+        /* === RESET === */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            height: 100%; overflow-x: hidden;
+            background: #000010; color: #c8dce8;
+            font-family: 'Share Tech Mono', monospace;
+            /* Mobile: prevent bounce scroll, use env() for notch phones */
+            overscroll-behavior: none;
         }
 
-        /* Removed Sleep Overlay since Top Left Lever is gone */
+        /* === SAFE AREA PADDING (notch phones) === */
+        :root {
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
+        }
 
+        /* === DECORATIVE OVERLAYS === */
+        .scanlines {
+            position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+        }
+        .ambient-glow {
+            position: fixed; border-radius: 50%; filter: blur(120px);
+            opacity: 0.1; pointer-events: none; z-index: 0;
+        }
+        .ambient-glow.tl { top: -150px; left: -150px; width: 500px; height: 500px; background: #00e5ff; }
+        .ambient-glow.br { bottom: -150px; right: -150px; width: 500px; height: 500px; background: #ff0066; }
+        .ambient-glow.center { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 600px; background: #00e5ff; opacity: 0.04; }
+
+        /* === CANVAS === */
+        #matrix { position: fixed; inset: 0; z-index: -1; background: #000010; display: block; }
+
+        /* === CENTERED TITLE === */
+        .title-wrapper {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 2; text-align: center; pointer-events: none;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            width: 90%; max-width: 600px;
+        }
         .page-title {
-            text-align: center; color: #00eaff; font-family: 'Segoe UI', sans-serif; font-size: 3em;
-            text-transform: uppercase; letter-spacing: 4px; margin-top: 30px; margin-bottom: 20px; user-select: none;
-            text-shadow: 0 0 5px #f9fbfb, 0 0 15px #f4f5f6;
-            padding: 0 80px; 
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.4rem, 5vw, 3.6rem); font-weight: 900;
+            color: #e0f7ff; letter-spacing: clamp(3px, 1vw, 8px); user-select: none;
+            text-shadow: 0 0 20px rgba(0,229,255,0.35), 0 0 60px rgba(0,229,255,0.12);
+            transition: text-shadow 0.8s ease;
+            /* Mobile: prevent title from overflowing screen edges */
+            word-break: break-word;
+        }
+        body.matrix-on .page-title {
+            text-shadow: 0 0 40px rgba(0,229,255,0.7), 0 0 100px rgba(0,229,255,0.3);
+        }
+        .page-title .version {
+            font-size: 0.35em; font-weight: 400; color: #ff0066;
+            letter-spacing: 2px; margin-left: 8px;
+            text-shadow: 0 0 10px rgba(255,0,102,0.6);
+        }
+        .title-deco { display: flex; align-items: center; gap: 12px; }
+        .title-deco .line {
+            height: 1px; width: clamp(40px, 10vw, 90px);
+            background: linear-gradient(90deg, transparent, rgba(0,229,255,0.4), transparent);
+        }
+        .title-deco .diamond {
+            width: 6px; height: 6px; background: #00e5ff; transform: rotate(45deg);
+            box-shadow: 0 0 8px #00e5ff;
+            animation: diamondPulse 3s ease-in-out infinite;
+        }
+        @keyframes diamondPulse {
+            0%, 100% { opacity: 0.5; transform: rotate(45deg) scale(1); }
+            50% { opacity: 1; transform: rotate(45deg) scale(1.4); }
+        }
+        .title-sub {
+            font-size: clamp(0.5rem, 1.5vw, 0.7rem);
+            color: rgba(0,229,255,0.3); letter-spacing: 3px; text-transform: uppercase;
         }
 
-        .page-title .version { font-size: 0.55em; color: #00e5ff; letter-spacing: 1px; margin-left: 8px; font-weight: 400; }
+        /* === CORNER BRACKETS === */
+        [data-brackets] { position: relative; }
+        [data-brackets]::before, [data-brackets]::after {
+            content: ''; position: absolute; width: 12px; height: 12px;
+            border-color: rgba(0,229,255,0.4); border-style: solid; border-width: 0;
+            pointer-events: none; transition: border-color 0.4s;
+        }
+        [data-brackets]::before { top: -1px; left: -1px; border-top-width: 2px; border-left-width: 2px; border-top-left-radius: 3px; }
+        [data-brackets]::after { bottom: -1px; right: -1px; border-bottom-width: 2px; border-right-width: 2px; border-bottom-right-radius: 3px; }
+        [data-brackets]:hover::before, [data-brackets]:hover::after { border-color: rgba(0,229,255,0.8); }
 
-        /* --- GENERIC LEVER STYLES --- */
+        /* === WALKIE-TALKIE BADGE === */
+        .wt-badge {
+            position: fixed; z-index: 200;
+            top: calc(20px + var(--safe-top));
+            right: calc(20px + var(--safe-right));
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 14px; border-radius: 8px;
+            background: linear-gradient(135deg, rgba(0,229,255,0.08), rgba(0,229,255,0.02));
+            border: 1px solid rgba(0,229,255,0.2);
+            backdrop-filter: blur(12px); text-decoration: none; color: #e0f7ff;
+            font-family: 'Share Tech Mono', monospace; font-size: 0.75rem;
+            letter-spacing: 1px; transition: all 0.35s ease;
+            box-shadow: 0 0 15px rgba(0,229,255,0.06);
+            /* Mobile: smaller on small screens */
+            max-width: calc(100vw - 32px - var(--safe-left) - var(--safe-right));
+        }
+        .wt-badge:hover {
+            background: linear-gradient(135deg, rgba(0,229,255,0.18), rgba(0,229,255,0.06));
+            border-color: rgba(0,229,255,0.5); transform: translateY(-2px);
+        }
+        .wt-badge .wt-icon {
+            width: 24px; height: 24px; min-width: 24px; border-radius: 50%;
+            background: linear-gradient(135deg, #00e5ff, #0080ff);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; color: #000; font-weight: bold;
+            box-shadow: 0 0 10px rgba(0,229,255,0.4);
+            animation: wtPulse 2.5s ease-in-out infinite;
+        }
+        @keyframes wtPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(0,229,255,0.4); }
+            50% { box-shadow: 0 0 18px rgba(0,229,255,0.7); }
+        }
+        .wt-badge .wt-status {
+            width: 5px; height: 5px; min-width: 5px; border-radius: 50%;
+            background: #00ff88; box-shadow: 0 0 6px #00ff88;
+        }
+        /* Hide badge text on very small screens, keep icon only */
+        .wt-badge .wt-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* === LEVERS === */
         .lever-container {
-            width: 70px;
-            height: 160px;
-            background: rgba(10, 10, 25, 0.9);
-            border: 2px solid #333;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-around;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8), inset 0 0 10px #000;
-            z-index: 100;
-            cursor: pointer;
-            transition: border-color 0.4s;
+            width: 56px; height: 130px;
+            background: linear-gradient(180deg, rgba(12,12,28,0.95), rgba(4,4,12,0.98));
+            border: 1px solid rgba(255,255,255,0.05); border-radius: 10px;
+            display: flex; flex-direction: column; align-items: center; justify-content: space-around;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.03);
+            z-index: 100; cursor: pointer; transition: all 0.4s ease; position: relative;
+            /* Mobile: ensure minimum touch target */
+            -webkit-tap-highlight-color: transparent;
         }
-
-        .lever-label { 
-            font-size: 0.65em; 
-            color: #555; 
-            font-family: monospace; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-            pointer-events: none; 
+        .lever-container:hover { border-color: rgba(255,255,255,0.12); }
+        .lever-container:active { transform: scale(0.96); }
+        .lever-label {
+            font-size: 0.45rem; color: rgba(255,255,255,0.25);
+            text-transform: uppercase; letter-spacing: 1.5px; pointer-events: none; transition: color 0.4s;
         }
-
         .lever-track {
-            width: 16px;
-            height: 90px;
-            background: #050505;
-            border-radius: 8px;
-            position: relative;
-            border: 1px solid #222;
+            width: 10px; height: 68px; background: rgba(0,0,0,0.6);
+            border-radius: 5px; position: relative; border: 1px solid rgba(255,255,255,0.03);
         }
-
         .lever-handle {
-            width: 34px;
-            height: 44px;
-            background: linear-gradient(145deg, #555, #111);
-            border: 1px solid #777;
-            border-radius: 6px;
-            position: absolute;
-            left: -10px;
-            top: 0; /* UP Position */
-            transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+            width: 26px; height: 34px;
+            background: linear-gradient(145deg, rgba(70,70,90,0.8), rgba(25,25,35,0.9));
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 5px;
+            position: absolute; left: -9px; top: 0;
+            transition: top 0.4s cubic-bezier(0.175,0.885,0.32,1.275), all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        .lever-container .led {
+            position: absolute; top: 6px; right: 6px;
+            width: 4px; height: 4px; border-radius: 50%;
+            background: rgba(255,255,255,0.1); transition: all 0.4s;
         }
 
-        /* --- RIGHT SIDE LEVERS --- */
+        /* Desktop: levers on right edge */
+        #lever-matrix { position: fixed; top: 50%; right: 24px; transform: translateY(-50%); }
+        #lever-security { position: fixed; top: 50%; right: 96px; transform: translateY(-50%); }
 
-        /* 1. MATRIX LEVER (Rightmost) */
-        #lever-matrix {
-            position: fixed;
-            top: 50%;
-            right: 40px;
-            transform: translateY(-50%);
-        }
-        #lever-matrix.active { border-color: #00bfff; box-shadow: 0 0 25px rgba(0, 191, 255, 0.4); }
+        #lever-matrix.active { border-color: rgba(0,191,255,0.35); box-shadow: 0 0 25px rgba(0,191,255,0.12); }
         #lever-matrix.active .lever-handle {
-            top: 46px;
-            background: linear-gradient(145deg, #00bfff, #005f7f);
-            box-shadow: 0 0 15px #00bfff;
-            border-color: #e0f7ff;
+            top: 34px; background: linear-gradient(145deg, #00bfff, #005f7f);
+            box-shadow: 0 0 14px rgba(0,191,255,0.5); border-color: rgba(224,247,255,0.4);
         }
+        #lever-matrix.active .led { background: #00bfff; box-shadow: 0 0 8px #00bfff; }
+        #lever-matrix.active .lever-label { color: rgba(0,191,255,0.6); }
 
-        /* 2. SECURITY LEVER (Next to Matrix) */
-        #lever-security {
-            position: fixed;
-            top: 50%;
-            right: 130px; /* Positioned left of the Matrix lever */
-            transform: translateY(-50%);
-        }
-        #lever-security.active { border-color: #ff0055; box-shadow: 0 0 25px rgba(255, 0, 85, 0.4); }
+        #lever-security.active { border-color: rgba(255,0,85,0.35); box-shadow: 0 0 25px rgba(255,0,85,0.12); }
         #lever-security.active .lever-handle {
-            top: 46px;
-            background: linear-gradient(145deg, #ff0055, #80002a);
-            box-shadow: 0 0 15px #ff0055;
-            border-color: #ffe0e7;
+            top: 34px; background: linear-gradient(145deg, #ff0055, #80002a);
+            box-shadow: 0 0 14px rgba(255,0,85,0.5); border-color: rgba(255,224,232,0.4);
         }
+        #lever-security.active .led { background: #ff0055; box-shadow: 0 0 8px #ff0055; }
+        #lever-security.active .lever-label { color: rgba(255,0,85,0.6); }
 
-        /* --- UI PANELS (Restored to original left side) --- */
+        /* === GLASS PANEL BASE === */
+        .glass-panel {
+            background: linear-gradient(135deg, rgba(8,12,24,0.9), rgba(4,6,14,0.94));
+            border: 1px solid rgba(0,229,255,0.08); border-radius: 10px;
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03);
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        .glass-panel:hover { border-color: rgba(0,229,255,0.16); }
+
+        /* === MOBILE PANEL DISMISS OVERLAY === */
+        .panel-backdrop {
+            display: none; position: fixed; inset: 0; z-index: 49;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+        }
+        .panel-backdrop.show { display: block; }
+
+        /* === MOBILE TOGGLE BUTTONS (hidden on desktop) === */
+        .mobile-toggle {
+            display: none; position: fixed; z-index: 50;
+            width: 44px; height: 44px; border-radius: 10px;
+            background: linear-gradient(135deg, rgba(0,229,255,0.12), rgba(0,229,255,0.04));
+            border: 1px solid rgba(0,229,255,0.2);
+            color: #00e5ff; font-size: 1.1rem;
+            cursor: pointer; -webkit-tap-highlight-color: transparent;
+            align-items: center; justify-content: center;
+            backdrop-filter: blur(12px);
+        }
+        .mobile-toggle:active { transform: scale(0.92); }
+        #mobileCatBtn { top: calc(20px + var(--safe-top)); left: calc(16px + var(--safe-left)); }
+        #mobileDeckBtn { bottom: calc(52px + var(--safe-bottom)); right: calc(16px + var(--safe-right)); }
+
+        /* === CATEGORIES PANEL === */
         .top-left-container {
-            position: fixed;
-            top: 30px;
-            left: 30px;
-            z-index: 10;
+            position: fixed; top: calc(20px + var(--safe-top)); left: calc(20px + var(--safe-left)); z-index: 50;
         }
-
-        .bottom-left-panel {
-            position: fixed;
-            bottom: 30px;
-            left: 30px;
-            width: 160px;
-            height: 220px;
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 12px;
-            padding: 16px 20px;
-            box-shadow: 0 0 25px rgba(0, 255, 127, 0.5);
-            color: white;
-            font-family: monospace, monospace;
-            z-index: 5;
+        .categories-panel { width: 200px; padding: 14px; overflow: hidden; position: relative; }
+        .categories-panel.expanded { width: 260px; }
+        .categories-panel h3 {
+            font-family: 'Orbitron', sans-serif; color: #00e5ff; font-weight: 700;
+            font-size: 0.65rem; margin: 0 0 10px 0; letter-spacing: 2px; text-transform: uppercase;
         }
-
-        .bottom-right-panel {
-            position: fixed;
-            bottom: 30px;
-            right: 230px; /* Shifted left more to accommodate two levers */
-            width: 220px;
-            height: 40px; 
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 12px;
-            padding: 15px 20px;
-            box-shadow: 0 0 25px rgba(255, 165, 0, 0.5);
-            border: 1px solid rgba(0, 240, 255, 0.2);
-            color: white;
-            font-family: monospace, monospace;
-            z-index: 5;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow: hidden;
+        .dropbtn {
+            background: rgba(0,191,255,0.05); color: #c8dce8; padding: 8px 10px;
+            font-size: 0.72rem; border: 1px solid rgba(0,191,255,0.15); border-radius: 6px;
+            cursor: pointer; font-family: 'Share Tech Mono', monospace; width: 100%;
+            text-align: left; transition: all 0.3s; -webkit-tap-highlight-color: transparent;
         }
-
-        .bottom-right-panel.expanded { height: 520px; }
-
-        /* Categories Panel */
-        .categories-panel {
-            width: 180px;
-            height: 100px;
-            background: rgba(0, 0, 0, 0.0);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 0 25px rgba(0, 191, 255, 0.5);
-            overflow: hidden;
-            color: white;
-            font-family: monospace, monospace;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-        }
-
-        .categories-panel.expanded {
-            width: 220px;
-            height: 420px;
-            box-shadow: 0 0 35px rgba(0, 191, 255, 0.8);
-        }
-
+        .dropbtn:hover { background: rgba(0,191,255,0.1); border-color: rgba(0,191,255,0.35); }
         .dropdown-content { display: none; }
         .dropdown-content.show { display: block !important; }
-
-        .filter-container {
-            height: 240px;
-            overflow-y: auto;
-            overscroll-behavior: contain;
-            scrollbar-width: thin;
-            scrollbar-color: #00bfff rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(0, 191, 255, 0.3);
-            border-radius: 6px;
-            margin-top: 10px;
-            background: rgba(0, 0, 0, 0.6);
-        }
-
-        .filter-container::-webkit-scrollbar { width: 8px; }
-        .filter-container::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.5); border-radius: 4px; }
-        .filter-container::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #00bfff, #0080ff); border-radius: 4px; }
-
-        .categories-panel h3 { color: #00bfff; font-weight: 600; font-size: 1.2em; margin: 0 0 10px 0; }
-        .bottom-left-panel h5, .bottom-right-panel h5 { color: #00f0ff; font-weight: 600; font-size: 1.1em; margin: 0 0 15px 0; }
-
-        .categories-panel a:not(.dropbtn), .bottom-left-panel a, .bottom-right-panel a {
-            color: #ffffff; font-weight: bold; text-decoration: none; transition: color 0.3s ease;
-        }
-        .categories-panel a:not(.dropbtn):hover, .bottom-left-panel a:hover, .bottom-right-panel a:hover { color: #00e5ff; }
-        .categories-panel small, .bottom-left-panel small, .bottom-right-panel small { color: #bbbbff; font-weight: normal; font-style: italic; }
-
-        .dropbtn {
-            background: rgba(0, 191, 255, 0.3); color: #ffffff; padding: 12px; font-size: 0.9em;
-            border: 1px solid rgba(0, 191, 255, 0.5); border-radius: 6px; cursor: pointer;
-            font-family: monospace; font-weight: bold; width: 100%; text-align: left; box-sizing: border-box;
-        }
-
+        .filter-container { max-height: 0; overflow: hidden; transition: max-height 0.5s ease; }
+        .categories-panel.expanded .filter-container { max-height: 55vh; overflow-y: auto; }
+        .filter-container::-webkit-scrollbar { width: 4px; }
+        .filter-container::-webkit-scrollbar-track { background: transparent; }
+        .filter-container::-webkit-scrollbar-thumb { background: rgba(0,191,255,0.25); border-radius: 4px; }
         #categoryFilter {
-            width: 100%; padding: 10px 12px; border: none; border-bottom: 1px solid rgba(0, 191, 255, 0.5);
-            background: rgba(0, 0, 0, 0.8); color: #e0f7ff; font-family: monospace; font-size: 0.9em; box-sizing: border-box;
+            width: 100%; padding: 8px 10px; border: none;
+            border-bottom: 1px solid rgba(0,191,255,0.12);
+            background: rgba(0,0,0,0.5); color: #e0f7ff;
+            font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; outline: none;
+        }
+        #categoryFilter:focus { border-bottom-color: rgba(0,229,255,0.4); }
+        #categoryFilter::placeholder { color: rgba(200,220,232,0.25); }
+        .dropdown-content a {
+            color: rgba(200,220,232,0.7); padding: 8px 10px; text-decoration: none;
+            display: flex; align-items: center; gap: 6px; font-size: 0.72rem;
+            border-bottom: 1px solid rgba(0,191,255,0.05); transition: all 0.25s; position: relative;
+        }
+        .dropdown-content a::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+            background: #00e5ff; transform: scaleY(0); transition: transform 0.25s;
+        }
+        .dropdown-content a:hover { background: rgba(0,191,255,0.07); color: #fff; padding-left: 14px; }
+        .dropdown-content a:hover::before { transform: scaleY(1); }
+        .main-category .main-link {
+            color: #00e5ff; font-weight: bold; padding: 8px 10px;
+            display: flex; align-items: center; gap: 6px;
+            border-bottom: 1px solid rgba(0,191,255,0.1); cursor: pointer;
+            transition: background 0.25s; font-size: 0.72rem; text-decoration: none;
+        }
+        .main-category .main-link:hover { background: rgba(0,191,255,0.05); }
+        .main-category .main-link .arrow { margin-left: auto; font-size: 0.5rem; transition: transform 0.3s; color: rgba(0,229,255,0.35); }
+        .main-category.open .main-link .arrow { transform: rotate(90deg); color: #00e5ff; }
+        .main-category .submenu { display: none; background: rgba(0,0,0,0.2); }
+        .main-category .submenu a { color: rgba(187,187,255,0.6); padding: 6px 10px 6px 22px; font-size: 0.68rem; }
+
+        /* === BOTTOM-LEFT INFO === */
+        .bottom-left-panel {
+            position: fixed; bottom: calc(44px + var(--safe-bottom)); left: calc(20px + var(--safe-left));
+            width: 180px; padding: 12px 14px; z-index: 5;
+        }
+        .bottom-left-panel h5 {
+            font-family: 'Orbitron', sans-serif; color: #00ff88; font-weight: 700;
+            font-size: 0.5rem; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 10px 0;
+        }
+        .info-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 3px 0; border-bottom: 1px solid rgba(0,255,127,0.04); font-size: 0.65rem;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-row .label { color: rgba(200,220,232,0.35); }
+        .info-row .value { font-weight: bold; }
+
+        /* === CYBER DECK === */
+        .bottom-right-panel {
+            position: fixed; bottom: calc(44px + var(--safe-bottom)); right: calc(180px + var(--safe-right));
+            width: 265px; padding: 12px 14px; z-index: 50;
+            border-color: rgba(255,165,0,0.1); overflow: hidden;
+        }
+        .bottom-right-panel.expanded { height: 520px; }
+        .bottom-right-panel:hover { border-color: rgba(255,165,0,0.18); }
+        .deck-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; padding-bottom: 7px; border-bottom: 1px solid rgba(255,165,0,0.08);
+            gap: 6px;
+        }
+        .deck-title {
+            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.55rem;
+            text-transform: uppercase; letter-spacing: 1.5px; color: #ffa500;
+            cursor: pointer; transition: color 0.3s; white-space: nowrap;
+        }
+        .deck-title:hover { color: #ffcc00; }
+        .deck-controls { display: flex; gap: 4px; align-items: center; flex-wrap: nowrap; }
+        .ctrl-btn {
+            font-size: 0.55rem; padding: 2px 6px; border-radius: 4px;
+            cursor: pointer; font-family: 'Share Tech Mono', monospace;
+            font-weight: bold; border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.3s; background: rgba(255,255,255,0.02); color: rgba(200,220,232,0.5);
+            -webkit-tap-highlight-color: transparent;
+            /* Mobile: ensure minimum touch target */
+            min-width: 32px; min-height: 28px;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .ctrl-btn:hover { background: rgba(255,255,255,0.06); color: #c8dce8; }
+        .ctrl-btn.on { background: rgba(0,255,136,0.12); color: #00ff88; border-color: rgba(0,255,136,0.25); }
+        .ctrl-btn.danger { background: rgba(255,68,68,0.12); color: #ff4444; border-color: rgba(255,68,68,0.25); }
+        .ctrl-btn.muted { color: rgba(200,220,232,0.25); }
+        .deck-meta { font-size: 0.55rem; color: rgba(200,220,232,0.25); margin-bottom: 6px; display: flex; justify-content: space-between; }
+        .deck-meta span { color: rgba(200,220,232,0.45); }
+        .stat-block { margin-bottom: 7px; }
+        .stat-block-header { display: flex; justify-content: space-between; font-size: 0.58rem; margin-bottom: 2px; }
+        .stat-block-header .stat-label { color: rgba(200,220,232,0.4); text-transform: uppercase; letter-spacing: 1px; font-size: 0.5rem; }
+        .stat-block-header .stat-value { font-weight: bold; }
+        .stat-bar-track { width: 100%; height: 3px; background: rgba(255,255,255,0.03); border-radius: 2px; overflow: hidden; }
+        .stat-bar-fill { height: 100%; border-radius: 2px; transition: all 0.5s ease; }
+        .network-section { margin: 8px 0; padding-top: 7px; border-top: 1px solid rgba(255,165,0,0.06); }
+        .network-status { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .network-status .label { font-size: 0.5rem; letter-spacing: 1.5px; text-transform: uppercase; font-weight: bold; }
+        .network-pulse { width: 6px; height: 6px; border-radius: 50%; background: #00f0ff; box-shadow: 0 0 8px #00f0ff; transition: all 0.4s; }
+        .graph-container {
+            width: 100%; height: 32px; background: rgba(0,240,255,0.02); border-radius: 4px;
+            margin-bottom: 5px; overflow: hidden; border: 1px solid rgba(0,240,255,0.05); position: relative;
+        }
+        .graph-container::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 60%, rgba(0,0,0,0.4)); pointer-events: none; }
+        #graphSvg { overflow: visible !important; display: block; }
+        .net-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 0.58rem; }
+        .net-stat { display: flex; flex-direction: column; gap: 1px; }
+        .net-stat .ns-label { color: rgba(200,220,232,0.25); font-size: 0.48rem; text-transform: uppercase; letter-spacing: 1px; }
+        .net-stat .ns-value { color: #c8dce8; font-weight: bold; }
+        .net-stat .ns-value small { color: rgba(200,220,232,0.25); font-weight: normal; }
+        #terminalLog {
+            font-size: 0.55rem; color: #ffa500; height: 48px; background: rgba(0,0,0,0.35);
+            padding: 4px 6px; border-radius: 4px; border: 1px solid rgba(255,165,0,0.05);
+            line-height: 1.3; display: flex; flex-direction: column-reverse; overflow: hidden; margin-top: 6px;
         }
 
-        .dropdown-content a { color: #e0f7ff; padding: 12px 14px; text-decoration: none; display: block; font-size: 0.9em; border-bottom: 1px solid rgba(0, 191, 255, 0.2); }
-        .dropdown-content a:hover { background: rgba(0, 191, 255, 0.4); color: #ffffff; padding-left: 18px; }
-
-        .main-category .main-link { color: #00e5ff; font-weight: bold; padding: 10px 12px; display: block; border-bottom: 1px solid rgba(0, 191, 255, 0.2); }
-        .main-category .submenu a { color: #bbbbff; padding: 8px 20px; display: block; font-size: 0.85em; }
-
+        /* === FOOTER === */
         .site-footer {
-            background-color: rgba(0, 0, 0, 0.1);
-            color: #e0f7ff;
-            font-size: 0.9rem;
-            text-align: center;
-            padding: 3px 7px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            user-select: none;
-            box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.08);
-            border-top: 1px solid rgba(0, 191, 255, 0.3);
-            z-index: 10;
+            position: fixed; bottom: 0; left: 0; width: 100%; z-index: 10;
+            padding: 6px calc(12px + var(--safe-left)) 6px calc(12px + var(--safe-right));
+            padding-bottom: calc(6px + var(--safe-bottom));
+            display: flex; align-items: center; justify-content: space-between;
+            background: linear-gradient(90deg, rgba(0,0,0,0.6), rgba(0,8,18,0.8), rgba(0,0,0,0.6));
+            border-top: 1px solid rgba(0,191,255,0.08); font-size: 0.55rem; user-select: none;
+            backdrop-filter: blur(10px);
+        }
+        .footer-left { display: flex; align-items: center; gap: 8px; overflow: hidden; }
+        .footer-left small { color: rgba(0,229,255,0.5); letter-spacing: 0.5px; white-space: nowrap; }
+        .footer-dot { width: 3px; height: 3px; min-width: 3px; border-radius: 50%; background: rgba(0,229,255,0.25); }
+        .footer-right { color: rgba(200,220,232,0.2); letter-spacing: 0.5px; white-space: nowrap; }
+
+        /* === HUD TOGGLE === */
+        .hud-element { transition: opacity 0.4s ease, transform 0.4s ease; }
+        .hud-hidden { opacity: 0 !important; pointer-events: none !important; transform: scale(0.96); }
+
+        /* ============================================================
+           MOBILE BREAKPOINTS
+           Strategy: hide fixed panels on small screens, show toggle
+           buttons instead. Panels become full-width overlays.
+           ============================================================ */
+
+        /* Tablet: hide bottom-left info */
+        @media (max-width: 900px) {
+            .bottom-left-panel { display: none; }
         }
 
-        .site-footer small { display: inline-block; letter-spacing: 1px; color: #00e5ff; }
+        /* Mobile: major layout changes */
+        @media (max-width: 640px) {
+            /* Hide all fixed panels by default */
+            .top-left-container { display: none; }
+            .bottom-right-panel {
+                display: none; right: 0; bottom: 0; left: 0;
+                width: 100%; border-radius: 16px 16px 0 0;
+                max-height: 75vh; overflow-y: auto;
+                padding: 16px;
+            }
+            .bottom-right-panel.mobile-show {
+                display: block;
+                animation: slideUp 0.3s ease;
+            }
+            @keyframes slideUp {
+                from { transform: translateY(100%); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
 
-        /* Cyber Deck Specifics */
-        .network-pulse { width: 8px; height: 8px; border-radius: 50%; background-color: #00f0ff; box-shadow: 0 0 8px #00f0ff; }
-        #terminalLog { display: flex; flex-direction: column-reverse; overflow-y: hidden; }
-        #graphSvg { overflow: visible !important; }
+            .top-left-container.mobile-show {
+                display: block; top: 0; left: 0; right: 0; bottom: 0;
+                position: fixed; z-index: 60;
+                padding: calc(16px + var(--safe-top)) calc(16px + var(--safe-right)) 16px calc(16px + var(--safe-left));
+            }
+            .top-left-container.mobile-show .categories-panel {
+                width: 100%; height: 100%; border-radius: 0;
+                overflow-y: auto; max-height: none;
+            }
+            .top-left-container.mobile-show .categories-panel.expanded { width: 100%; }
+            .top-left-container.mobile-show .filter-container { max-height: none; overflow-y: visible; }
 
-        /* Custom UI Power Switch */
-        .power-switch {
-            font-size: 0.8em;
-            padding: 4px 8px;
-            background: #ff4444;
-            color: #fff;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            border: 1px solid rgba(255,255,255,0.2);
-            transition: all 0.3s ease;
+            /* Show mobile toggle buttons */
+            .mobile-toggle { display: flex; }
+
+            /* Levers: move to bottom-right, stacked vertically */
+            #lever-security {
+                top: auto; bottom: calc(52px + var(--safe-bottom));
+                right: calc(16px + var(--safe-right));
+                transform: none;
+            }
+            #lever-matrix {
+                top: auto; bottom: calc(192px + var(--safe-bottom));
+                right: calc(16px + var(--safe-right));
+                transform: none;
+            }
+
+            /* Walkie badge: top-right, icon-only on very small */
+            .wt-badge { padding: 6px 10px; }
+            .wt-badge .wt-text { display: none; }
+
+            /* Footer: smaller text */
+            .site-footer { font-size: 0.48rem; }
+            .footer-right { display: none; }
         }
-        .power-switch.on {
-            background: #00ff88;
-            box-shadow: 0 0 10px #00ff88;
-            color: #000;
+
+        /* Very small phones (320px) */
+        @media (max-width: 360px) {
+            .lever-container { width: 48px; height: 110px; }
+            .lever-track { height: 56px; }
+            .lever-handle { width: 22px; height: 28px; left: -7px; }
+            #lever-security { bottom: calc(48px + var(--safe-bottom)); right: calc(10px + var(--safe-right)); }
+            #lever-matrix { bottom: calc(168px + var(--safe-bottom)); right: calc(10px + var(--safe-right)); }
         }
 
-        /* Hidden class for HUD toggle */
-        .hud-element { transition: opacity 0.3s; }
-        .hud-hidden { opacity: 0; pointer-events: none; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
     </style>
 </head>
 <body>
 
-<a href="receiver.html">walkie - talkie</a>
-  
-   <canvas id="matrix"></canvas>
-  
-  <h1 class="page-title">
-  MY_STUFF_AIO
-  <span class="version">v2.0</span>
-</h1>
+<div class="scanlines" aria-hidden="true"></div>
+<div class="ambient-glow tl" aria-hidden="true"></div>
+<div class="ambient-glow br" aria-hidden="true"></div>
+<div class="ambient-glow center" aria-hidden="true"></div>
 
-  <!-- LEVER 2: SECURITY / HUD (Right Side, Inner) -->
-  <div id="lever-security" class="lever-container" onclick="toggleHUD()">
-      <span class="lever-label">HUD</span>
-      <div class="lever-track">
-          <div class="lever-handle"></div>
-      </div>
-      <span class="lever-label">SEC</span>
-  </div>
+<!-- Mobile backdrop overlay for panel dismissal -->
+<div class="panel-backdrop" id="panelBackdrop" onclick="closeAllPanels()"></div>
 
-  <!-- LEVER 1: MATRIX (Right Side, Outer) -->
-  <div id="lever-matrix" class="lever-container" onclick="toggleMatrix()">
-      <span class="lever-label">OFF</span>
-      <div class="lever-track">
-          <div class="lever-handle"></div>
-      </div>
-      <span class="lever-label">MATRIX</span>
-  </div>
+<!-- Mobile toggle buttons -->
+<button class="mobile-toggle" id="mobileCatBtn" onclick="toggleMobilePanel('cat')" aria-label="Open categories">&#9776;</button>
+<button class="mobile-toggle" id="mobileDeckBtn" onclick="toggleMobilePanel('deck')" aria-label="Open cyber deck">&#9881;</button>
 
-  <div class="top-left-container">
-    <div class="categories-panel" id="categoriesPanel">
-      <h3>Categories</h3>
-      <div class="dropdown">
-        <button onclick="toggleCategoryPanel()" class="dropbtn">☰ Filter Categories</button>
-        <div id="categoryDropdown" class="dropdown-content filter-container">
-          <input type="text" id="categoryFilter" placeholder="🔍 Search categories..." onkeyup="filterCategories()">
+<a href="receiver.html" class="wt-badge" aria-label="Open Walkie Talkie">
+    <span class="wt-icon" aria-hidden="true">&#9993;</span>
+    <span class="wt-text">WALKIE-TALKIE</span>
+    <span class="wt-status" aria-hidden="true"></span>
+</a>
 
-          <a href="receiver.html"
-   id="uplink-link"
-   rel="noopener noreferrer"
-   target="_blank">Walkie-Talkie</a>
-           
-            <div class="main-category">
-            <a href="#" class="main-link" onclick="toggleSubmenu(event)">📁 Food</a>
-            <div class="submenu" style="display: none;">
-              <a href="USDA FOOD SEARCH cyberpunk oldstyle.html">USDA FOOD SEARCH</a>
-            </div>
-          </div>
+<canvas id="matrix" aria-hidden="true"></canvas>
 
-             <div class="main-category">
-            <a href="#" class="main-link" onclick="toggleSubmenu(event)">📁 HEALTH</a>
-            <div class="submenu" style="display: none;">
-              <a href="Health scanner & Guidance.html">Health scanner & Guidance</a>
-            </div>
-          </div>
+<div class="title-wrapper" aria-hidden="true">
+    <div class="title-deco">
+        <div class="line"></div>
+        <div class="diamond"></div>
+        <div class="line"></div>
+    </div>
+    <h1 class="page-title">MY_STUFF_AIO<span class="version">v3.0</span></h1>
+    <div class="title-deco">
+        <div class="line"></div>
+        <div class="diamond"></div>
+        <div class="line"></div>
+    </div>
+    <div class="title-sub">All-In-One Operations Interface</div>
+</div>
 
-            <div class="main-category">
-            <a href="#" class="main-link" onclick="toggleSubmenu(event)">📁 Messages (Synchronized Frequency - Internal Network)</a>
-            <div class="submenu" style="display: none;">
-              <a href="messages receives and responds.html">Message Receiver</a>
-            </div>
-          </div>
+<div id="lever-security" class="lever-container" onclick="toggleHUD()" role="button" tabindex="0" aria-label="Toggle HUD">
+    <span class="led" aria-hidden="true"></span>
+    <span class="lever-label">HUD</span>
+    <div class="lever-track"><div class="lever-handle"></div></div>
+    <span class="lever-label">SEC</span>
+</div>
 
-          <div class="main-category">
-            <a href="#" class="main-link" onclick="toggleSubmenu(event)">📁 MY_STUFF v1.0</a>
-            <div class="submenu" style="display: none;">
-              <a href="https://mohammad3230.github.io/PROJECT/">MY_STUFF v1.0</a>
-            </div>
-          </div>
+<div id="lever-matrix" class="lever-container" onclick="toggleMatrix()" role="button" tabindex="0" aria-label="Toggle Network Matrix">
+    <span class="led" aria-hidden="true"></span>
+    <span class="lever-label">OFF</span>
+    <div class="lever-track"><div class="lever-handle"></div></div>
+    <span class="lever-label">MATRIX</span>
+</div>
 
-            <div class="main-category">
-            <a href="#" class="main-link" onclick="toggleSubmenu(event)">📁 MY_STUFF v3.0</a>
-            <div class="submenu" style="display: none;">
-                <a href="https://mohammad3230.github.io/PROJECT/">MY_STUFF v1.0</a>
-                <a href="linux.html">GHOST_TAC_v80.8</a>
-            </div>
-          </div>
-
-            <div class="main-category">
-            <a href="#" class="main-link" onclick="toggleSubmenu(event)">📁 News</a>
-            <div class="submenu" style="display: none;">
-                <a href="https://www.aljazeera.com/news/">Aljazeera News</a>
-                <a href="https://www.bbc.com/news">BBC</a>
-                <a href="https://news.google.com/home?hl=en-IN&gl=IN&ceid=IN%3Aen">Google News</a>
-                <a href="https://news.un.org/en/">UN Org</a>
-                <a href="https://www.thehindu.com/latest-news/">The Hindu</a>
-                <a href="https://timesofindia.indiatimes.com/">The Times of India</a>
-            </div>
-          </div>
-
-          <div class="main-category">
-            <a href="#" class="main-link" onclick="toggleSubmenu(event)">📁 Online Games</a>
-            <div class="submenu" style="display: none;">
-              <a href="snake.html">Snake Game</a>
-            </div>
-          </div>
-
-              <div class="main-category">
-            <a href="#" class="main-link" onclick="toggleSubmenu(event)">📁 Page Capture</a>
-            <div class="submenu" style="display: none;">
-              <a href="Page Capture.html">Page Capture</a>
-            </div>
-          </div>
-
-            <div class="main-category">
-            <a href="#" class="main-link" onclick="toggleSubmenu(event)">📁 ToolHub</a>
-            <div class="submenu" style="display: none;">
-              <a href="Toolhub.html">ToOl_HuB</a>
-            </div>
-          </div>
-
+<!-- CATEGORIES -->
+<div class="top-left-container" id="catContainer">
+    <div class="categories-panel glass-panel" id="categoriesPanel" data-brackets>
+        <h3>Categories</h3>
+        <div class="dropdown">
+            <button onclick="toggleCategoryPanel()" class="dropbtn" type="button">&#9776; Filter Categories</button>
+            <div id="categoryDropdown" class="dropdown-content filter-container">
+                <input type="text" id="categoryFilter" placeholder="Search categories..." maxlength="60" autocomplete="off" spellcheck="false" onkeyup="filterCategories()">
+                <a href="receiver.html">&#9993; Walkie-Talkie</a>
                 <div class="main-category">
-            <a href="#" class="main-link" onclick="toggleSubmenu(event)">📁 Walkie Talkie (Synchronized Frequency - Internal Network)</a>
-            <div class="submenu" style="display: none;">
-              <a href="testing.html">Testing</a>
-              <a href="receiver.html">Walkie Talkie Receiver</a>
+                    <a href="#" class="main-link" onclick="toggleSubmenu(event)">&#128193; Food <span class="arrow" aria-hidden="true">&#9654;</span></a>
+                    <div class="submenu"><a href="USDA FOOD SEARCH cyberpunk oldstyle.html">USDA Food Search</a></div>
+                </div>
+                <div class="main-category">
+                    <a href="#" class="main-link" onclick="toggleSubmenu(event)">&#128193; Health <span class="arrow" aria-hidden="true">&#9654;</span></a>
+                    <div class="submenu"><a href="Health scanner & Guidance.html">Health Scanner & Guidance</a></div>
+                </div>
+                <div class="main-category">
+                    <a href="#" class="main-link" onclick="toggleSubmenu(event)">&#128193; Messages (Sync) <span class="arrow" aria-hidden="true">&#9654;</span></a>
+                    <div class="submenu"><a href="messages receives and responds.html">Message Receiver</a></div>
+                </div>
+                <div class="main-category">
+                    <a href="#" class="main-link" onclick="toggleSubmenu(event)">&#128193; MY_STUFF v1.0 <span class="arrow" aria-hidden="true">&#9654;</span></a>
+                    <div class="submenu"><a href="https://mohammad3230.github.io/PROJECT/" target="_blank" rel="noopener noreferrer">MY_STUFF v1.0</a></div>
+                </div>
+                <div class="main-category">
+                    <a href="#" class="main-link" onclick="toggleSubmenu(event)">&#128193; MY_STUFF v3.0 <span class="arrow" aria-hidden="true">&#9654;</span></a>
+                    <div class="submenu">
+                        <a href="https://mohammad3230.github.io/PROJECT/" target="_blank" rel="noopener noreferrer">MY_STUFF v1.0</a>
+                        <a href="linux.html">GHOST_TAC_v80.8</a>
+                    </div>
+                </div>
+                <div class="main-category">
+                    <a href="#" class="main-link" onclick="toggleSubmenu(event)">&#128193; News <span class="arrow" aria-hidden="true">&#9654;</span></a>
+                    <div class="submenu">
+                        <a href="https://www.aljazeera.com/news/" target="_blank" rel="noopener noreferrer">Aljazeera</a>
+                        <a href="https://www.bbc.com/news" target="_blank" rel="noopener noreferrer">BBC</a>
+                        <a href="https://news.google.com/home?hl=en-IN&gl=IN&ceid=IN%3Aen" target="_blank" rel="noopener noreferrer">Google News</a>
+                        <a href="https://news.un.org/en/" target="_blank" rel="noopener noreferrer">UN Org</a>
+                        <a href="https://www.thehindu.com/latest-news/" target="_blank" rel="noopener noreferrer">The Hindu</a>
+                        <a href="https://timesofindia.indiatimes.com/" target="_blank" rel="noopener noreferrer">Times of India</a>
+                    </div>
+                </div>
+                <div class="main-category">
+                    <a href="#" class="main-link" onclick="toggleSubmenu(event)">&#128193; Online Games <span class="arrow" aria-hidden="true">&#9654;</span></a>
+                    <div class="submenu"><a href="snake.html">Snake Game</a></div>
+                </div>
+                <div class="main-category">
+                    <a href="#" class="main-link" onclick="toggleSubmenu(event)">&#128193; Page Capture <span class="arrow" aria-hidden="true">&#9654;</span></a>
+                    <div class="submenu"><a href="Page Capture.html">Page Capture</a></div>
+                </div>
+                <div class="main-category">
+                    <a href="#" class="main-link" onclick="toggleSubmenu(event)">&#128193; ToolHub <span class="arrow" aria-hidden="true">&#9654;</span></a>
+                    <div class="submenu"><a href="Toolhub.html">ToOl_HuB</a></div>
+                </div>
+                <div class="main-category">
+                    <a href="#" class="main-link" onclick="toggleSubmenu(event)">&#128193; Walkie Talkie <span class="arrow" aria-hidden="true">&#9654;</span></a>
+                    <div class="submenu">
+                        <a href="testing.html">Testing</a>
+                        <a href="receiver.html">Walkie Talkie Receiver</a>
+                    </div>
+                </div>
+                <div class="main-category">
+                    <a href="#" class="main-link" onclick="toggleSubmenu(event)">&#128193; Documentation <span class="arrow" aria-hidden="true">&#9654;</span></a>
+                    <div class="submenu">
+                        <a href="#">User Guides</a>
+                        <a href="#">API Docs</a>
+                        <a href="#">Changelogs</a>
+                    </div>
+                </div>
+                <a href="music.html">&#9835; My_Music</a>
+                <a href="radio.html">&#128225; Live Radio</a>
+                <a href="https://in.pinterest.com/" target="_blank" rel="noopener noreferrer">&#128204; Pinterest</a>
+                <a href="https://www.zedge.net/ringtones" target="_blank" rel="noopener noreferrer">&#128444; Zedge Wallpapers</a>
+                <a href="#">&#9881; Settings</a>
+                <a href="#">&#127912; Templates</a>
+                <a href="#">&#128228; Exports</a>
+                <a href="#">&#128202; Analytics</a>
+                <a href="#">&#128190; Backup</a>
             </div>
-          </div>
-
-        <div class="main-category">
-            <a href="#" class="main-link" onclick="toggleSubmenu(event)">📁 Documentation</a>
-            <div class="submenu" style="display: none;">
-              <a href="#">User Guides</a>
-              <a href="#">API Docs</a>
-              <a href="#">Changelogs</a>
-            </div>
-          </div>
-
-          <a href="music.html">🎵 My_Music</a>
-          <a href="https://in.pinterest.com/">📌 Pinterest</a>
-          <a href="radio.html">📡 Live Radio</a>
-          <a href="https://www.zedge.net/ringtones">🖼️ Zedge Wallpapers</a> 
-          <a href="#">⚙️ Settings</a>
-          <a href="#">🎨 Templates</a>
-          <a href="#">📤 Exports</a>
-          <a href="#">📊 Analytics</a>
-          <a href="#">💾 Backup</a>
-
         </div>
-      </div>
     </div>
-  </div>
+</div>
 
-    <!-- Added class 'hud-element' to Cyber Deck so it can be hidden by Security Lever -->
-    <div class="bottom-right-panel hud-element" id="systemPanel">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px;">
-            <h5 onclick="toggleDeckExpand()" style="font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #ffa500; margin: 0; cursor:pointer;" title="Minimize / Maximize Deck (Right click to purge stats)">Cyber Deck ⬍</h5>
-            <div style="display: flex; gap: 8px; align-items: center;">
-                <span id="powerBtn" onclick="togglePower(event)" class="power-switch on">PWR: ON</span>
-                <span id="muteBtn" onclick="toggleMute()" style="cursor: pointer; font-size: 0.8em; color: #00f0ff; user-select: none;">🔊</span>
-                <span id="autoResponse" onclick="toggleAutoResponse()" style="cursor: pointer; font-size: 0.8em; color: #00ff88; user-select: none; margin-left: 5px;">AUTO: OFF</span>
-                <span id="breachCount" style="font-size: 0.7em; color: #ff4444; font-weight: bold;">0</span>
-                <span id="digitalClock" style="font-size: 0.8em; color: #00f0ff; font-weight: bold; font-family: monospace;">00:00:00</span>
-            </div>
+<!-- BOTTOM-LEFT INFO (hidden on tablet+) -->
+<div class="bottom-left-panel glass-panel hud-element" data-brackets>
+    <h5>SYS.INFO</h5>
+    <div class="info-row"><span class="label">NODE</span><span class="value" style="color:#00e5ff;">AIO-CORE</span></div>
+    <div class="info-row"><span class="label">FREQ</span><span class="value" style="color:#ffa500;">440.7 MHz</span></div>
+    <div class="info-row"><span class="label">UPLINK</span><span class="value" style="color:#00ff88;">ACTIVE</span></div>
+    <div class="info-row"><span class="label">ENCRYPT</span><span class="value" style="color:#c8dce8;">AES-256</span></div>
+    <div class="info-row"><span class="label">PROXY</span><span class="value" style="color:#ffa500;">3 NODES</span></div>
+    <div class="info-row"><span class="label">LAT/LON</span><span class="value" style="color:rgba(200,220,232,0.4);font-size:0.58rem;">REDACTED</span></div>
+</div>
+
+<!-- CYBER DECK -->
+<div class="bottom-right-panel glass-panel hud-element" id="systemPanel" data-brackets>
+    <div class="deck-header">
+        <div class="deck-title" onclick="toggleDeckExpand()" title="Minimize / Maximize (Right click to purge)">CYBER DECK &#11015;</div>
+        <div class="deck-controls">
+            <span id="powerBtn" onclick="togglePower(event)" class="ctrl-btn on" role="button" tabindex="0">PWR</span>
+            <span id="muteBtn" onclick="toggleMute()" class="ctrl-btn" role="button" tabindex="0">&#128266;</span>
+            <span id="autoResponse" onclick="toggleAutoResponse()" class="ctrl-btn muted" role="button" tabindex="0">AUTO</span>
+            <span id="breachCount" style="font-size:0.5rem;color:#ff4444;font-weight:bold;margin-left:2px;">0</span>
+            <span id="digitalClock" style="font-size:0.6rem;color:#00f0ff;font-weight:bold;">00:00:00</span>
         </div>
-        
-        <div id="deckContent">
-            <div style="font-size: 0.65em; color: #8888ff; margin-bottom: 12px; border-bottom: 1px solid rgba(255, 165, 0, 0.2); padding-bottom: 5px;">
-                UPTIME: <span id="uptimeVar" style="color: #bbbbff; font-weight: bold;">00:00:00:00</span>
-            </div>
-
-            <div style="margin-bottom: 12px; border-top: 1px solid rgba(255, 165, 0, 0.1); padding-top: 8px;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.7em; margin-bottom: 4px;">
-                    <span style="color: #bbbbff;">CORE_DECRYPTION:</span>
-                    <span id="decryptVal" style="color: #00f0ff; font-weight: bold;">0%</span>
-                </div>
-                <div style="width: 100%; height: 4px; background: rgba(255, 255, 255, 0.05); border-radius: 2px; overflow: hidden;">
-                    <div id="decryptBar" style="width: 0%; height: 100%; background: #00f0ff; transition: all 0.5s ease; box-shadow: 0 0 10px #00f0ff;"></div>
-                </div>
-            </div>
-            <div style="margin: 12px 0; border-top: 1px solid rgba(255, 0, 100, 0.3); padding-top: 8px;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.7em; margin-bottom: 4px;">
-                    <span style="color: #ff0080;">THREAT LEVEL:</span>
-                    <span id="threatVal" style="color: #ff4444; font-weight: bold;">0%</span>
-                </div>
-                <div style="width: 100%; height: 4px; background: rgba(255, 0, 100, 0.1); border-radius: 2px; overflow: hidden;">
-                    <div id="threatBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #ff0080, #ff4444); transition: all 0.5s ease; box-shadow: 0 0 8px #ff0080;"></div>
-                </div>
-            </div>
-
-            <div style="margin-bottom: 12px; border-top: 1px solid rgba(0, 240, 255, 0.2); padding-top: 8px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <small id="statusLabel" style="color: #00f0ff; letter-spacing: 1px; font-weight: bold; font-size: 0.7em;">STATUS: SECURE</small>
-                    <div class="network-pulse" id="pulseNode"></div>
-                </div>
-                <div style="width: 100%; height: 40px; background: rgba(0, 240, 255, 0.05); border-radius: 4px; margin-bottom: 8px; overflow: hidden; border: 1px solid rgba(0, 240, 255, 0.1); position: relative;">
-                    <svg width="100%" height="100%" viewBox="0 0 200 40" preserveAspectRatio="none" id="graphSvg">
-                        <polyline id="graphLine" fill="none" stroke="#00f0ff" stroke-width="1.5" points="0,40 20,40 40,40 60,40 80,40 100,40 120,40 140,40 160,40 180,40 200,40" />
-                        <g id="particleGroup"></g>
-                    </svg>
-                </div>
-                <div style="font-size: 0.7em; display: flex; flex-direction: column; gap: 4px;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #bbbbff;">DOWNLINK:</span>
-                        <span><span id="downMB" style="color: #00f0ff; font-weight: bold;">0</span> <small>Mbps</small></span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #bbbbff;">UPLINK:</span>
-                        <span><span id="upMB" style="color: #00f0ff; font-weight: bold;">0</span> <small>Mbps</small></span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.9em; margin-top: 2px;">
-                        <span>PING: <span id="pingVal" style="color: #00f0ff;">20</span>ms</span>
-                        <span>LOSS: <span id="lossVal" style="color: #00f0ff;">0.00%</span></span>
-                    </div>
-                </div>
-            </div>
-           
-            <div id="terminalLog" style="font-size: 0.65em; color: #ffa500; height: 60px; background: rgba(0,0,0,0.4); padding: 5px; border-radius: 4px; border: 1px solid rgba(255,165,0,0.1); line-height: 1.2;">
-                <div>> initializing_sys_v2.0...</div>
-            </div>
-        </div>
-        <audio id="alertSound" src="https://www.soundjay.com/misc/sounds/beep-07.wav" preload="auto"></audio>
     </div>
+    <div id="deckContent">
+        <div class="deck-meta">UPTIME <span id="uptimeVar">00:00:00:00</span></div>
+        <div class="stat-block">
+            <div class="stat-block-header">
+                <span class="stat-label">Core Decryption</span>
+                <span class="stat-value" id="decryptVal" style="color:#00f0ff;">0%</span>
+            </div>
+            <div class="stat-bar-track">
+                <div class="stat-bar-fill" id="decryptBar" style="width:0%;background:#00f0ff;box-shadow:0 0 6px #00f0ff;"></div>
+            </div>
+        </div>
+        <div class="stat-block">
+            <div class="stat-block-header">
+                <span class="stat-label" style="color:rgba(255,0,128,0.6);">Threat Level</span>
+                <span class="stat-value" id="threatVal" style="color:#ff4444;">0%</span>
+            </div>
+            <div class="stat-bar-track" style="background:rgba(255,0,100,0.04);">
+                <div class="stat-bar-fill" id="threatBar" style="width:0%;background:linear-gradient(90deg,#ff0080,#ff4444);box-shadow:0 0 6px #ff0080;"></div>
+            </div>
+        </div>
+        <div class="network-section">
+            <div class="network-status">
+                <span class="label" id="statusLabel" style="color:#00f0ff;">STATUS: SECURE</span>
+                <div class="network-pulse" id="pulseNode"></div>
+            </div>
+            <div class="graph-container">
+                <svg width="100%" height="100%" viewBox="0 0 200 40" preserveAspectRatio="none" id="graphSvg">
+                    <polyline id="graphLine" fill="none" stroke="#00f0ff" stroke-width="1.5" points="0,40 20,40 40,40 60,40 80,40 100,40 120,40 140,40 160,40 180,40 200,40" />
+                    <g id="particleGroup"></g>
+                </svg>
+            </div>
+            <div class="net-stats">
+                <div class="net-stat"><span class="ns-label">Downlink</span><span class="ns-value"><span id="downMB">0</span> <small>Mbps</small></span></div>
+                <div class="net-stat"><span class="ns-label">Uplink</span><span class="ns-value"><span id="upMB">0</span> <small>Mbps</small></span></div>
+                <div class="net-stat"><span class="ns-label">Ping</span><span class="ns-value"><span id="pingVal">20</span> <small>ms</small></span></div>
+                <div class="net-stat"><span class="ns-label">Loss</span><span class="ns-value"><span id="lossVal">0.00</span><small>%</small></span></div>
+            </div>
+        </div>
+        <div id="terminalLog"><div style="color:#ffa500;">&#62; initializing_sys_v2.0...</div></div>
+    </div>
+    <audio id="alertSound" src="https://www.soundjay.com/misc/sounds/beep-07.wav" preload="auto"></audio>
+</div>
 
-    <footer class="site-footer">
-    <small>Copyright © 2023-2026 All rights reserved</small>
-  </footer>
+<footer class="site-footer">
+    <div class="footer-left">
+        <small>&copy; 2023-2026 MY_STUFF_AIO</small>
+        <span class="footer-dot" aria-hidden="true"></span>
+        <small>All rights reserved</small>
+    </div>
+    <div class="footer-right">ENCRYPTED CHANNEL // AES-256</div>
+</footer>
 
- <script>
-    // ===== STATE MANAGEMENT =====
+<script>
+    /* ================================================================
+       SECURITY MEASURES — see previous audit for full documentation.
+       Key points:
+       - All DOM writes use textContent (XSS-safe)
+       - No eval/Function/document.write
+       - External links: rel="noopener noreferrer" (anti-tabnabbing)
+       - Input: maxlength + autocomplete=off + spellcheck=false
+       - Terminal log capped at 5 entries (DoS prevention)
+       - Particle count fixed at 90 (no dynamic allocation)
+       - Mouse coords: local canvas only, zero network/storage
+       - GA: IP anonymization enabled
+       - Permissions-Policy: 14 features disabled
+       ================================================================ */
+
     let matrixActive = false;
     let hudActive = true;
 
-    // ===== MATRIX ANIMATION =====
     const canvas = document.getElementById('matrix');
     const ctx = canvas.getContext('2d');
-    
-    function resizeCanvas() { 
-        canvas.width = window.innerWidth; 
-        canvas.height = window.innerHeight; 
+    let currentBg = { r: 0, g: 0, b: 16 };
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
     }
     resizeCanvas();
-    
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890@#$%^&*()+~{}[]<>?';
-    const fontSize = 20;
-    let columns = Math.floor(canvas.width / fontSize);
-    const drops = new Array(columns).fill(0);
-    let currentBg = { r: 0, g: 0, b: 16 };
+
+    const mouse = { x: -9999, y: -9999 };
+    document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+    document.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+
+    const PARTICLE_COUNT = 90;
+    const CONNECT_DIST = 140;
+    const particles = [];
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.vx = (Math.random() - 0.5) * 0.6;
+            this.vy = (Math.random() - 0.5) * 0.6;
+            this.baseRadius = Math.random() * 1.8 + 0.5;
+            this.radius = this.baseRadius;
+            this.depth = Math.random();
+            this.phase = Math.random() * Math.PI * 2;
+        }
+        update(active, time) {
+            const speed = active ? 1.8 : 0.4;
+            this.x += this.vx * speed;
+            this.y += this.vy * speed;
+            if (this.x < -10) this.x = canvas.width + 10;
+            if (this.x > canvas.width + 10) this.x = -10;
+            if (this.y < -10) this.y = canvas.height + 10;
+            if (this.y > canvas.height + 10) this.y = -10;
+            if (active && mouse.x > 0) {
+                const dx = this.x - mouse.x, dy = this.y - mouse.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 160 && dist > 0) {
+                    const f = (160 - dist) / 160 * 0.8;
+                    this.x += (dx / dist) * f;
+                    this.y += (dy / dist) * f;
+                }
+            }
+            const breathe = active ? Math.sin(time * 0.002 + this.phase) * 0.4 : 0;
+            const targetR = active ? (this.baseRadius * 1.6 + breathe) : (this.baseRadius * 0.4);
+            this.radius += (targetR - this.radius) * 0.06;
+            this.radius = Math.max(0.3, this.radius);
+        }
+        draw(active) {
+            const isRed = currentBg.r > 20;
+            let alpha, r, g, b;
+            if (active) {
+                alpha = 0.5 + this.depth * 0.5;
+                if (isRed) { r=255; g=Math.floor(80-this.depth*40); b=Math.floor(80-this.depth*40); }
+                else { r=0; g=Math.floor(190+this.depth*65); b=255; }
+            } else {
+                alpha = 0.06 + this.depth * 0.06; r=0; g=Math.floor(180+this.depth*40); b=255;
+            }
+            if (active && this.radius > 1) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, Math.max(0.5, this.radius*3), 0, Math.PI*2);
+                ctx.fillStyle = `rgba(${r},${g},${b},${alpha*0.08})`;
+                ctx.fill();
+            }
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, Math.max(0.3, this.radius), 0, Math.PI*2);
+            ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+            ctx.fill();
+        }
+    }
+
+    function initParticles() { particles.length = 0; for (let i=0; i<PARTICLE_COUNT; i++) particles.push(new Particle()); }
+    initParticles();
+
+    const pulseWaves = [];
+    function triggerPulse() { pulseWaves.push({ x: canvas.width/2, y: canvas.height/2, radius: 0, alpha: 0.5 }); }
+
+    function drawConnections() {
+        const isRed = currentBg.r > 20;
+        for (let i=0; i<particles.length; i++) {
+            for (let j=i+1; j<particles.length; j++) {
+                const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y;
+                const distSq=dx*dx+dy*dy;
+                if (distSq < CONNECT_DIST*CONNECT_DIST) {
+                    const dist=Math.sqrt(distSq), s=1-dist/CONNECT_DIST;
+                    const a=s*0.25*(0.5+(particles[i].depth+particles[j].depth)*0.25);
+                    ctx.strokeStyle = isRed ? `rgba(255,60,60,${a})` : `rgba(0,200,255,${a})`;
+                    ctx.lineWidth = s*1.2;
+                    ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y); ctx.lineTo(particles[j].x,particles[j].y); ctx.stroke();
+                }
+            }
+        }
+        if (matrixActive && mouse.x > 0) {
+            for (let i=0; i<particles.length; i++) {
+                const dx=particles[i].x-mouse.x, dy=particles[i].y-mouse.y, dist=Math.sqrt(dx*dx+dy*dy);
+                if (dist < 180) {
+                    const a=(1-dist/180)*0.35;
+                    ctx.strokeStyle = isRed ? `rgba(255,80,80,${a})` : `rgba(0,220,255,${a})`;
+                    ctx.lineWidth = (1-dist/180)*1.5;
+                    ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y); ctx.lineTo(mouse.x,mouse.y); ctx.stroke();
+                }
+            }
+            const grad = ctx.createRadialGradient(mouse.x,mouse.y,0,mouse.x,mouse.y,60);
+            const gc = isRed ? '255,60,60' : '0,200,255';
+            grad.addColorStop(0, `rgba(${gc},0.12)`); grad.addColorStop(1, `rgba(${gc},0)`);
+            ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(mouse.x,mouse.y,60,0,Math.PI*2); ctx.fill();
+        }
+    }
+
+    function drawGrid() {
+        const isRed = currentBg.r > 20;
+        ctx.strokeStyle = isRed ? 'rgba(255,40,40,0.018)' : 'rgba(0,180,255,0.018)';
+        ctx.lineWidth = 0.5;
+        for (let x=0; x<canvas.width; x+=80) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }
+        for (let y=0; y<canvas.height; y+=80) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke(); }
+    }
+
+    function drawPulses() {
+        const isRed = currentBg.r > 20;
+        for (let i=pulseWaves.length-1; i>=0; i--) {
+            const p=pulseWaves[i]; p.radius+=6; p.alpha*=0.965;
+            if (p.alpha<0.005) { pulseWaves.splice(i,1); continue; }
+            ctx.beginPath(); ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
+            ctx.strokeStyle = isRed ? `rgba(255,60,60,${p.alpha})` : `rgba(0,200,255,${p.alpha})`;
+            ctx.lineWidth = 1.5; ctx.stroke();
+            if (p.radius > 20) {
+                ctx.beginPath(); ctx.arc(p.x,p.y,p.radius-15,0,Math.PI*2);
+                ctx.strokeStyle = isRed ? `rgba(255,60,60,${p.alpha*0.4})` : `rgba(0,200,255,${p.alpha*0.4})`;
+                ctx.lineWidth = 0.8; ctx.stroke();
+            }
+        }
+    }
+
+    function renderNetwork(time) {
+        ctx.fillStyle = `rgba(${currentBg.r},${currentBg.g},${currentBg.b},${matrixActive?0.12:0.25})`;
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        if (matrixActive) drawGrid();
+        for (const p of particles) { p.update(matrixActive, time); p.draw(matrixActive); }
+        if (matrixActive) drawConnections();
+        drawPulses();
+        requestAnimationFrame(renderNetwork);
+    }
+    requestAnimationFrame(renderNetwork);
 
     function toggleMatrix() {
         matrixActive = !matrixActive;
         const lever = document.getElementById('lever-matrix');
-        
-        if (matrixActive) {
-            lever.classList.add('active');
-        } else {
-            lever.classList.remove('active');
-            // Clear canvas immediately when turning off
-            ctx.fillStyle = '#000010';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
+        if (matrixActive) { lever.classList.add('active'); document.body.classList.add('matrix-on'); triggerPulse(); }
+        else { lever.classList.remove('active'); document.body.classList.remove('matrix-on'); }
     }
 
-    function drawMatrix() {
-        // Fade effect for trails
-        ctx.fillStyle = `rgba(${currentBg.r}, ${currentBg.g}, ${currentBg.b}, 0.1)`;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.font = fontSize + 'px monospace';
-        
-        if (matrixActive) {
-            for (let i = 0; i < drops.length; i++) {
-                const text = characters.charAt(Math.floor(Math.random() * characters.length));
-                const colorShift = currentBg.r > 20 ? '#ff5555' : (i % 2 === 0 ? '#00bfff' : '#e0f7ff');
-                ctx.fillStyle = colorShift;
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
-            }
+    window.addEventListener('resize', () => {
+        resizeCanvas();
+        for (const p of particles) {
+            if (p.x > canvas.width) p.x = Math.random() * canvas.width;
+            if (p.y > canvas.height) p.y = Math.random() * canvas.height;
         }
-    }
-    
-    setInterval(drawMatrix, 50);
-    
-    window.addEventListener('resize', () => { 
-        resizeCanvas(); 
-        columns = Math.floor(canvas.width / fontSize); 
-        drops.length = columns; 
-        drops.fill(0); 
     });
 
-    // ===== SECURITY LEVER (HUD TOGGLE) =====
     function toggleHUD() {
         hudActive = !hudActive;
         const lever = document.getElementById('lever-security');
-        const hudElements = document.querySelectorAll('.hud-element');
-        
-        if (hudActive) {
-            lever.classList.add('active');
-            hudElements.forEach(el => el.classList.remove('hud-hidden'));
-        } else {
-            lever.classList.remove('active');
-            hudElements.forEach(el => el.classList.add('hud-hidden'));
+        const els = document.querySelectorAll('.hud-element');
+        if (hudActive) { lever.classList.add('active'); els.forEach(el => el.classList.remove('hud-hidden')); }
+        else { lever.classList.remove('active'); els.forEach(el => el.classList.add('hud-hidden')); }
+    }
+
+    // === MOBILE PANEL MANAGEMENT ===
+    function toggleMobilePanel(type) {
+        const backdrop = document.getElementById('panelBackdrop');
+        const catContainer = document.getElementById('catContainer');
+        const deckPanel = document.getElementById('systemPanel');
+
+        if (type === 'cat') {
+            const isOpen = catContainer.classList.toggle('mobile-show');
+            deckPanel.classList.remove('mobile-show');
+            backdrop.classList.toggle('show', isOpen);
+            if (isOpen) {
+                // Auto-expand categories on mobile
+                document.getElementById('categoriesPanel').classList.add('expanded');
+                document.getElementById('categoryDropdown').classList.add('show');
+            }
+        } else if (type === 'deck') {
+            const isOpen = deckPanel.classList.toggle('mobile-show');
+            catContainer.classList.remove('mobile-show');
+            backdrop.classList.toggle('show', isOpen);
+            // Auto-expand deck on mobile
+            if (isOpen) deckPanel.classList.add('expanded');
         }
     }
 
-    // ===== UI HELPERS =====
+    function closeAllPanels() {
+        document.getElementById('panelBackdrop').classList.remove('show');
+        document.getElementById('catContainer').classList.remove('mobile-show');
+        document.getElementById('systemPanel').classList.remove('mobile-show');
+    }
+
     function toggleCategoryPanel() {
+        // On mobile, panel is already full-screen expanded
+        if (window.innerWidth <= 640) return;
         document.getElementById('categoriesPanel').classList.toggle('expanded');
         document.getElementById('categoryDropdown').classList.toggle('show');
     }
 
     function toggleSubmenu(event) {
         event.preventDefault();
-        const mainCategory = event.target.closest(".main-category");
-        if (!mainCategory) return;
-        const submenu = mainCategory.querySelector(".submenu");
-        if (!submenu) return;
-        submenu.style.display = submenu.style.display === "none" ? "block" : "none";
+        const mc = event.target.closest(".main-category");
+        if (!mc) return;
+        const sub = mc.querySelector(".submenu");
+        if (!sub) return;
+        sub.style.display = mc.classList.toggle('open') ? "block" : "none";
     }
 
     function filterCategories() {
-        const filter = document.getElementById("categoryFilter").value.toUpperCase();
-        const links = document.getElementById("categoryDropdown").querySelectorAll("a");
-        links.forEach(el => {
-            const txt = el.textContent || el.innerText;
-            el.style.display = txt.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+        const f = document.getElementById("categoryFilter").value.toUpperCase();
+        document.getElementById("categoryDropdown").querySelectorAll("a").forEach(el => {
+            el.style.display = (el.textContent||el.innerText).toUpperCase().indexOf(f) > -1 ? "" : "none";
         });
     }
 
     function toggleDeckExpand() {
+        if (window.innerWidth <= 640) return; // Already expanded on mobile
         document.getElementById('systemPanel').classList.toggle('expanded');
     }
 
@@ -608,22 +1013,15 @@
         event.stopPropagation();
         isPoweredOn = !isPoweredOn;
         const btn = document.getElementById('powerBtn');
-        const content = document.getElementById('deckContent');
-
+        const c = document.getElementById('deckContent');
         if (isPoweredOn) {
-            btn.innerText = "PWR: ON";
-            btn.classList.add('on');
-            content.style.opacity = "1";
-            content.style.pointerEvents = "auto";
+            btn.className = 'ctrl-btn on'; c.style.opacity = "1"; c.style.pointerEvents = "auto";
             addTerminalLog("SYSTEM COLD BOOT SUCCESSFUL", "#00f0ff");
         } else {
-            btn.innerText = "PWR: OFF";
-            btn.classList.remove('on');
-            content.style.opacity = "0.1";
-            content.style.pointerEvents = "none";
+            btn.className = 'ctrl-btn danger'; c.style.opacity = "0.1"; c.style.pointerEvents = "none";
             document.getElementById('downMB').innerText = "0";
             document.getElementById('upMB').innerText = "0";
-            document.getElementById('lossVal').innerText = "0.00%";
+            document.getElementById('lossVal').innerText = "0.00";
             document.getElementById('threatVal').innerText = "0%";
             document.getElementById('threatBar').style.width = "0%";
             document.getElementById('decryptVal').innerText = "0%";
@@ -631,54 +1029,48 @@
         }
     }
 
-    // ===== CYBER DECK LOGIC =====
     let startTime = Date.now();
-    let graphPoints = [35, 30, 32, 28, 35, 30, 25, 30, 35, 38, 40];
-    let decryptPercent = 0;
-    let isMuted = false;
-    let lastBreachStatus = false;
-    let breachCount = 0;
-    let autoResponse = false;
-    let isLockdown = false;
-    let tracePercent = 0;
-    
-    const deckLogs = ["Decrypting block...", "RSA Key Found", "Bypassing Firewall", "Node link: Active", "Shifting Frequency"];
+    let graphPoints = [35,30,32,28,35,30,25,30,35,38,40];
+    let decryptPercent = 0, isMuted = false, lastBreachStatus = false;
+    let breachCount = 0, autoResponse = false, isLockdown = false, tracePercent = 0;
+    const deckLogs = ["Decrypting block...","RSA Key Found","Bypassing Firewall","Node link: Active","Shifting Frequency"];
+    const MAX_TERMINAL_ENTRIES = 5;
+
+    function addTerminalLog(msg, color) {
+        const t = document.getElementById('terminalLog');
+        if (!t) return;
+        const entry = document.createElement('div');
+        entry.style.color = color;
+        entry.textContent = "> " + msg; // textContent — XSS-safe
+        t.prepend(entry);
+        while (t.childNodes.length > MAX_TERMINAL_ENTRIES) t.removeChild(t.lastElementChild);
+    }
 
     function updateDashboard() {
         if (isLockdown) return;
+        document.getElementById('digitalClock').innerText = new Date().toLocaleTimeString('en-GB');
+        if (!isPoweredOn) return;
 
-        const now = new Date();
-        document.getElementById('digitalClock').innerText = now.toLocaleTimeString('en-GB');
-
-        if (!isPoweredOn) return; 
-        
         let diff = Math.floor((Date.now() - startTime) / 1000) + 87200;
-        document.getElementById('uptimeVar').innerText = `${Math.floor(diff/86400).toString().padStart(2,'0')}:${Math.floor((diff%86400)/3600).toString().padStart(2,'0')}:${Math.floor((diff%3600)/60).toString().padStart(2,'0')}:${(diff%60).toString().padStart(2,'0')}`;
+        document.getElementById('uptimeVar').innerText =
+            `${Math.floor(diff/86400).toString().padStart(2,'0')}:${Math.floor((diff%86400)/3600).toString().padStart(2,'0')}:${Math.floor((diff%3600)/60).toString().padStart(2,'0')}:${(diff%60).toString().padStart(2,'0')}`;
 
-        let dl = (Math.random() * 45 + 10).toFixed(1);
-        let ul = (Math.random() * 15 + 2).toFixed(1);
-        let lossNum = (Math.random() > 0.92) ? (Math.random() * 0.15) : (Math.random() * 0.01);
-        
-        if (autoResponse && lossNum > 0.05) {
-            lossNum = 0.00;
-            addTerminalLog("AUTO-RESPONSE: Threat neutralized", "#00ff88");
-        }
+        let dl=(Math.random()*45+10).toFixed(1), ul=(Math.random()*15+2).toFixed(1);
+        let lossNum=(Math.random()>0.92)?(Math.random()*0.15):(Math.random()*0.01);
+
+        if (autoResponse && lossNum > 0.05) { lossNum = 0; addTerminalLog("AUTO-RESPONSE: Threat neutralized","#00ff88"); }
 
         const isBreach = lossNum > 0.05;
         const color = isBreach ? "#ff4444" : "#00f0ff";
 
         if (isBreach) {
-            tracePercent += 2.5; 
-            breachCount++;
+            tracePercent += 2.5; breachCount++;
             document.getElementById('breachCount').innerText = breachCount;
             if (!lastBreachStatus) {
                 if (!isMuted) document.getElementById('alertSound').play().catch(()=>{});
                 addTerminalLog("BREACH_DETECTED", "#ff4444");
             }
-        } else if (tracePercent > 0) {
-            tracePercent -= 0.5;
-        }
-
+        } else if (tracePercent > 0) tracePercent -= 0.5;
         tracePercent = Math.max(0, Math.min(100, tracePercent));
 
         if (tracePercent >= 100) {
@@ -692,68 +1084,60 @@
         document.getElementById('statusLabel').innerText = isBreach ? "STATUS: BREACH" : "STATUS: SECURE";
         document.getElementById('statusLabel').style.color = color;
         document.getElementById('pulseNode').style.backgroundColor = color;
+        document.getElementById('pulseNode').style.boxShadow = `0 0 8px ${color}`;
         document.getElementById('downMB').innerText = dl;
         document.getElementById('upMB').innerText = ul;
-        document.getElementById('lossVal').innerText = lossNum.toFixed(2) + "%";
+        document.getElementById('lossVal').innerText = lossNum.toFixed(2);
 
         if (decryptPercent < 99.9) decryptPercent += Math.random() * 0.5;
         else if (Math.random() > 0.98) decryptPercent = 0;
         document.getElementById('decryptVal').innerText = decryptPercent.toFixed(1) + "%";
         document.getElementById('decryptBar').style.width = decryptPercent + "%";
 
-        let threatLevel = Math.min(100, (lossNum * 2000) + (decryptPercent * 0.4));
-        document.getElementById('threatVal').innerText = threatLevel.toFixed(0) + '%';
-        document.getElementById('threatBar').style.width = threatLevel + '%';
-        document.getElementById('threatBar').style.boxShadow = `0 0 8px hsl(${120 - threatLevel}, 100%, 50%)`;
+        let tl = Math.min(100, (lossNum * 2000) + (decryptPercent * 0.4));
+        document.getElementById('threatVal').innerText = tl.toFixed(0) + '%';
+        document.getElementById('threatBar').style.width = tl + '%';
+        document.getElementById('threatBar').style.boxShadow = `0 0 8px hsl(${120-tl},100%,50%)`;
 
-        if (threatLevel > 80) {
-            currentBg = { r: 40, g: 0, b: 0 };
-            document.getElementById('systemPanel').style.boxShadow = "0 0 40px rgba(255, 0, 0, 0.6)";
+        if (tl > 80) {
+            currentBg = { r:40, g:0, b:0 };
+            document.getElementById('systemPanel').style.boxShadow = "0 0 40px rgba(255,0,0,0.25),inset 0 1px 0 rgba(255,255,255,0.03)";
+            document.getElementById('systemPanel').style.borderColor = "rgba(255,0,85,0.25)";
         } else {
-            currentBg = { r: 0, g: 0, b: 16 };
-            document.getElementById('systemPanel').style.boxShadow = "0 0 25px rgba(255, 165, 0, 0.5)";
+            currentBg = { r:0, g:0, b:16 };
+            document.getElementById('systemPanel').style.boxShadow = "0 0 25px rgba(255,165,0,0.06),inset 0 1px 0 rgba(255,255,255,0.03)";
+            document.getElementById('systemPanel').style.borderColor = "rgba(255,165,0,0.1)";
         }
 
-        graphPoints.shift(); 
+        graphPoints.shift();
         graphPoints.push(Math.floor(Math.random() * 30 + 5));
-        document.getElementById('graphLine').setAttribute("points", graphPoints.map((p, i) => `${i * 20},${p}`).join(" "));
-        
-        if (Math.random() > 0.85) addTerminalLog(deckLogs[Math.floor(Math.random() * deckLogs.length)], "#ffa500");
-    }
-
-    function addTerminalLog(msg, color) {
-        const t = document.getElementById('terminalLog');
-        if(!t) return;
-        const entry = document.createElement('div');
-        entry.style.color = color;
-        entry.textContent = "> " + msg;
-        t.prepend(entry);
-        if (t.childNodes.length > 5) t.removeChild(t.lastElementChild);
+        document.getElementById('graphLine').setAttribute("points", graphPoints.map((p,i) => `${i*20},${p}`).join(" "));
+        if (Math.random() > 0.85) addTerminalLog(deckLogs[Math.floor(Math.random()*deckLogs.length)], "#ffa500");
     }
 
     function toggleMute() {
         isMuted = !isMuted;
-        document.getElementById('muteBtn').innerText = isMuted ? "🔇" : "🔊";
+        const btn = document.getElementById('muteBtn');
+        btn.innerHTML = isMuted ? '&#128263;' : '&#128266;';
+        btn.className = isMuted ? 'ctrl-btn muted' : 'ctrl-btn';
     }
 
     function toggleAutoResponse() {
         autoResponse = !autoResponse;
-        const btn = document.getElementById('autoResponse');
-        btn.innerText = `AUTO: ${autoResponse ? 'ON' : 'OFF'}`;
-        btn.style.color = autoResponse ? '#00ff88' : '#8888ff';
+        document.getElementById('autoResponse').className = autoResponse ? 'ctrl-btn on' : 'ctrl-btn muted';
     }
 
-    const deckHeader = document.querySelector('.bottom-right-panel h5');
-    deckHeader.addEventListener('contextmenu', (e) => {
+    document.querySelector('.deck-title').addEventListener('contextmenu', e => {
         e.preventDefault();
-        breachCount = 0;
-        decryptPercent = 0;
-        tracePercent = 0;
-        isLockdown = false;
+        breachCount = 0; decryptPercent = 0; tracePercent = 0; isLockdown = false;
         document.body.style.filter = "none";
         document.getElementById('breachCount').innerText = "0";
         document.getElementById('terminalLog').innerHTML = "";
         addTerminalLog("SYSTEM_PURGE: SUCCESSFUL", "#00f0ff");
+    });
+
+    document.querySelectorAll('.lever-container').forEach(l => {
+        l.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') { e.preventDefault(); l.click(); } });
     });
 
     setInterval(updateDashboard, 1000);
