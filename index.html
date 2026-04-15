@@ -77,13 +77,11 @@
             pointer-events:none;z-index:100;
         }
 
-        /* ===== UPPER SHELL: header + sidebar + main ===== */
         #upper-shell{
             flex:1;display:flex;flex-direction:column;min-height:0;
             position:relative;overflow:hidden;
         }
 
-        /* ===== SHUTDOWN OVERLAY — covers only header+main, NOT footer ===== */
         #shutdown-screen{
             position:absolute;inset:0;z-index:2000;
             background:#000;
@@ -101,20 +99,10 @@
             0%,100%{background:#080808;border-color:#040404;box-shadow:none}
             50%{background:#1a1a1a;border-color:#111;box-shadow:0 0 4px rgba(255,26,26,0.06)}
         }
-        .off-text{
-            color:#111;font-size:.95rem;font-weight:900;
-            letter-spacing:8px;text-transform:uppercase;
-        }
-        .off-hint{
-            color:#0a0a0a;font-size:.55rem;font-weight:900;
-            letter-spacing:3px;text-transform:uppercase;
-            animation:hintPulse 4s ease-in-out infinite;
-        }
-        @keyframes hintPulse{
-            0%,100%{color:#060606}50%{color:#151515}
-        }
+        .off-text{color:#111;font-size:.95rem;font-weight:900;letter-spacing:8px;text-transform:uppercase}
+        .off-hint{color:#0a0a0a;font-size:.55rem;font-weight:900;letter-spacing:3px;text-transform:uppercase;animation:hintPulse 4s ease-in-out infinite}
+        @keyframes hintPulse{0%,100%{color:#060606}50%{color:#151515}}
 
-        /* ===== HEADER ===== */
         header{
             background:var(--metal-shine);border-bottom:4px solid #000;
             padding:16px 20px;display:flex;justify-content:space-between;align-items:center;
@@ -129,7 +117,18 @@
         .sig-bar.low{background:var(--accent-red);border-color:#660000;box-shadow:0 0 5px rgba(255,26,26,0.35)}
         .sig-name{font-size:.48rem;color:#444;letter-spacing:2px;text-transform:uppercase;font-weight:900}
 
-        /* ===== LAYOUT ===== */
+        /* Speed readout in header */
+        .speed-readout{
+            font-size:.52rem;color:#333;font-weight:900;
+            letter-spacing:1px;text-transform:uppercase;
+            transition:color .4s;
+            min-width:90px;text-align:right;
+        }
+        .speed-readout.active{color:var(--accent-green)}
+        .speed-readout.testing{color:var(--accent-amber);animation:speedBlink 1s ease-in-out infinite}
+        .speed-readout.fail{color:var(--accent-red)}
+        @keyframes speedBlink{0%,100%{opacity:1}50%{opacity:.4}}
+
         .wrapper{display:flex;flex:1;overflow:hidden;min-height:0}
         nav{
             width:240px;background:#151515;border-right:5px solid #000;
@@ -156,7 +155,6 @@
         .m-btn-wt.active::after{background:var(--accent-amber);box-shadow:0 0 8px var(--accent-amber)}
         .m-btn-reset{color:var(--accent-red);margin-top:auto}
 
-        /* ===== MAIN CONTENT ===== */
         main{
             flex:1;padding:16px;background:#050505;
             position:relative;z-index:5;display:flex;flex-direction:column;min-height:0;overflow:hidden;
@@ -177,21 +175,30 @@
             background:repeating-linear-gradient(0deg,transparent,transparent 4px,rgba(0,0,0,0.06) 4px,rgba(0,0,0,0.06) 8px);
             pointer-events:none;z-index:1;
         }
-        #main-screen.off{
-            background:#020202;border-color:#1a1a1a;
-            box-shadow:inset 0 0 40px rgba(0,0,0,0.9);color:#0a0a0a;
-        }
+        #main-screen.off{background:#020202;border-color:#1a1a1a;box-shadow:inset 0 0 40px rgba(0,0,0,0.9);color:#0a0a0a}
         #main-screen.off::before{display:none}
         #main-screen.off .cmd-fixed-area{display:none}
 
-        /* Scan sweep */
+        /* Command prompt: hidden by default, shown only on dashboard */
+        .cmd-fixed-area{
+            flex-shrink:0;
+            border-top:1px solid rgba(0,229,255,0.06);
+            padding-top:6px;margin-top:6px;
+            position:relative;z-index:2;
+            max-height:0;overflow:hidden;opacity:0;
+            transition:max-height .3s ease,opacity .3s ease,padding .3s ease,margin .3s ease;
+            padding-top:0;margin-top:0;
+        }
+        #main-screen.show-cmd .cmd-fixed-area{
+            max-height:300px;opacity:1;padding-top:6px;margin-top:6px;
+        }
+
         .scan-sweep{position:absolute;top:0;left:0;right:0;height:2px;z-index:3;pointer-events:none;opacity:0;transition:opacity .4s}
         .scan-sweep.active{opacity:1}
         .scan-sweep-glow{position:absolute;top:-25px;left:0;right:0;height:50px;background:linear-gradient(180deg,transparent,rgba(0,229,255,0.04),transparent);animation:sweepDown 3s linear infinite}
         .scan-sweep-line{position:absolute;top:0;left:0;right:0;height:100%;background:linear-gradient(180deg,transparent,var(--accent-cyan),transparent);box-shadow:0 0 15px var(--accent-cyan);animation:sweepDown 3s linear infinite}
         @keyframes sweepDown{0%{top:-50px}100%{top:100%}}
 
-        /* Screen text classes */
         .s-header{font-weight:900;font-size:.85rem;color:var(--accent-cyan);text-shadow:0 0 8px rgba(0,229,255,0.35);border-bottom:2px solid rgba(0,229,255,0.12);padding-bottom:10px;margin-bottom:16px}
         .s-green{color:var(--accent-green);text-shadow:0 0 5px rgba(0,255,65,0.15)}
         .s-cyan{color:var(--accent-cyan);text-shadow:0 0 5px rgba(0,229,255,0.15)}
@@ -220,15 +227,21 @@
         @keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
         .cursor-blink{display:inline-block;width:7px;height:12px;background:var(--accent-cyan);animation:cursorBlink 1s step-end infinite;vertical-align:text-bottom;margin-left:2px}
 
-        /* Command prompt */
-        .cmd-fixed-area{flex-shrink:0;border-top:1px solid rgba(0,229,255,0.06);padding-top:6px;margin-top:6px;position:relative;z-index:2}
+        .cache-pill{
+            position:absolute;top:8px;right:8px;z-index:10;
+            padding:3px 8px;font-size:.52rem;font-weight:900;
+            letter-spacing:1px;text-transform:uppercase;
+            border-radius:2px;pointer-events:none;
+            animation:cacheFadeIn .4s ease;
+        }
+        .cache-pill.from-cache{background:rgba(255,157,0,0.12);color:var(--accent-amber);border:1px solid rgba(255,157,0,0.2)}
+        .cache-pill.fresh{background:rgba(0,229,255,0.08);color:var(--accent-cyan);border:1px solid rgba(0,229,255,0.15)}
+        .cache-pill.saved{background:rgba(0,255,65,0.08);color:var(--accent-green);border:1px solid rgba(0,255,65,0.15)}
+        @keyframes cacheFadeIn{0%{opacity:0;transform:translateY(-4px)}100%{opacity:1;transform:translateY(0)}}
+
         .cmd-input-wrap{display:flex;align-items:center;background:rgba(0,229,255,0.015);border:1px solid rgba(0,229,255,0.06);padding:0}
         .cmd-prompt{padding:10px;color:var(--accent-cyan);font-weight:900;font-size:.72rem;white-space:nowrap;flex-shrink:0;border-right:1px solid rgba(0,229,255,0.06)}
-        .cmd-input{
-            flex:1;background:transparent;border:none;outline:none;color:var(--accent-cyan);
-            font-family:'Courier New',Courier,monospace;font-size:.82rem;padding:10px;
-            caret-color:var(--accent-cyan);user-select:text;-webkit-user-select:text;
-        }
+        .cmd-input{flex:1;background:transparent;border:none;outline:none;color:var(--accent-cyan);font-family:'Courier New',Courier,monospace;font-size:.82rem;padding:10px;caret-color:var(--accent-cyan);user-select:text;-webkit-user-select:text}
         .cmd-input::placeholder{color:rgba(0,229,255,0.12)}
         .cmd-input.rate-limited{color:var(--accent-red)!important;caret-color:var(--accent-red)!important}
         .cmd-output{margin-top:5px;max-height:180px;overflow-y:auto;font-size:.72rem}
@@ -241,19 +254,10 @@
         .cmd-out-info{color:var(--accent-cyan)}
         .cmd-out-warn{color:var(--accent-amber)}
 
-        /* Iframe */
         .screen-iframe-wrap{flex:1;position:relative;z-index:2;display:none;flex-direction:column;min-height:0}
         .screen-iframe-wrap.active{display:flex}
-        .screen-iframe-bar{
-            background:#0a0a0a;border:2px solid rgba(0,229,255,0.06);border-bottom:none;
-            padding:10px 12px;display:flex;justify-content:space-between;align-items:center;
-            font-size:.65rem;color:var(--accent-cyan);flex-shrink:0;
-        }
-        .screen-iframe-bar button{
-            background:#111;color:var(--accent-amber);border:2px solid #332200;
-            padding:6px 18px;cursor:pointer;font-family:inherit;font-weight:900;font-size:.65rem;text-transform:uppercase;
-            min-height:36px;min-width:80px;display:inline-flex;align-items:center;justify-content:center;
-        }
+        .screen-iframe-bar{background:#0a0a0a;border:2px solid rgba(0,229,255,0.06);border-bottom:none;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;font-size:.65rem;color:var(--accent-cyan);flex-shrink:0}
+        .screen-iframe-bar button{background:#111;color:var(--accent-amber);border:2px solid #332200;padding:6px 18px;cursor:pointer;font-family:inherit;font-weight:900;font-size:.65rem;text-transform:uppercase;min-height:36px;min-width:80px;display:inline-flex;align-items:center;justify-content:center}
         .screen-iframe-bar button:hover{background:#1a1a0a}
         .screen-iframe-body{flex:1;border:2px solid rgba(0,229,255,0.06);background:#000;position:relative;min-height:0}
         .screen-iframe-body iframe{width:100%;height:100%;border:none;display:block;background:#000}
@@ -261,113 +265,56 @@
         .iframe-loading .spinner{width:28px;height:28px;border:3px solid rgba(0,229,255,0.1);border-top-color:var(--accent-cyan);border-radius:50%;animation:spin .8s linear infinite}
         @keyframes spin{to{transform:rotate(360deg)}}
 
-        /* ===== FOOTER — always visible, always on top ===== */
-        footer{
-            background:linear-gradient(90deg,rgba(0,0,0,0.5),rgba(8,8,18,0.8),rgba(0,0,0,0.5));
-            border-top:5px solid #000;position:relative;z-index:2500;flex-shrink:0;
-        }
+        footer{background:linear-gradient(90deg,rgba(0,0,0,0.5),rgba(8,8,18,0.8),rgba(0,0,0,0.5));border-top:5px solid #000;position:relative;z-index:2500;flex-shrink:0}
         #sys-light-bar{height:10px;width:100%;background:var(--accent-red);box-shadow:0 0 16px var(--accent-red);transition:background .5s,box-shadow .5s}
         #sys-light-bar.on{background:var(--accent-green);box-shadow:0 0 30px var(--accent-green)}
-        .footer-controls{
-            display:flex;justify-content:space-between;align-items:center;
-            padding:10px 16px;background:var(--metal-shine);gap:10px;
-        }
+        .footer-controls{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:var(--metal-shine);gap:10px}
         .power-unit{display:flex;align-items:center;gap:12px}
         .power-info{display:flex;flex-direction:column;gap:3px}
         .power-label-top{font-size:.48rem;color:#555;text-transform:uppercase;letter-spacing:2px;font-weight:900}
         #status-text{font-weight:900;letter-spacing:2px;color:var(--accent-red);font-size:.7rem;transition:color .4s}
         #status-text.on{color:var(--accent-green)}
-        .armor-toggle{
-            width:68px;height:34px;
-            background:linear-gradient(180deg,#1a1a1a,#0a0a0a);
-            border:4px solid #000;border-radius:6px;cursor:pointer;position:relative;
-            box-shadow:3px 3px 0 #000,inset 0 0 12px rgba(0,0,0,0.8);
-            transition:all .3s ease;-webkit-tap-highlight-color:transparent;flex-shrink:0;
-        }
+        .armor-toggle{width:68px;height:34px;background:linear-gradient(180deg,#1a1a1a,#0a0a0a);border:4px solid #000;border-radius:6px;cursor:pointer;position:relative;box-shadow:3px 3px 0 #000,inset 0 0 12px rgba(0,0,0,0.8);transition:all .3s ease;-webkit-tap-highlight-color:transparent;flex-shrink:0}
         .armor-toggle:active{border-color:var(--accent-green)}
-        .armor-toggle::before{
-            content:"";position:absolute;top:50%;right:8px;transform:translateY(-50%);
-            width:8px;height:8px;border-radius:50%;background:var(--accent-red);
-            border:2px solid #330000;box-shadow:0 0 8px var(--accent-red);
-            transition:all .4s ease;z-index:3;
-        }
-        .armor-toggle.on::before{
-            background:var(--accent-green);border-color:#005500;
-            box-shadow:0 0 10px var(--accent-green),0 0 20px rgba(0,255,65,0.15);
-        }
-        .toggle-lever{
-            position:absolute;top:2px;left:2px;width:24px;height:20px;
-            background:linear-gradient(180deg,#444,#222);border:2px solid #000;border-radius:4px;
-            box-shadow:inset 1px 1px 0 #666,2px 2px 4px rgba(0,0,0,0.6);
-            transition:left .3s cubic-bezier(.4,0,.2,1);z-index:2;
-        }
-        .toggle-lever::after{
-            content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-            width:10px;height:1.5px;background:#111;
-            box-shadow:0 -3px 0 #111,0 3px 0 #111;border-radius:1px;
-        }
-        .armor-toggle.on .toggle-lever{
-            left:32px;background:linear-gradient(180deg,#555,#2a2a2a);
-            box-shadow:inset 1px 1px 0 #777,2px 2px 4px rgba(0,0,0,0.6),0 0 6px rgba(0,255,65,0.12);
-        }
+        .armor-toggle::before{content:"";position:absolute;top:50%;right:8px;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:var(--accent-red);border:2px solid #330000;box-shadow:0 0 8px var(--accent-red);transition:all .4s ease;z-index:3}
+        .armor-toggle.on::before{background:var(--accent-green);border-color:#005500;box-shadow:0 0 10px var(--accent-green),0 0 20px rgba(0,255,65,0.15)}
+        .toggle-lever{position:absolute;top:2px;left:2px;width:24px;height:20px;background:linear-gradient(180deg,#444,#222);border:2px solid #000;border-radius:4px;box-shadow:inset 1px 1px 0 #666,2px 2px 4px rgba(0,0,0,0.6);transition:left .3s cubic-bezier(.4,0,.2,1);z-index:2}
+        .toggle-lever::after{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:10px;height:1.5px;background:#111;box-shadow:0 -3px 0 #111,0 3px 0 #111;border-radius:1px}
+        .armor-toggle.on .toggle-lever{left:32px;background:linear-gradient(180deg,#555,#2a2a2a);box-shadow:inset 1px 1px 0 #777,2px 2px 4px rgba(0,0,0,0.6),0 0 6px rgba(0,255,65,0.12)}
         .toggle-labels{display:flex;justify-content:space-between;width:68px;margin-top:3px;padding:0 4px}
         .toggle-labels span{font-size:.42rem;font-weight:900;letter-spacing:1px;color:#333;transition:color .3s}
         .toggle-labels .lbl-on.active-lbl{color:var(--accent-green)}
         .toggle-labels .lbl-off.active-lbl{color:var(--accent-red)}
-        .scan-mech{
-            background:linear-gradient(145deg,#001a1a,#000a0a);color:var(--accent-cyan);
-            border:3px solid #003333;padding:10px 24px;font-weight:900;cursor:pointer;
-            box-shadow:3px 3px 0 #000,inset 1px 1px 0 #004444;
-            text-transform:uppercase;font-family:'Courier New',Courier,monospace;transition:all .3s;
-            -webkit-tap-highlight-color:transparent;min-width:80px;
-            display:inline-flex;align-items:center;justify-content:center;
-        }
+        .scan-mech{background:linear-gradient(145deg,#001a1a,#000a0a);color:var(--accent-cyan);border:3px solid #003333;padding:10px 24px;font-weight:900;cursor:pointer;box-shadow:3px 3px 0 #000,inset 1px 1px 0 #004444;text-transform:uppercase;font-family:'Courier New',Courier,monospace;transition:all .3s;-webkit-tap-highlight-color:transparent;min-width:80px;display:inline-flex;align-items:center;justify-content:center}
         .scan-mech:hover{background:linear-gradient(145deg,#002a2a,#001515);border-color:var(--accent-cyan)}
-        .scan-mech.active{
-            background:linear-gradient(145deg,#002020,#001010);border-color:var(--accent-cyan);
-            box-shadow:3px 3px 0 #000,0 0 18px rgba(0,229,255,0.12),inset 0 0 8px rgba(0,229,255,0.04);
-            animation:scanPulse 2s ease-in-out infinite;
-        }
-        @keyframes scanPulse{
-            0%,100%{box-shadow:3px 3px 0 #000,0 0 8px rgba(0,229,255,0.08)}
-            50%{box-shadow:3px 3px 0 #000,0 0 20px rgba(0,229,255,0.2)}
-        }
+        .scan-mech.active{background:linear-gradient(145deg,#002020,#001010);border-color:var(--accent-cyan);box-shadow:3px 3px 0 #000,0 0 18px rgba(0,229,255,0.12),inset 0 0 8px rgba(0,229,255,0.04);animation:scanPulse 2s ease-in-out infinite}
+        @keyframes scanPulse{0%,100%{box-shadow:3px 3px 0 #000,0 0 8px rgba(0,229,255,0.08)}50%{box-shadow:3px 3px 0 #000,0 0 20px rgba(0,229,255,0.2)}}
         .footer-text{color:#444;font-size:.62rem;white-space:nowrap;text-align:center}
 
-        /* ===== RESPONSIVE ===== */
         @media(max-width:900px){
             nav{width:200px;padding:10px;gap:8px}
             .m-btn{padding:11px;font-size:.7rem;box-shadow:3px 3px 0 #000,inset 1px 1px 1px #444}
-            .s-grid{grid-template-columns:1fr 1fr}
-            .s-cell{padding:8px}.s-cell-val{font-size:.85rem}
+            .s-grid{grid-template-columns:1fr 1fr}.s-cell{padding:8px}.s-cell-val{font-size:.85rem}
             .s-header{font-size:.78rem;padding-bottom:8px;margin-bottom:10px}
+            .speed-readout{min-width:70px;font-size:.48rem}
         }
         @media(max-width:700px){
             body{height:auto;height:100dvh;overflow-y:auto;-webkit-overflow-scrolling:touch}
             .wrapper{flex-direction:column}
-            nav{
-                width:100%;border-right:none;border-bottom:5px solid #000;
-                flex-direction:row;overflow-x:auto;overflow-y:hidden;padding:6px 8px;gap:6px;
-            }
+            nav{width:100%;border-right:none;border-bottom:5px solid #000;flex-direction:row;overflow-x:auto;overflow-y:hidden;padding:6px 8px;gap:6px}
             .nav-label{display:none}
             .m-btn{white-space:nowrap;padding:8px 10px;font-size:.65rem;box-shadow:3px 3px 0 #000,inset 1px 1px 1px #444;flex-shrink:0}
             .m-btn.active::after{width:7px;height:7px}
             .m-btn-wt.active::after{width:7px;height:7px;background:var(--accent-amber);box-shadow:0 0 6px var(--accent-amber)}
             .m-btn-reset{margin-top:0}
+            .speed-readout{display:none}
         }
         @media(max-width:380px){
-            header{padding:10px 12px}
-            .sig-bars{height:24px}.sig-bar{width:8px}
-            .armor-toggle{width:56px;height:28px}
-            .toggle-lever{width:18px;height:15px}
-            .armor-toggle.on .toggle-lever{left:26px}
-            .toggle-labels{width:56px}
+            header{padding:10px 12px}.sig-bars{height:24px}.sig-bar{width:8px}
+            .armor-toggle{width:56px;height:28px}.toggle-lever{width:18px;height:15px}.armor-toggle.on .toggle-lever{left:26px}.toggle-labels{width:56px}
             .scan-mech{padding:8px 16px;font-size:.58rem;min-width:70px;min-height:38px}
             .footer-controls{padding:8px 12px;gap:8px;align-items:stretch}
-            .armor-toggle{width:52px;height:26px}
-            .toggle-lever{width:16px;height:14px}
-            .armor-toggle.on .toggle-lever{left:24px}
-            .toggle-labels{width:52px}
+            .armor-toggle{width:52px;height:26px}.toggle-lever{width:16px;height:14px}.armor-toggle.on .toggle-lever{left:24px}.toggle-labels{width:52px}
             .footer-text{font-size:.58rem}
         }
         @media(max-height:500px) and (orientation:landscape){
@@ -381,10 +328,7 @@
 </head>
 <body>
 
-    <!-- ===== UPPER SHELL: header + sidebar + main (shutdown overlay lives here) ===== -->
     <div id="upper-shell">
-
-        <!-- Shutdown overlay: covers header+main only, footer stays accessible -->
         <div id="shutdown-screen">
             <div class="off-dot"></div>
             <div class="off-text">Power Off</div>
@@ -396,14 +340,17 @@
                 AIO: <span style="color:#fff">MY_STUFF_v3.0</span> |
                 <span id="clock" style="color:var(--accent-amber)">00:00:00</span>
             </div>
-            <div class="sig_cluster">
-                <div class="sig-bars">
-                    <div class="sig-bar sig-bar-1" id="bar1"></div>
-                    <div class="sig-bar sig-bar-2" id="bar2"></div>
-                    <div class="sig-bar sig-bar-3" id="bar3"></div>
-                    <div class="sig-bar sig-bar-4" id="bar4"></div>
+            <div style="display:flex;align-items:center;gap:14px">
+                <div class="speed-readout" id="speed-readout">--</div>
+                <div class="sig_cluster">
+                    <div class="sig-bars">
+                        <div class="sig-bar sig-bar-1" id="bar1"></div>
+                        <div class="sig-bar sig-bar-2" id="bar2"></div>
+                        <div class="sig-bar sig-bar-3" id="bar3"></div>
+                        <div class="sig-bar sig-bar-4" id="bar4"></div>
+                    </div>
+                    <div class="sig-name">Signal</div>
                 </div>
-                <div class="sig-name">Signal</div>
             </div>
         </header>
 
@@ -414,6 +361,7 @@
                 <button class="m-btn dead" data-screen="v1" onclick="loadScreen('v1',this)">My Stuff v1.0</button>
                 <button class="m-btn dead" data-screen="v2" onclick="loadScreen('v2',this)">My Stuff v2.0</button>
                 <button class="m-btn m-btn-wt dead" data-screen="wt" onclick="loadScreen('wt',this)">Walkie-Talkie</button>
+                <button class="m-btn dead" data-screen="logs" onclick="loadScreen('logs',this)">Sys Log</button>
                 <button class="m-btn m-btn-reset" onclick="location.reload()">Reset</button>
             </nav>
 
@@ -451,7 +399,6 @@
         </div>
     </div>
 
-    <!-- ===== FOOTER: always visible, z-index above everything ===== -->
     <footer>
         <div id="sys-light-bar"></div>
         <div class="footer-controls">
@@ -479,13 +426,116 @@
         /* ===== STATE ===== */
         var isPowerOn = false,
             isScanOn  = false,
-            currentScreen = 'dash',
+            currentScreen = null,
             netSpeed  = 0,
+            speedTestRunning = false,
             cmdHistory = [],
             cmdHistoryIdx = -1,
             cmdBound = false;
 
-        /* ===== SECURITY: Input sanitization ===== */
+        /* ===== CACHE SYSTEM ===== */
+        var CACHE_PREFIX = 'aio_sc_';
+        var screenCache = {};
+        var iframeMemState = { url:'', title:'' };
+
+        function cacheSave(id) {
+            if (!id) return;
+            var html = document.getElementById('screen-content').innerHTML;
+            if (!html || !html.trim()) return;
+            screenCache[id] = html;
+            try { localStorage.setItem(CACHE_PREFIX + id, html); } catch(e) {}
+        }
+        function cacheLoad(id) {
+            if (screenCache[id]) return screenCache[id];
+            try {
+                var s = localStorage.getItem(CACHE_PREFIX + id);
+                if (s && s.trim()) { screenCache[id] = s; return s; }
+            } catch(e) {}
+            return null;
+        }
+        function cacheClear(id) {
+            delete screenCache[id];
+            try { localStorage.removeItem(CACHE_PREFIX + id); } catch(e) {}
+        }
+        function cacheClearAll() {
+            screenCache = {};
+            var keys = [];
+            try {
+                for (var i = 0; i < localStorage.length; i++) {
+                    var k = localStorage.key(i);
+                    if (k && k.indexOf(CACHE_PREFIX) === 0) keys.push(k);
+                }
+                keys.forEach(function(k) { localStorage.removeItem(k); });
+            } catch(e) {}
+        }
+        function cacheStatus() {
+            var keys = Object.keys(screenCache), lsCount = 0, lsBytes = 0;
+            try {
+                for (var i = 0; i < localStorage.length; i++) {
+                    var k = localStorage.key(i);
+                    if (k && k.indexOf(CACHE_PREFIX) === 0) {
+                        lsCount++;
+                        lsBytes += (localStorage.getItem(k) || '').length;
+                    }
+                }
+            } catch(e) {}
+            return { ramKeys: keys, ramCount: keys.length, lsCount: lsCount, lsBytes: lsBytes };
+        }
+        function cacheSaveIframe(url, title) {
+            iframeMemState = { url: url, title: title };
+            try { localStorage.setItem('aio_iframe_st', JSON.stringify(iframeMemState)); } catch(e) {}
+        }
+        function cacheLoadIframe() {
+            if (iframeMemState.url) return iframeMemState;
+            try { var s = localStorage.getItem('aio_iframe_st'); if (s) { iframeMemState = JSON.parse(s); return iframeMemState; } } catch(e) {}
+            return null;
+        }
+        function cacheClearIframe() {
+            iframeMemState = { url:'', title:'' };
+            try { localStorage.removeItem('aio_iframe_st'); } catch(e) {}
+        }
+        function saveCmdHistory() {
+            try { localStorage.setItem('aio_cmd_hist', JSON.stringify(cmdHistory.slice(-80))); } catch(e) {}
+        }
+        function loadCmdHistory() {
+            try { var s = localStorage.getItem('aio_cmd_hist'); if (s) { cmdHistory = JSON.parse(s); if (!Array.isArray(cmdHistory)) cmdHistory = []; } } catch(e) { cmdHistory = []; }
+        }
+        function saveCmdOutput() {
+            var el = document.getElementById('cmd-output');
+            if (!el) return;
+            try { localStorage.setItem('aio_cmd_out', el.innerHTML); } catch(e) {}
+        }
+        function loadCmdOutput() {
+            var el = document.getElementById('cmd-output');
+            if (!el) return;
+            try { var s = localStorage.getItem('aio_cmd_out'); if (s) el.innerHTML = s; } catch(e) {}
+        }
+
+        /* Cross-tab sync */
+        window.addEventListener('storage', function(e) {
+            if (!e.key || e.key.indexOf(CACHE_PREFIX) !== 0) return;
+            var id = e.key.substring(CACHE_PREFIX.length);
+            if (e.newValue === null) { delete screenCache[id]; }
+            else {
+                screenCache[id] = e.newValue;
+                if (id === currentScreen && isPowerOn) {
+                    document.getElementById('screen-content').innerHTML = e.newValue || '';
+                    showCachePill('from-cache', 'SYNCED');
+                }
+            }
+        });
+
+        function showCachePill(type, text) {
+            var ex = document.querySelector('.cache-pill');
+            if (ex) ex.remove();
+            var pill = document.createElement('div');
+            pill.className = 'cache-pill ' + type;
+            pill.textContent = text || type.toUpperCase();
+            document.getElementById('main-screen').appendChild(pill);
+            setTimeout(function() { if (pill.parentNode) pill.remove(); }, 1800);
+        }
+
+        /* ===== SECURITY ===== */
         function sanitizeInput(raw) {
             if (typeof raw !== 'string') return '';
             var c = raw.replace(/\0/g, '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
@@ -494,8 +544,6 @@
             if (/(?:expression|behavior|binding|url\()/i.test(c)) return '';
             return c;
         }
-
-        /* ===== SECURITY: Rate limiter ===== */
         var cmdTimestamps = [], CMD_RATE_LIMIT = 10, CMD_RATE_WINDOW = 1000, CMD_COOLDOWN_MS = 500;
         function isRateLimited() {
             var now = Date.now();
@@ -504,8 +552,6 @@
             cmdTimestamps.push(now);
             return false;
         }
-
-        /* ===== SECURITY: URL allowlist ===== */
         var ALLOWED_ORIGINS = ['https://mohammad3230.github.io'];
         function isUrlAllowed(url) {
             if (typeof url !== 'string') return false;
@@ -513,14 +559,12 @@
             try {
                 var p = new URL(url, window.location.href);
                 if (p.protocol !== 'https:') return false;
-                for (var i = 0; i < ALLOWED_ORIGINS.length; i++) {
-                    if (p.origin === ALLOWED_ORIGINS[i]) return true;
-                }
-            } catch (e) { return false; }
+                for (var i = 0; i < ALLOWED_ORIGINS.length; i++) { if (p.origin === ALLOWED_ORIGINS[i]) return true; }
+            } catch(e) {}
             return false;
         }
 
-        /* ===== CMD OUTPUT HELPER ===== */
+        /* ===== CMD OUTPUT ===== */
         function addCmdOutput(lines) {
             var el = document.getElementById('cmd-output');
             if (!el) return;
@@ -531,19 +575,17 @@
                 el.appendChild(d);
             }
             el.scrollTop = el.scrollHeight;
+            saveCmdOutput();
         }
 
-        /* ===== BIND COMMAND INPUT (once) ===== */
+        /* ===== COMMAND INPUT ===== */
         function bindCmdInput() {
             if (cmdBound) return;
             cmdBound = true;
             var input = document.getElementById('cmd-input');
             if (!input) return;
-
             input.addEventListener('keydown', function(e) {
-                if (!isPowerOn) return;
-
-                /* History arrows */
+                if (!isPowerOn || currentScreen !== 'dash') return;
                 if (e.key === 'ArrowUp') {
                     e.preventDefault();
                     if (cmdHistory.length > 0 && cmdHistoryIdx < cmdHistory.length - 1) {
@@ -558,95 +600,165 @@
                     else { cmdHistoryIdx = -1; input.value = ''; }
                     return;
                 }
-
                 if (e.key !== 'Enter') return;
                 e.preventDefault();
-
                 var raw = input.value.trim();
                 input.value = '';
                 if (!raw) return;
-
-                /* Rate limit */
                 if (isRateLimited()) {
                     input.classList.add('rate-limited');
-                    addCmdOutput([{ t: 'RATE LIMIT: too many commands', c: 'cmd-out-err' }]);
-                    setTimeout(function() { input.classList.remove('rate-limited'); }, CMD_COOLDOWN_MS);
+                    addCmdOutput([{ t:'RATE LIMIT: too many commands', c:'cmd-out-err' }]);
+                    setTimeout(function(){ input.classList.remove('rate-limited'); }, CMD_COOLDOWN_MS);
                     return;
                 }
-
                 var cmd = sanitizeInput(raw);
-                if (!cmd) { addCmdOutput([{ t: 'BLOCKED: invalid input', c: 'cmd-out-err' }]); return; }
-
+                if (!cmd) { addCmdOutput([{ t:'BLOCKED: invalid input', c:'cmd-out-err' }]); return; }
                 cmdHistory.push(cmd);
-                if (cmdHistory.length > 50) cmdHistory.shift();
+                if (cmdHistory.length > 80) cmdHistory.shift();
                 cmdHistoryIdx = -1;
-
-                addCmdOutput([{ t: 'AIO> ' + cmd, c: 'cmd-out-info' }]);
-
-                var lc = cmd.toLowerCase();
-                if (lc === 'help') {
-                    addCmdOutput([
-                        { t: '  help      - show commands', c: 'cmd-out-ok' },
-                        { t: '  clear     - clear output', c: 'cmd-out-ok' },
-                        { t: '  status    - system status', c: 'cmd-out-ok' },
-                        { t: '  speed     - bandwidth test', c: 'cmd-out-ok' },
-                        { t: '  scan      - toggle scan mode', c: 'cmd-out-ok' },
-                        { t: '  dash      - load dashboard', c: 'cmd-out-ok' },
-                        { t: '  logs      - load system log', c: 'cmd-out-ok' },
-                        { t: '  poweroff  - shut down', c: 'cmd-out-ok' }
-                    ]);
-                } else if (lc === 'clear') {
-                    document.getElementById('cmd-output').innerHTML = '';
-                } else if (lc === 'status') {
-                    addCmdOutput([
-                        { t: '  Power:  ' + (isPowerOn ? 'ON' : 'OFF'), c: 'cmd-out-ok' },
-                        { t: '  Scan:   ' + (isScanOn ? 'ACTIVE' : 'OFF'), c: isScanOn ? 'cmd-out-warn' : 'cmd-out-ok' },
-                        { t: '  Speed:  ' + (netSpeed > 0 ? (netSpeed > 1000000 ? (netSpeed/1000000).toFixed(1)+' Mbps' : Math.round(netSpeed/1000)+' Kbps') : 'UNKNOWN'), c: 'cmd-out-info' },
-                        { t: '  Screen: ' + currentScreen.toUpperCase(), c: 'cmd-out-info' }
-                    ]);
-                } else if (lc === 'speed') {
-                    addCmdOutput([{ t: '  Running bandwidth test...', c: 'cmd-out-info' }]);
-                    runSpeedTest();
-                } else if (lc === 'scan') {
-                    toggleScan();
-                    addCmdOutput([{ t: '  Scan mode: ' + (isScanOn ? 'ACTIVE' : 'OFF'), c: isScanOn ? 'cmd-out-warn' : 'cmd-out-ok' }]);
-                } else if (lc === 'dash') {
-                    loadScreen('dash', document.querySelector('.m-btn[data-screen="dash"]'));
-                    addCmdOutput([{ t: '  Loaded: DASHBOARD', c: 'cmd-out-ok' }]);
-                } else if (lc === 'logs') {
-                    loadScreen('logs', null);
-                    addCmdOutput([{ t: '  Loaded: SYSTEM LOG', c: 'cmd-out-ok' }]);
-                } else if (lc === 'poweroff') {
-                    addCmdOutput([{ t: '  Shutting down...', c: 'cmd-out-err' }]);
-                    setTimeout(togglePower, 600);
-                } else {
-                    addCmdOutput([{ t: '  Unknown command: ' + cmd, c: 'cmd-out-err' }]);
-                }
+                saveCmdHistory();
+                addCmdOutput([{ t:'AIO> ' + cmd, c:'cmd-out-info' }]);
+                processCommand(cmd);
             });
         }
 
-        /* ===== SPEED TEST ===== */
+        function processCommand(cmd) {
+            var lc = cmd.toLowerCase();
+            if (lc === 'help') {
+                addCmdOutput([
+                    { t:'  help         - show commands', c:'cmd-out-ok' },
+                    { t:'  clear        - clear output', c:'cmd-out-ok' },
+                    { t:'  status       - system status', c:'cmd-out-ok' },
+                    { t:'  speed        - force speed test', c:'cmd-out-ok' },
+                    { t:'  scan         - toggle scan', c:'cmd-out-ok' },
+                    { t:'  dash         - go to dashboard', c:'cmd-out-ok' },
+                    { t:'  logs         - go to system log', c:'cmd-out-ok' },
+                    { t:'  save         - save screen to cache', c:'cmd-out-ok' },
+                    { t:'  cache        - show cache status', c:'cmd-out-ok' },
+                    { t:'  clearcache   - clear all cached data', c:'cmd-out-ok' },
+                    { t:'  reload       - reload current screen fresh', c:'cmd-out-ok' },
+                    { t:'  poweroff     - shut down', c:'cmd-out-ok' }
+                ]);
+            } else if (lc === 'clear') {
+                document.getElementById('cmd-output').innerHTML = '';
+                try { localStorage.removeItem('aio_cmd_out'); } catch(e) {}
+            } else if (lc === 'status') {
+                var cs = cacheStatus();
+                addCmdOutput([
+                    { t:'  Power:   ' + (isPowerOn ? 'ON' : 'OFF'), c:'cmd-out-ok' },
+                    { t:'  Scan:    ' + (isScanOn ? 'ACTIVE' : 'OFF'), c: isScanOn ? 'cmd-out-warn' : 'cmd-out-ok' },
+                    { t:'  Speed:   ' + formatSpeed(netSpeed), c: netSpeed > 0 ? 'cmd-out-ok' : 'cmd-out-err' },
+                    { t:'  Screen:  ' + (currentScreen || 'NONE').toUpperCase(), c:'cmd-out-info' },
+                    { t:'  Cache:   ' + cs.lsCount + ' screens (' + (cs.lsBytes/1024).toFixed(1) + ' KB)', c:'cmd-out-warn' },
+                    { t:'  History: ' + cmdHistory.length + ' commands', c:'cmd-out-info' }
+                ]);
+            } else if (lc === 'speed') {
+                addCmdOutput([{ t:'  Running bandwidth test...', c:'cmd-out-info' }]);
+                runSpeedTest();
+            } else if (lc === 'scan') {
+                toggleScan();
+                addCmdOutput([{ t:'  Scan mode: ' + (isScanOn ? 'ACTIVE' : 'OFF'), c: isScanOn ? 'cmd-out-warn' : 'cmd-out-ok' }]);
+            } else if (lc === 'dash') {
+                loadScreen('dash', document.querySelector('.m-btn[data-screen="dash"]'));
+            } else if (lc === 'logs') {
+                loadScreen('logs', document.querySelector('.m-btn[data-screen="logs"]'));
+            } else if (lc === 'save') {
+                if (currentScreen) { cacheSave(currentScreen); addCmdOutput([{ t:'  Saved: ' + currentScreen.toUpperCase(), c:'cmd-out-ok' }]); showCachePill('saved', 'SAVED'); }
+                else addCmdOutput([{ t:'  No active screen', c:'cmd-out-err' }]);
+            } else if (lc === 'cache') {
+                var cs = cacheStatus();
+                addCmdOutput([
+                    { t:'  === CACHE ===', c:'cmd-out-info' },
+                    { t:'  RAM:     ' + cs.ramCount + ' screens', c:'cmd-out-ok' },
+                    { t:'  Storage: ' + cs.lsCount + ' keys / ' + (cs.lsBytes/1024).toFixed(1) + ' KB', c:'cmd-out-warn' }
+                ]);
+            } else if (lc === 'clearcache') {
+                var n = cacheStatus().lsCount;
+                cacheClearAll(); cacheClearIframe();
+                addCmdOutput([{ t:'  Cleared ' + n + ' cached screens', c:'cmd-out-warn' }]);
+            } else if (lc === 'reload') {
+                if (currentScreen) {
+                    cacheClear(currentScreen);
+                    loadScreen(currentScreen, document.querySelector('.m-btn[data-screen="'+currentScreen+'"]'));
+                    showCachePill('fresh', 'FRESH');
+                } else addCmdOutput([{ t:'  No active screen', c:'cmd-out-err' }]);
+            } else if (lc === 'poweroff') {
+                addCmdOutput([{ t:'  Shutting down...', c:'cmd-out-err' }]);
+                setTimeout(togglePower, 600);
+            } else {
+                addCmdOutput([{ t:'  Unknown: ' + cmd, c:'cmd-out-err' }]);
+            }
+        }
+
+        /* ===== SPEED TEST — uses fetch() via connect-src (NOT img-src) ===== */
+        function formatSpeed(bps) {
+            if (bps <= 0) return 'NO SIGNAL';
+            var mbps = bps / 1000000;
+            if (mbps >= 1) return mbps.toFixed(1) + ' Mbps';
+            return Math.round(bps / 1000) + ' Kbps';
+        }
+
+        function updateSpeedReadout(text, cls) {
+            var el = document.getElementById('speed-readout');
+            if (!el) return;
+            el.textContent = text || '--';
+            el.className = 'speed-readout' + (cls ? ' ' + cls : '');
+        }
+
         function runSpeedTest() {
-            if (!isPowerOn) return;
-            var img = new Image(), start = performance.now(), done = false, sz = 500000;
-            img.onload = img.onerror = function() {
-                if (done) return; done = true;
-                var e = (performance.now() - start) / 1000;
-                if (e < 0.1) e = 0.1;
-                netSpeed = Math.round(sz * 8 / e);
+            if (!isPowerOn || speedTestRunning) return;
+            speedTestRunning = true;
+            updateSpeedReadout('TESTING...', 'testing');
+
+            var sz = 500000;
+            var start = performance.now();
+            var done = false;
+
+            /* Use fetch() — allowed by connect-src CSP directive */
+            fetch('https://speed.cloudflare.com/__down?bytes=' + sz + '&r=' + Date.now(), {
+                cache: 'no-store',
+                mode: 'cors'
+            }).then(function(resp) {
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                return resp.arrayBuffer();
+            }).then(function(buf) {
+                if (done) return;
+                done = true;
+                var elapsed = (performance.now() - start) / 1000;
+                if (elapsed < 0.05) elapsed = 0.05;
+                /* buf.byteLength = actual bytes received */
+                netSpeed = Math.round((buf.byteLength * 8) / elapsed);
+                speedTestRunning = false;
                 updateSignalBars();
-            };
-            setTimeout(function() { if (!done) { done = true; netSpeed = 0; updateSignalBars(); } }, 8000);
-            img.src = 'https://speed.cloudflare.com/__down?bytes=' + sz + '&r=' + Date.now();
+                updateSpeedReadout(formatSpeed(netSpeed), 'active');
+            }).catch(function(err) {
+                if (done) return;
+                done = true;
+                netSpeed = 0;
+                speedTestRunning = false;
+                updateSignalBars();
+                updateSpeedReadout('BLOCKED', 'fail');
+            });
+
+            /* Timeout fallback — 8 seconds */
+            setTimeout(function() {
+                if (!done) {
+                    done = true;
+                    netSpeed = 0;
+                    speedTestRunning = false;
+                    updateSignalBars();
+                    updateSpeedReadout('TIMEOUT', 'fail');
+                }
+            }, 8000);
         }
 
         function updateSignalBars() {
             var bars = [document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3'), document.getElementById('bar4')];
-            bars.forEach(function(b, i) { b.className = 'sig-bar sig-bar-' + (i + 1); });
-            if (!isPowerOn || netSpeed === 0) return;
-            var m = netSpeed / 1000000, c;
-            if (m >= 2) { c = 'good'; bars.forEach(function(b) { b.classList.add(c); }); }
-            else if (netSpeed / 1000 >= 150) { c = 'average'; bars[0].classList.add(c); bars[1].classList.add(c); bars[2].classList.add(c); }
+            bars.forEach(function(b,i){ b.className = 'sig-bar sig-bar-' + (i+1); });
+            if (!isPowerOn || netSpeed <= 0) return;
+            var mbps = netSpeed / 1000000, c;
+            if (mbps >= 2) { c = 'good'; bars.forEach(function(b){ b.classList.add(c); }); }
+            else if (mbps >= 0.5) { c = 'average'; bars[0].classList.add(c); bars[1].classList.add(c); bars[2].classList.add(c); }
             else { c = 'low'; bars[0].classList.add(c); }
         }
 
@@ -662,7 +774,6 @@
         /* ===== POWER TOGGLE ===== */
         function togglePower() {
             isPowerOn = !isPowerOn;
-
             var bar = document.getElementById('sys-light-bar'),
                 st  = document.getElementById('status-text'),
                 sd  = document.getElementById('shutdown-screen'),
@@ -673,53 +784,67 @@
                 bs  = document.querySelectorAll('.m-btn[data-screen]');
 
             if (isPowerOn) {
-                /* --- POWER ON --- */
                 bar.classList.add('on');
-                st.textContent = 'SYSTEM: ACTIVE';
-                st.classList.add('on');
+                st.textContent = 'SYSTEM: ACTIVE'; st.classList.add('on');
                 sd.classList.add('hidden');
                 tg.classList.add('on');
-                ln.classList.add('active-lbl');
-                lf.classList.remove('active-lbl');
+                ln.classList.add('active-lbl'); lf.classList.remove('active-lbl');
                 sc.classList.remove('off');
-                bs.forEach(function(b) { b.classList.remove('dead'); });
+                bs.forEach(function(b){ b.classList.remove('dead'); });
 
-                /* Load dashboard immediately */
+                loadCmdHistory();
+
+                /* Load dashboard with cache */
                 currentScreen = 'dash';
-                bs.forEach(function(b) { b.classList.remove('active'); });
+                bs.forEach(function(b){ b.classList.remove('active'); });
                 var dashBtn = document.querySelector('.m-btn[data-screen="dash"]');
                 if (dashBtn) dashBtn.classList.add('active');
-                document.getElementById('screen-content').innerHTML = screenData.dash();
 
+                var cached = cacheLoad('dash');
+                if (cached) {
+                    document.getElementById('screen-content').innerHTML = cached;
+                    showCachePill('from-cache', 'RESTORED');
+                } else {
+                    document.getElementById('screen-content').innerHTML = screenData.dash();
+                    showCachePill('fresh', 'FRESH');
+                }
+
+                /* Show command prompt (dashboard only) */
+                sc.classList.add('show-cmd');
+
+                loadCmdOutput();
                 runSpeedTest();
                 bindCmdInput();
             } else {
-                /* --- POWER OFF --- */
+                if (currentScreen) cacheSave(currentScreen);
+                saveCmdOutput();
+
                 bar.classList.remove('on');
-                st.textContent = 'SYSTEM: STANDBY';
-                st.classList.remove('on');
+                st.textContent = 'SYSTEM: STANDBY'; st.classList.remove('on');
                 sd.classList.remove('hidden');
                 tg.classList.remove('on');
-                ln.classList.remove('active-lbl');
-                lf.classList.add('active-lbl');
-                sc.classList.add('off');
+                ln.classList.remove('active-lbl'); lf.classList.add('active-lbl');
+                sc.classList.remove('off');
+                sc.classList.remove('show-cmd');
                 document.getElementById('screen-content').innerHTML = '';
-                document.getElementById('cmd-output').innerHTML = '';
-                bs.forEach(function(b) { b.classList.remove('active'); b.classList.add('dead'); });
-                netSpeed = 0;
+                bs.forEach(function(b){ b.classList.remove('active'); b.classList.add('dead'); });
+                netSpeed = 0; speedTestRunning = false;
                 updateSignalBars();
+                updateSpeedReadout('--', '');
                 if (isScanOn) toggleScan();
                 closeIframe();
             }
         }
 
-        /* ===== IFRAME MANAGEMENT ===== */
+        /* ===== IFRAME ===== */
         function openInScreen(url, title) {
             if (!isPowerOn) return;
             if (!isUrlAllowed(url)) {
-                addCmdOutput([{ t: 'SECURITY: URL blocked — origin not in allowlist', c: 'cmd-out-err' }]);
+                addCmdOutput([{ t:'SECURITY: URL blocked', c:'cmd-out-err' }]);
                 return;
             }
+            if (currentScreen) cacheSave(currentScreen);
+            cacheSaveIframe(url, title);
             var w = document.getElementById('iframe-wrap'),
                 s = document.getElementById('screen-scroll'),
                 f = document.getElementById('screen-iframe'),
@@ -730,19 +855,16 @@
             f.src = 'about:blank';
             s.style.display = 'none';
             w.classList.add('active');
-            f.onload = function() { l.style.display = 'none'; };
-            f.onerror = function() { l.innerHTML = '<span style="color:var(--accent-red)">CONNECTION FAILED</span>'; };
+            f.onload = function(){ l.style.display = 'none'; };
+            f.onerror = function(){ l.innerHTML = '<span style="color:var(--accent-red)">CONNECTION FAILED</span>'; };
             f.src = url;
         }
-
         function closeIframe() {
             document.getElementById('iframe-wrap').classList.remove('active');
             document.getElementById('screen-iframe').src = 'about:blank';
             document.getElementById('screen-scroll').style.display = 'block';
         }
-
-        /* Focus steal prevention */
-        document.getElementById('screen-iframe').addEventListener('focus', function() {
+        document.getElementById('screen-iframe').addEventListener('focus', function(){
             if (isPowerOn) { window.focus(); var ci = document.getElementById('cmd-input'); if (ci) ci.focus(); }
         }, true);
 
@@ -765,7 +887,7 @@
                     + '<div class="s-line"><span class="s-dim">&gt;</span> FREQUENCY... <span class="s-yellow">440.7 MHz</span></div>'
                     + '<div class="s-line"><span class="s-dim">&gt;</span> LAT/LON... <span class="s-red">REDACTED</span></div>'
                     + '<div class="s-line"><span class="s-dim">&gt;</span> FIREWALL... <span class="s-green">ACTIVE</span></div>'
-                    + '<div class="s-line"><span class="s-dim">&gt;</span> BANDWIDTH... <span class="s-cyan">SCANNING</span></div>'
+                    + '<div class="s-line"><span class="s-dim">&gt;</span> BANDWIDTH... <span class="s-cyan" id="dash-bandwidth">SCANNING</span></div>'
                     + '</div>'
                     + '<hr class="s-divider">'
                     + '<div class="s-line"><span class="s-dim">&gt;</span> COMMAND INTERFACE READY<span class="cursor-blink"></span></div>';
@@ -804,19 +926,6 @@
                     + '<div class="s-line"><span class="s-dim">&gt;</span> AVAILABLE CHANNELS:</div>'
                     + '<div style="margin-top:8px"><button class="s-link" onclick="openInScreen(\'working As secured Miliatry grade.html\',\'WALKIE-TALKIE GLOBAL\')">&#9654; OPEN WALKIE-TALKIE GLOBAL EDITION</button></div>';
             },
-            sys: function() {
-                return '<div class="s-header">[ SYSTEM DIAGNOSTICS ]</div>'
-                    + '<div class="s-block">'
-                    + '<div class="s-line"><span class="s-dim">&gt;</span> SYSTEM CHECK... <span class="s-green">OK</span></div>'
-                    + '<div class="s-line"><span class="s-dim">&gt;</span> GPS LOCK... <span class="s-green">ACQUIRED</span></div>'
-                    + '<div class="s-line"><span class="s-dim">&gt;</span> FREQUENCY... <span class="s-yellow">440.7 MHz</span></div>'
-                    + '<div class="s-line"><span class="s-dim">&gt;</span> PROXY CHAIN... <span class="s-amber">3 NODES</span></div>'
-                    + '<div class="s-line"><span class="s-dim">&gt;</span> LAT/LON... <span class="s-red">REDACTED</span></div>'
-                    + '<div class="s-line"><span class="s-dim">&gt;</span> ENCRYPTION... <span class="s-blue">AES-256 LOADED</span></div>'
-                    + '<div class="s-line"><span class="s-dim">&gt;</span> FIREWALL... <span class="s-green">ACTIVE</span></div>'
-                    + '<div class="s-line"><span class="s-dim">&gt;</span> SIGNAL... <span class="s-lime">NOMINAL</span></div>'
-                    + '</div>';
-            },
             logs: function() {
                 return '<div class="s-header">[ SYSTEM LOG ]</div>'
                     + '<div id="screen-log">'
@@ -829,17 +938,49 @@
         /* ===== LOAD SCREEN ===== */
         function loadScreen(id, btn) {
             if (!isPowerOn) return;
+            if (currentScreen && currentScreen !== id) cacheSave(currentScreen);
             closeIframe();
             currentScreen = id;
-            document.querySelectorAll('.m-btn[data-screen]').forEach(function(b) { b.classList.remove('active'); });
+
+            var cached = cacheLoad(id);
+            if (cached) {
+                document.getElementById('screen-content').innerHTML = cached;
+                showCachePill('from-cache', 'RESTORED');
+            } else if (screenData[id]) {
+                document.getElementById('screen-content').innerHTML = screenData[id]();
+                showCachePill('fresh', 'FRESH');
+            }
+
+            document.querySelectorAll('.m-btn[data-screen]').forEach(function(b){ b.classList.remove('active'); });
             if (btn) btn.classList.add('active');
-            if (screenData[id]) document.getElementById('screen-content').innerHTML = screenData[id]();
+            document.getElementById('screen-scroll').scrollTop = 0;
+
+            /* Command prompt: show ONLY on dashboard */
+            var sc = document.getElementById('main-screen');
+            if (id === 'dash') {
+                sc.classList.add('show-cmd');
+            } else {
+                sc.classList.remove('show-cmd');
+            }
         }
 
+        /* ===== Update dashboard bandwidth field after speed test ===== */
+        var origUpdateSpeed = updateSpeedReadout;
+        var _updateSpeedReadout = updateSpeedReadout;
+        updateSpeedReadout = function(text, cls) {
+            _updateSpeedReadout(text, cls);
+            /* Also update the dashboard BANDWIDTH line if visible */
+            var bw = document.getElementById('dash-bandwidth');
+            if (bw && currentScreen === 'dash') {
+                if (cls === 'testing') { bw.textContent = 'TESTING...'; bw.className = 's-amber'; }
+                else if (cls === 'fail') { bw.textContent = 'FAILED'; bw.className = 's-red'; }
+                else if (netSpeed > 0) { bw.textContent = formatSpeed(netSpeed); bw.className = 's-green'; }
+                else { bw.textContent = 'SCANNING'; bw.className = 's-cyan'; }
+            }
+        };
+
         /* ===== CLOCK ===== */
-        setInterval(function() {
-            document.getElementById('clock').textContent = new Date().toLocaleTimeString();
-        }, 1000);
+        setInterval(function(){ document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }, 1000);
 
         /* ===== LIVE LOG FEED ===== */
         var logMsgs = [
@@ -850,8 +991,9 @@
             'Secure tunnel established.','Auth token rotated.'
         ];
         var logColors = ['var(--accent-green)','var(--accent-cyan)','var(--accent-amber)','var(--accent-blue)','var(--accent-lime)'];
+        var logTick = 0;
 
-        setInterval(function() {
+        setInterval(function(){
             if (!isPowerOn || currentScreen !== 'logs') return;
             var el = document.getElementById('screen-log');
             if (!el) return;
@@ -866,15 +1008,34 @@
                 d.textContent = '[' + t + '] ' + m;
             }
             el.appendChild(d); el.scrollTop = el.scrollHeight;
-            if (el.children.length > 50) el.removeChild(el.firstChild);
+            if (el.children.length > 80) el.removeChild(el.firstChild);
+            logTick++;
+            if (logTick % 5 === 0) cacheSave('logs');
         }, 3000);
 
         /* ===== PERIODIC SPEED TEST ===== */
-        setInterval(function() { if (isPowerOn) runSpeedTest(); }, 15000);
+        setInterval(function(){ if (isPowerOn) runSpeedTest(); }, 15000);
 
-        /* ===== KEYBOARD POWER TOGGLE ===== */
-        document.getElementById('power-toggle').addEventListener('keydown', function(e) {
+        /* ===== KEYBOARD ===== */
+        document.getElementById('power-toggle').addEventListener('keydown', function(e){
             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePower(); }
+        });
+
+        /* ===== LIFECYCLE ===== */
+        window.addEventListener('beforeunload', function(){
+            if (isPowerOn && currentScreen) cacheSave(currentScreen);
+            saveCmdOutput(); saveCmdHistory();
+        });
+        document.addEventListener('visibilitychange', function(){
+            if (document.hidden) {
+                if (isPowerOn && currentScreen) cacheSave(currentScreen);
+                saveCmdOutput(); saveCmdHistory();
+            } else {
+                if (isPowerOn && currentScreen) {
+                    try { var f = localStorage.getItem(CACHE_PREFIX + currentScreen); if (f) screenCache[currentScreen] = f; } catch(e) {}
+                }
+                loadCmdHistory();
+            }
         });
     </script>
 </body>
