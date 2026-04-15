@@ -115,9 +115,15 @@
         .sig-bar.good{background:var(--accent-green);border-color:#005500;box-shadow:0 0 5px rgba(0,255,65,0.35)}
         .sig-bar.average{background:var(--accent-yellow);border-color:#665500;box-shadow:0 0 5px rgba(255,208,0,0.35)}
         .sig-bar.low{background:var(--accent-red);border-color:#660000;box-shadow:0 0 5px rgba(255,26,26,0.35)}
-        .sig-name{font-size:.48rem;color:#444;letter-spacing:2px;text-transform:uppercase;font-weight:900}
+        .sig-indicator{
+            font-size:.5rem;font-weight:900;letter-spacing:2px;
+            text-transform:uppercase;min-width:52px;text-align:left;
+            color:#222;transition:color .5s ease,text-shadow .5s ease;
+        }
+        .sig-indicator.good{color:var(--accent-green);text-shadow:0 0 6px rgba(0,255,65,0.3)}
+        .sig-indicator.average{color:var(--accent-yellow);text-shadow:0 0 6px rgba(255,208,0,0.3)}
+        .sig-indicator.low{color:var(--accent-red);text-shadow:0 0 6px rgba(255,26,26,0.3)}
 
-        /* Speed readout in header */
         .speed-readout{
             font-size:.52rem;color:#333;font-weight:900;
             letter-spacing:1px;text-transform:uppercase;
@@ -179,7 +185,6 @@
         #main-screen.off::before{display:none}
         #main-screen.off .cmd-fixed-area{display:none}
 
-        /* Command prompt: hidden by default, shown only on dashboard */
         .cmd-fixed-area{
             flex-shrink:0;
             border-top:1px solid rgba(0,229,255,0.06);
@@ -349,7 +354,7 @@
                         <div class="sig-bar sig-bar-3" id="bar3"></div>
                         <div class="sig-bar sig-bar-4" id="bar4"></div>
                     </div>
-                    <div class="sig-name">Signal</div>
+                    <div class="sig-indicator" id="sig-indicator">--</div>
                 </div>
             </div>
         </header>
@@ -690,7 +695,7 @@
             }
         }
 
-        /* ===== SPEED TEST — uses fetch() via connect-src (NOT img-src) ===== */
+        /* ===== SPEED TEST ===== */
         function formatSpeed(bps) {
             if (bps <= 0) return 'NO SIGNAL';
             var mbps = bps / 1000000;
@@ -703,6 +708,14 @@
             if (!el) return;
             el.textContent = text || '--';
             el.className = 'speed-readout' + (cls ? ' ' + cls : '');
+            /* Also update the dashboard BANDWIDTH line if visible */
+            var bw = document.getElementById('dash-bandwidth');
+            if (bw && currentScreen === 'dash') {
+                if (cls === 'testing') { bw.textContent = 'TESTING...'; bw.className = 's-amber'; }
+                else if (cls === 'fail') { bw.textContent = 'FAILED'; bw.className = 's-red'; }
+                else if (netSpeed > 0) { bw.textContent = formatSpeed(netSpeed); bw.className = 's-green'; }
+                else { bw.textContent = 'SCANNING'; bw.className = 's-cyan'; }
+            }
         }
 
         function runSpeedTest() {
@@ -714,7 +727,6 @@
             var start = performance.now();
             var done = false;
 
-            /* Use fetch() — allowed by connect-src CSP directive */
             fetch('https://speed.cloudflare.com/__down?bytes=' + sz + '&r=' + Date.now(), {
                 cache: 'no-store',
                 mode: 'cors'
@@ -726,7 +738,6 @@
                 done = true;
                 var elapsed = (performance.now() - start) / 1000;
                 if (elapsed < 0.05) elapsed = 0.05;
-                /* buf.byteLength = actual bytes received */
                 netSpeed = Math.round((buf.byteLength * 8) / elapsed);
                 speedTestRunning = false;
                 updateSignalBars();
@@ -740,7 +751,6 @@
                 updateSpeedReadout('BLOCKED', 'fail');
             });
 
-            /* Timeout fallback — 8 seconds */
             setTimeout(function() {
                 if (!done) {
                     done = true;
@@ -754,12 +764,32 @@
 
         function updateSignalBars() {
             var bars = [document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3'), document.getElementById('bar4')];
+            var ind  = document.getElementById('sig-indicator');
+
             bars.forEach(function(b,i){ b.className = 'sig-bar sig-bar-' + (i+1); });
+            ind.className = 'sig-indicator';
+            ind.textContent = '--';
+
             if (!isPowerOn || netSpeed <= 0) return;
-            var mbps = netSpeed / 1000000, c;
-            if (mbps >= 2) { c = 'good'; bars.forEach(function(b){ b.classList.add(c); }); }
-            else if (mbps >= 0.5) { c = 'average'; bars[0].classList.add(c); bars[1].classList.add(c); bars[2].classList.add(c); }
-            else { c = 'low'; bars[0].classList.add(c); }
+
+            var mbps = netSpeed / 1000000, c, label;
+
+            if (mbps >= 5) {
+                c = 'good'; label = 'STRONG';
+                bars.forEach(function(b){ b.classList.add(c); });
+            } else if (mbps >= 2) {
+                c = 'good'; label = 'GOOD';
+                bars.forEach(function(b){ b.classList.add(c); });
+            } else if (mbps >= 0.5) {
+                c = 'average'; label = 'FAIR';
+                bars[0].classList.add(c); bars[1].classList.add(c); bars[2].classList.add(c);
+            } else {
+                c = 'low'; label = 'WEAK';
+                bars[0].classList.add(c);
+            }
+
+            ind.textContent = label;
+            ind.classList.add(c);
         }
 
         /* ===== SCAN MODE ===== */
@@ -794,7 +824,6 @@
 
                 loadCmdHistory();
 
-                /* Load dashboard with cache */
                 currentScreen = 'dash';
                 bs.forEach(function(b){ b.classList.remove('active'); });
                 var dashBtn = document.querySelector('.m-btn[data-screen="dash"]');
@@ -809,7 +838,6 @@
                     showCachePill('fresh', 'FRESH');
                 }
 
-                /* Show command prompt (dashboard only) */
                 sc.classList.add('show-cmd');
 
                 loadCmdOutput();
@@ -955,7 +983,6 @@
             if (btn) btn.classList.add('active');
             document.getElementById('screen-scroll').scrollTop = 0;
 
-            /* Command prompt: show ONLY on dashboard */
             var sc = document.getElementById('main-screen');
             if (id === 'dash') {
                 sc.classList.add('show-cmd');
@@ -963,21 +990,6 @@
                 sc.classList.remove('show-cmd');
             }
         }
-
-        /* ===== Update dashboard bandwidth field after speed test ===== */
-        var origUpdateSpeed = updateSpeedReadout;
-        var _updateSpeedReadout = updateSpeedReadout;
-        updateSpeedReadout = function(text, cls) {
-            _updateSpeedReadout(text, cls);
-            /* Also update the dashboard BANDWIDTH line if visible */
-            var bw = document.getElementById('dash-bandwidth');
-            if (bw && currentScreen === 'dash') {
-                if (cls === 'testing') { bw.textContent = 'TESTING...'; bw.className = 's-amber'; }
-                else if (cls === 'fail') { bw.textContent = 'FAILED'; bw.className = 's-red'; }
-                else if (netSpeed > 0) { bw.textContent = formatSpeed(netSpeed); bw.className = 's-green'; }
-                else { bw.textContent = 'SCANNING'; bw.className = 's-cyan'; }
-            }
-        };
 
         /* ===== CLOCK ===== */
         setInterval(function(){ document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }, 1000);
