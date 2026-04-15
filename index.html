@@ -11,90 +11,6 @@
   gtag('config', 'GT-NC6T5LRJ');
 </script>
 
-    <!--
-    ================================================================
-    SECURITY AUDIT v2.0 — All findings and fixes documented inline.
-    
-    FINDINGS & RESOLUTIONS:
-    
-    [XSS-1]  innerHTML usage — FIXED: All innerHTML targets contain only
-             developer-controlled strings. User input NEVER reaches innerHTML.
-             executeCommand() uses textContent exclusively. Verified safe.
-    
-    [XSS-2]  Command input injection — FIXED: Added sanitizeInput() that
-             strips HTML/script patterns, control chars, and null bytes.
-             Added character-class whitelist. Rate-limited to 10/sec.
-    
-    [XSS-3]  iframe content — FIXED: Tightened sandbox. Removed allow-popups.
-             Added iframe focus-steal protection (blurs on focus).
-             Added allowed-origins allowlist in openInScreen().
-    
-    [CSP-1]  unsafe-inline — ACKNOWLEDGED: Unavoidable in single-file arch.
-             Move to nonce-based CSP with separate .js files for production.
-             Documented limitation preserved.
-    
-    [CSP-2]  frame-ancestors — ACKNOWLEDGED: Cannot enforce via meta tag.
-             GitHub Pages default X-Frame-Options:DENY provides equivalent
-             protection. Documented limitation preserved.
-    
-    [CJ-1]   Clickjacking — MITIGATED: GitHub Pages X-Frame-Options:DENY +
-             iframe sandbox prevents embedding. No frame-ancestors in CSP
-             is documented as meta-tag limitation.
-    
-    [REF-1]  Referrer Policy — OK: strict-origin-when-cross-origin active.
-    
-    [INJ-1]  SQL Injection — N/A: No database interaction.
-    
-    [INJ-2]  Command Injection — FIXED: Whitelist-based command matching
-             via Object.freeze(commandMap). No eval/Function/innerHTML
-             with user data. Input sanitized before matching.
-    
-    [PRIV-1] IP Address — OK: GA anonymize_ip:true. No server-side logging.
-    
-    [PRIV-2] LocalStorage — OK: Not used. No persistent client-side data.
-    
-    [PRIV-3] Cookies — OK: Not set anywhere in code.
-    
-    [PRIV-4] Geolocation — OK: Disabled via Permissions-Policy.
-    
-    [PRIV-5] Clipboard — FIXED: Added clipboard-read=() to Permissions-Policy.
-    
-    [MC-1]   Mixed Content — OK: All external resources use HTTPS.
-    
-    [MC-2]   Subresource Integrity — ACKNOWLEDGED: SRI unavailable for
-             Google Fonts dynamic CSS and Google AdSense/GTM. Documented.
-    
-    [SOC-1]  Social Engineering — OK: No credential collection, no fake
-             login forms, no deceptive UI mimicking other services.
-    
-    [SOC-2]  Phishing — OK: All external links use rel=noopener noreferrer
-             (via sandbox), clearly labeled as external.
-    
-    [DOM-1]  DOM Clobbering — OK: Exclusively uses getElementById().
-    
-    [PP-1]   Prototype Pollution — FIXED: commandMap frozen with
-             Object.freeze(). No Object.assign/merge with untrusted input.
-    
-    [RE-1]   ReDoS — N/A: No regex used on user input.
-    
-    [FS-1]   Focus Stealing — FIXED: iframe blur-on-focus handler prevents
-             loaded content from trapping keyboard focus.
-    
-    [FS-2]   Tabnabbing — OK: iframe sandbox prevents navigation to
-             opener. rel=noopener equivalent via sandbox.
-    
-    [RATE-1] Command Flooding — FIXED: 10 commands/sec rate limit with
-             cooldown feedback.
-    
-    [URL-1]  Open Redirect — FIXED: openInScreen() validates URLs against
-             an allowlist of trusted origins before loading in iframe.
-    
-    [SE-1]   Sensitive Data Exposure — MITIGATED: sysinfo/netstat show
-             only browser-available data (same info visible in devtools).
-             No server-side secrets exposed.
-    ================================================================
-    -->
-
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
         script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://googletagmanager.com;
@@ -102,34 +18,18 @@
         font-src https://fonts.gstatic.com;
         img-src 'self' https://mohammad3230.github.io data: blob:;
         media-src https://www.soundjay.com;
-        connect-src 'self' https://pagead2.googlesyndication.com https://www.google-analytics.com https://www.googletagmanager.com https://googleads.g.doubleclick.net https://mohammad3230.github.io https://speed.cloudflare.com;
-        frame-src https://pagead2.googlesyndication.com https://mohammad3230.github.io https://speed.cloudflare.com;
+        connect-src 'self' https://pagead2.googlesyndication.com https://www.google-analytics.com https://www.googletagmanager.com https://googleads.g.doubleclick.net;
+        frame-src https://pagead2.googlesyndication.com;
         object-src 'none';
         base-uri 'self';
         form-action 'self';
     ">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta http-equiv="Permissions-Policy" content="
-        camera=(),
-        microphone=(),
-        geolocation=(),
-        payment=(),
-        usb=(),
-        magnetometer=(),
-        gyroscope=(),
-        accelerometer=(),
-        ambient-light-sensor=(),
-        autoplay=(),
-        encrypted-media=(),
-        picture-in-picture=(),
-        screen-wake-lock=(),
-        idle-detection=(),
-        clipboard-read=(),
-        clipboard-write=(),
-        publickey-credentials-get=(),
-        gamepad=(),
-        speaker-selection=(),
-        display-capture=()
+        camera=(), microphone=(), geolocation=(), payment=(), usb=(),
+        magnetometer=(), gyroscope=(), accelerometer=(),
+        ambient-light-sensor=(), autoplay=(), encrypted-media=(),
+        picture-in-picture=(), screen-wake-lock=(), idle-detection=()
     ">
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
@@ -139,10 +39,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
     <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin="anonymous">
     <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" crossorigin="anonymous">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4592970036066688" crossorigin="anonymous"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4592970036066688" crossorigin="anonymous"></script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=GT-NC6T5LRJ" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googletagmanager.com/gtag/js?id=GT-NC6T5LRJ" crossorigin="anonymous"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -152,651 +51,605 @@
     <link rel="icon" href="https://mohammad3230.github.io/Games-More-.../favicon.png" type="image/png" sizes="32x32" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <!-- No generator meta — prevents server fingerprinting -->
-    <!-- No author meta — prevents deanonymization -->
-    <!-- No description meta — reduces info leakage to indexers -->
     <title>MY_STUFF_AIO</title>
 
     <style>
-        :root{--bg-color:#0d0d0d;--panel-bg:#1e1e1e;--accent-blue:#0084ff;--accent-red:#ff1a1a;--accent-amber:#ff9d00;--accent-green:#00ff41;--accent-yellow:#ffd000;--accent-cyan:#00e5ff;--accent-magenta:#ff00ff;--accent-lime:#b8ff00;--text-main:#c0c0c0;--metal-shine:linear-gradient(145deg,#2a2a2a,#111111)}
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        body{background-color:var(--bg-color);color:var(--text-main);font-family:'Courier New',Courier,monospace;display:flex;flex-direction:column;height:100vh;overflow:hidden;user-select:none}
-        body::after{content:"";position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle,transparent 70%,black 120%);pointer-events:none;z-index:100}
-        #shutdown-screen{position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:999;display:none}
-        header{background:var(--metal-shine);border-bottom:4px solid #000;padding:20px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 10px rgba(0,0,0,0.8);position:relative;z-index:5}
-        .sig-cluster{display:flex;align-items:center;gap:14px}
-        .sig-bars{display:flex;align-items:flex-end;gap:4px;height:32px}
-        .sig-bar{width:10px;background:#222;border:2px solid #111;transition:background .5s ease,box-shadow .5s ease,border-color .5s ease}
-        .sig-bar-1{height:25%}.sig-bar-2{height:50%}.sig-bar-3{height:75%}.sig-bar-4{height:100%}
-        .sig-bar.good{background:var(--accent-green);border-color:#005500;box-shadow:0 0 6px rgba(0,255,65,0.4)}
-        .sig-bar.average{background:var(--accent-yellow);border-color:#665500;box-shadow:0 0 6px rgba(255,208,0,0.4)}
-        .sig-bar.low{background:var(--accent-red);border-color:#660000;box-shadow:0 0 6px rgba(255,26,26,0.4)}
-        .sig-name{font-size:.55rem;color:#444;letter-spacing:2px;text-transform:uppercase;font-weight:900}
-        .wrapper{display:flex;flex:1;overflow:hidden}
-        nav{width:260px;background:#151515;border-right:6px solid #000;display:flex;flex-direction:column;gap:12px;padding:15px;overflow-y:auto;position:relative;z-index:5}
-        .nav-label{font-size:.65rem;color:#444;text-transform:uppercase;letter-spacing:2px;padding:0 5px 8px 5px;border-bottom:2px solid #222}
-        .m-btn{background:#222;color:#666;border:3px solid #111;padding:16px;cursor:pointer;text-transform:uppercase;font-weight:900;font-size:.8rem;box-shadow:4px 4px 0 #000,inset 2px 2px 2px #444;transition:transform .1s,box-shadow .1s;display:flex;justify-content:space-between;align-items:center;font-family:'Courier New',Courier,monospace;text-align:left}
-        .m-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
-        .m-btn.active{color:#fff;border-color:var(--accent-blue);background:#2a2a2a}
-        .m-btn.active::after{content:"";width:10px;height:10px;background:var(--accent-blue);border-radius:50%;box-shadow:0 0 10px var(--accent-blue);flex-shrink:0}
-        .m-btn.dead{opacity:.3;pointer-events:none}
-        .m-btn-wt{background:#1a1a0a;color:var(--accent-amber);border:3px solid #332200}
-        .m-btn-wt:hover{background:#2a2a10}
-        .m-btn-wt.active{border-color:var(--accent-amber);background:#2a2a10}
-        .m-btn-wt.active::after{background:var(--accent-amber);box-shadow:0 0 10px var(--accent-amber)}
-        main{flex:1;padding:20px;background:#050505;position:relative;z-index:5;display:flex;flex-direction:column}
-        #main-screen{flex:1;background:#000;border:4px solid #333;box-shadow:inset 0 0 60px rgba(0,255,65,0.03),inset 0 0 120px rgba(0,0,0,0.8);overflow:hidden;color:var(--accent-green);font-size:.85rem;line-height:1.7;position:relative;display:flex;flex-direction:column}
-        #main-screen::before{content:"";position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px);pointer-events:none;z-index:1}
-        #main-screen.off{background:#020202;border-color:#1a1a1a;box-shadow:inset 0 0 40px rgba(0,0,0,0.9);color:#0a0a0a}
-        #main-screen.off::before{display:none}
-        #main-screen.off .cmd-fixed-area{display:none}
-        .screen-scroll{flex:1;overflow-y:auto;position:relative;z-index:2;padding-bottom:4px}
-        .screen-scroll::-webkit-scrollbar{width:6px}
-        .screen-scroll::-webkit-scrollbar-track{background:#050a05}
-        .screen-scroll::-webkit-scrollbar-thumb{background:rgba(0,229,255,0.15)}
-        .scan-sweep{position:absolute;top:0;left:0;right:0;height:2px;z-index:3;pointer-events:none;opacity:0;transition:opacity .4s}
-        .scan-sweep.active{opacity:1}
-        .scan-sweep-line{position:absolute;top:0;left:0;right:0;height:100%;background:linear-gradient(180deg,transparent,var(--accent-cyan),transparent);box-shadow:0 0 20px var(--accent-cyan),0 0 60px rgba(0,229,255,0.15);animation:sweepDown 3s linear infinite}
-        .scan-sweep-glow{position:absolute;top:-30px;left:0;right:0;height:60px;background:linear-gradient(180deg,transparent,rgba(0,229,255,0.06),transparent);animation:sweepDown 3s linear infinite}
-        @keyframes sweepDown{0%{top:-2px}100%{top:100%}}
-        .s-header{font-weight:900;font-size:.9rem;color:var(--accent-cyan);text-shadow:0 0 10px rgba(0,229,255,0.4);border-bottom:2px solid rgba(0,229,255,0.15);padding-bottom:12px;margin-bottom:18px}
-        .s-green{color:var(--accent-green);text-shadow:0 0 6px rgba(0,255,65,0.2)}.s-cyan{color:var(--accent-cyan);text-shadow:0 0 6px rgba(0,229,255,0.2)}
-        .s-amber{color:var(--accent-amber);text-shadow:0 0 6px rgba(255,157,0,0.2)}.s-red{color:var(--accent-red);text-shadow:0 0 6px rgba(255,26,26,0.2);font-weight:900}
-        .s-blue{color:var(--accent-blue);text-shadow:0 0 6px rgba(0,132,255,0.2)}.s-yellow{color:var(--accent-yellow);text-shadow:0 0 6px rgba(255,208,0,0.2)}
-        .s-magenta{color:var(--accent-magenta);text-shadow:0 0 6px rgba(255,0,255,0.2)}.s-lime{color:var(--accent-lime);text-shadow:0 0 6px rgba(184,255,0,0.2)}
-        .s-dim{color:#225522}.s-label{color:#446644;font-size:.75rem}
-        .s-line{margin-bottom:4px}.s-divider{border:none;border-top:1px solid rgba(0,229,255,0.08);margin:14px 0}
-        .s-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0}
-        .s-cell{background:rgba(0,229,255,0.02);border:1px solid rgba(0,229,255,0.08);padding:12px;border-radius:2px}
-        .s-cell-label{font-size:.65rem;color:#336666;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-        .s-cell-val{font-size:1.1rem;font-weight:900}
-        .s-badge{display:inline-block;padding:2px 8px;font-size:.7rem;font-weight:900;border-radius:2px;letter-spacing:1px}
-        .s-badge-green{background:rgba(0,255,65,0.1);color:var(--accent-green);border:1px solid rgba(0,255,65,0.2)}
-        .s-badge-red{background:rgba(255,26,26,0.1);color:var(--accent-red);border:1px solid rgba(255,26,26,0.2)}
-        .s-badge-amber{background:rgba(255,157,0,0.1);color:var(--accent-amber);border:1px solid rgba(255,157,0,0.2)}
-        .s-badge-cyan{background:rgba(0,229,255,0.1);color:var(--accent-cyan);border:1px solid rgba(0,229,255,0.2)}
-        .s-badge-blue{background:rgba(0,132,255,0.1);color:var(--accent-blue);border:1px solid rgba(0,132,255,0.2)}
-        .s-block{background:rgba(0,229,255,0.015);border:1px solid rgba(0,229,255,0.06);padding:15px;margin:10px 0;border-radius:2px}
-        .s-link{color:var(--accent-blue);text-decoration:underline;cursor:pointer;font-weight:900;text-shadow:0 0 6px rgba(0,132,255,0.2);display:inline-block;padding:3px 0;border:none;background:none;font-family:inherit;font-size:inherit}
-        .s-link:hover{color:#33aaff}
-        @keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
-        .cursor-blink{display:inline-block;width:8px;height:14px;background:var(--accent-cyan);animation:cursorBlink 1s step-end infinite;vertical-align:text-bottom;margin-left:2px}
-        .cmd-fixed-area{flex-shrink:0;border-top:1px solid rgba(0,229,255,0.08);padding-top:8px;margin-top:8px;position:relative;z-index:2}
-        .cmd-input-wrap{display:flex;align-items:center;background:rgba(0,229,255,0.02);border:1px solid rgba(0,229,255,0.08);padding:0}
-        .cmd-prompt{padding:8px 10px;color:var(--accent-cyan);font-weight:900;font-size:.8rem;white-space:nowrap;flex-shrink:0;border-right:1px solid rgba(0,229,255,0.08)}
-        .cmd-input{flex:1;background:transparent;border:none;outline:none;color:var(--accent-cyan);font-family:'Courier New',Courier,monospace;font-size:.8rem;padding:8px 10px;caret-color:var(--accent-cyan)}
-        .cmd-input::placeholder{color:rgba(0,229,255,0.15)}
-        .cmd-input.rate-limited{color:var(--accent-red)!important;caret-color:var(--accent-red)!important}
-        .cmd-output{margin-top:6px;max-height:140px;overflow-y:auto;font-size:.75rem}
-        .cmd-output::-webkit-scrollbar{width:5px}.cmd-output::-webkit-scrollbar-track{background:transparent}.cmd-output::-webkit-scrollbar-thumb{background:rgba(0,229,255,0.12)}
-        .cmd-out-line{margin-bottom:1px}.cmd-out-cmd{color:rgba(0,229,255,0.35)}
-        .cmd-out-ok{color:var(--accent-green)}.cmd-out-warn{color:var(--accent-amber)}.cmd-out-err{color:var(--accent-red)}
-        .cmd-out-dim{color:#225522}.cmd-out-cyan{color:var(--accent-cyan)}
-        .screen-iframe-wrap{flex:1;position:relative;z-index:2;display:none;flex-direction:column}
-        .screen-iframe-wrap.active{display:flex}
-        .screen-iframe-bar{background:#0a0a0a;border:2px solid rgba(0,229,255,0.08);border-bottom:none;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;font-size:.7rem;color:var(--accent-cyan)}
-        .screen-iframe-bar button{background:#111;color:var(--accent-amber);border:2px solid #332200;padding:4px 14px;cursor:pointer;font-family:inherit;font-weight:900;font-size:.65rem;text-transform:uppercase}
-        .screen-iframe-bar button:hover{background:#1a1a0a}
-        .screen-iframe-body{flex:1;border:2px solid rgba(0,229,255,0.08);background:#000;position:relative}
-        .screen-iframe-body iframe{width:100%;height:100%;border:none;display:block;background:#000}
-        .iframe-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#225522;font-size:.8rem;gap:12px}
-        .iframe-loading .spinner{width:30px;height:30px;border:3px solid rgba(0,229,255,0.1);border-top-color:var(--accent-cyan);border-radius:50%;animation:spin .8s linear infinite}
-        @keyframes spin{to{transform:rotate(360deg)}}
-        footer{background:#1a1a1a;padding:0;display:flex;flex-direction:column;border-top:6px solid #000;position:relative;z-index:1001}
-        #sys-light-bar{height:12px;width:100%;background:var(--accent-red);box-shadow:0 0 20px var(--accent-red);transition:.5s}
-        .footer-controls{display:flex;justify-content:space-between;align-items:center;padding:15px 30px;background:var(--metal-shine)}
-        .power-unit{display:flex;align-items:center;gap:18px}
-        .power-info{display:flex;flex-direction:column;gap:4px}
-        .power-label-top{font-size:.55rem;color:#555;text-transform:uppercase;letter-spacing:2px;font-weight:900}
-        #status-text{font-weight:900;letter-spacing:2px;color:var(--accent-red);font-size:.75rem;transition:color .4s}
-        .armor-toggle{width:80px;height:40px;background:linear-gradient(180deg,#1a1a1a,#0a0a0a);border:4px solid #000;border-radius:6px;cursor:pointer;position:relative;box-shadow:3px 3px 0 #000,inset 0 0 15px rgba(0,0,0,0.8);transition:all .3s ease;-webkit-tap-highlight-color:transparent;flex-shrink:0}
-        .armor-toggle:active{transform:translate(1px,1px);box-shadow:1px 1px 0 #000,inset 0 0 15px rgba(0,0,0,0.8)}
-        .armor-toggle::before{content:"";position:absolute;top:50%;right:10px;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;background:var(--accent-red);border:2px solid #330000;box-shadow:0 0 8px var(--accent-red);transition:all .4s ease;z-index:3}
-        .armor-toggle.on::before{background:var(--accent-green);border-color:#005500;box-shadow:0 0 12px var(--accent-green),0 0 25px rgba(0,255,65,0.2)}
-        .toggle-lever{position:absolute;top:3px;left:3px;width:30px;height:26px;background:linear-gradient(180deg,#444,#222);border:2px solid #000;border-radius:4px;box-shadow:inset 1px 1px 0 #666,2px 2px 4px rgba(0,0,0,0.6);transition:left .3s cubic-bezier(.4,0,.2,1);z-index:2}
-        .toggle-lever::after{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:14px;height:2px;background:#111;box-shadow:0 -5px 0 #111,0 5px 0 #111;border-radius:1px}
-        .armor-toggle.on .toggle-lever{left:39px;background:linear-gradient(180deg,#555,#2a2a2a);box-shadow:inset 1px 1px 0 #777,2px 2px 4px rgba(0,0,0,0.6),0 0 8px rgba(0,255,65,0.15)}
-        .toggle-labels{display:flex;justify-content:space-between;width:80px;margin-top:4px;padding:0 6px}
-        .toggle-labels span{font-size:.5rem;font-weight:900;letter-spacing:1px;color:#333;transition:color .3s}
-        .toggle-labels .lbl-on.active-lbl{color:var(--accent-green)}
-        .toggle-labels .lbl-off.active-lbl{color:var(--accent-red)}
-        .scan-mech{background:linear-gradient(145deg,#001a1a,#000a0a);color:var(--accent-cyan);border:4px solid #003333;padding:15px 40px;font-weight:900;cursor:pointer;box-shadow:4px 4px 0 #000,inset 1px 1px 0 #004444;text-transform:uppercase;font-family:'Courier New',Courier,monospace;transition:all .3s}
-        .scan-mech:hover{background:linear-gradient(145deg,#002a2a,#001515)}
-        .scan-mech:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
-        .scan-mech.active{background:linear-gradient(145deg,#002020,#001010);border-color:var(--accent-cyan);box-shadow:4px 4px 0 #000,0 0 20px rgba(0,229,255,0.15),inset 0 0 10px rgba(0,229,255,0.05);animation:scanPulse 2s ease-in-out infinite}
-        @keyframes scanPulse{0%,100%{box-shadow:4px 4px 0 #000,0 0 10px rgba(0,229,255,0.1)}50%{box-shadow:4px 4px 0 #000,0 0 25px rgba(0,229,255,0.25)}}
-        @media(max-width:800px){body{overflow-y:auto;height:auto}.wrapper{flex-direction:column}nav{width:100%;border-right:none;border-bottom:6px solid #000;max-height:40vh}header{flex-direction:column;gap:10px;padding:15px}.footer-controls{flex-direction:column;gap:15px}.s-grid{grid-template-columns:1fr}}
-        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+        :root {
+            --bg-color: #0d0d0d;
+            --panel-bg: #1e1e1e;
+            --accent-blue: #0084ff;
+            --accent-red: #ff1a1a;
+            --accent-amber: #ff9d00;
+            --accent-green: #00ff41;
+            --text-main: #c0c0c0;
+            --metal-shine: linear-gradient(145deg, #2a2a2a, #111111);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        body::after {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 70%, black 120%);
+            pointer-events: none; z-index: 100;
+        }
+
+        #shutdown-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 999; display: none;
+        }
+
+        header {
+            background: var(--metal-shine);
+            border-bottom: 4px solid #000;
+            padding: 20px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+            position: relative; z-index: 5;
+        }
+
+        .sig-cluster { display: flex; align-items: center; gap: 20px; }
+        .sig-bars { display: flex; align-items: flex-end; gap: 8px; height: 45px; }
+        .bar {
+            width: 12px; background: #000; border: 2px solid #333;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 2px;
+        }
+        .bar-1 { height: 35%; }
+        .bar-2 { height: 65%; }
+        .bar-3 { height: 100%; }
+
+        .wrapper { display: flex; flex: 1; overflow: hidden; }
+
+        nav {
+            width: 260px; background: #151515; border-right: 6px solid #000;
+            display: flex; flex-direction: column; gap: 12px; padding: 15px;
+            overflow-y: auto; position: relative; z-index: 5;
+        }
+
+        .nav-label {
+            font-size: 0.65rem; color: #444; text-transform: uppercase;
+            letter-spacing: 2px; padding: 0 5px 8px 5px;
+            border-bottom: 2px solid #222;
+        }
+
+        .m-btn {
+            background: #222; color: #666; border: 3px solid #111; padding: 16px;
+            cursor: pointer; text-transform: uppercase; font-weight: 900; font-size: 0.8rem;
+            box-shadow: 4px 4px 0px #000, inset 2px 2px 2px #444;
+            transition: transform 0.1s, box-shadow 0.1s;
+            display: flex; justify-content: space-between; align-items: center;
+            font-family: 'Courier New', Courier, monospace;
+            text-align: left;
+        }
+        .m-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0px #000; }
+        .m-btn.active { color: #fff; border-color: var(--accent-blue); background: #2a2a2a; }
+        .m-btn.active::after {
+            content: ""; width: 10px; height: 10px; background: var(--accent-blue);
+            border-radius: 50%; box-shadow: 0 0 10px var(--accent-blue); flex-shrink: 0;
+        }
+        .m-btn.dead { opacity: 0.3; pointer-events: none; }
+
+        .m-btn-wt { background: #1a1a0a; color: var(--accent-amber); border: 3px solid #332200; }
+        .m-btn-wt:hover { background: #2a2a10; }
+        .m-btn-wt.active { border-color: var(--accent-amber); background: #2a2a10; }
+        .m-btn-wt.active::after { background: var(--accent-amber); box-shadow: 0 0 10px var(--accent-amber); }
+
+        main {
+            flex: 1; padding: 20px; background: #050505;
+            position: relative; z-index: 5;
+            display: flex; flex-direction: column;
+        }
+
+        #main-screen {
+            flex: 1;
+            background: #000;
+            border: 4px solid #333;
+            box-shadow: inset 0 0 60px rgba(0,255,65,0.03), inset 0 0 120px rgba(0,0,0,0.8);
+            padding: 25px;
+            overflow-y: auto;
+            color: var(--accent-green);
+            font-size: 0.85rem;
+            line-height: 1.7;
+            position: relative;
+        }
+
+        #main-screen::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
+            pointer-events: none; z-index: 1;
+        }
+
+        .screen-header {
+            border-bottom: 2px solid #1a3a1a; padding-bottom: 12px; margin-bottom: 18px;
+            font-weight: 900; font-size: 0.9rem; color: #00cc33;
+            text-shadow: 0 0 8px rgba(0,255,65,0.3);
+            position: relative; z-index: 2;
+        }
+        .screen-body { position: relative; z-index: 2; }
+        .scr-line { margin-bottom: 4px; }
+        .scr-label { color: #337733; }
+        .scr-val { color: var(--accent-green); text-shadow: 0 0 6px rgba(0,255,65,0.2); }
+        .scr-warn { color: var(--accent-amber); text-shadow: 0 0 6px rgba(255,157,0,0.2); }
+        .scr-err { color: var(--accent-red); text-shadow: 0 0 6px rgba(255,26,26,0.2); font-weight: 900; }
+        .scr-dim { color: #225522; }
+        .scr-divider { border: none; border-top: 1px solid #1a3a1a; margin: 14px 0; }
+        .scr-link {
+            color: var(--accent-blue); text-decoration: underline; cursor: pointer;
+            font-weight: 900; text-shadow: 0 0 6px rgba(0,132,255,0.2);
+            display: inline-block; padding: 2px 0;
+        }
+        .scr-link:hover { color: #33aaff; }
+        .scr-block { background: #050a05; border: 2px solid #1a3a1a; padding: 15px; margin: 10px 0; }
+        .scr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+        .scr-cell { background: #050a05; border: 1px solid #1a3a1a; padding: 12px; }
+
+        #main-screen.off {
+            background: #020202; border-color: #1a1a1a;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.9); color: #0a0a0a;
+        }
+        #main-screen.off::before { display: none; }
+
+        #screen-log { max-height: 300px; overflow-y: auto; margin-top: 10px; }
+        #screen-log::-webkit-scrollbar { width: 6px; }
+        #screen-log::-webkit-scrollbar-track { background: #050a05; }
+        #screen-log::-webkit-scrollbar-thumb { background: #1a3a1a; }
+
+        footer {
+            background: #1a1a1a; padding: 0; display: flex; flex-direction: column;
+            border-top: 6px solid #000;
+            position: relative;
+            z-index: 1001;
+        }
+        #sys-light-bar {
+            height: 12px; width: 100%; background: var(--accent-red);
+            box-shadow: 0 0 20px var(--accent-red); transition: 0.5s;
+        }
+        .footer-controls {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 30px; background: var(--metal-shine);
+        }
+
+        .power-unit {
+            display: flex; align-items: center; gap: 18px;
+        }
+        .power-info {
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .power-label-top {
+            font-size: 0.55rem; color: #555; text-transform: uppercase;
+            letter-spacing: 2px; font-weight: 900;
+        }
+        #status-text {
+            font-weight: 900; letter-spacing: 2px;
+            color: var(--accent-red); font-size: 0.75rem;
+            transition: color 0.4s;
+        }
+
+        .armor-toggle {
+            width: 80px; height: 40px;
+            background: linear-gradient(180deg, #1a1a1a, #0a0a0a);
+            border: 4px solid #000;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 3px 3px 0px #000, inset 0 0 15px rgba(0,0,0,0.8);
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+            flex-shrink: 0;
+        }
+        .armor-toggle:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px #000, inset 0 0 15px rgba(0,0,0,0.8);
+        }
+
+        .armor-toggle::before {
+            content: ""; position: absolute;
+            top: 50%; right: 10px; transform: translateY(-50%);
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--accent-red);
+            border: 2px solid #330000;
+            box-shadow: 0 0 8px var(--accent-red);
+            transition: all 0.4s ease;
+            z-index: 3;
+        }
+        .armor-toggle.on::before {
+            background: var(--accent-green);
+            border-color: #005500;
+            box-shadow: 0 0 12px var(--accent-green), 0 0 25px rgba(0,255,65,0.2);
+        }
+
+        .toggle-lever {
+            position: absolute;
+            top: 3px; left: 3px;
+            width: 30px; height: 26px;
+            background: linear-gradient(180deg, #444, #222);
+            border: 2px solid #000;
+            border-radius: 4px;
+            box-shadow: inset 1px 1px 0px #666, 2px 2px 4px rgba(0,0,0,0.6);
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2;
+        }
+        .toggle-lever::after {
+            content: ""; position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 14px; height: 2px;
+            background: #111;
+            box-shadow: 0 -5px 0 #111, 0 5px 0 #111;
+            border-radius: 1px;
+        }
+
+        .armor-toggle.on .toggle-lever {
+            left: 39px;
+            background: linear-gradient(180deg, #555, #2a2a2a);
+            box-shadow: inset 1px 1px 0px #777, 2px 2px 4px rgba(0,0,0,0.6), 0 0 8px rgba(0,255,65,0.15);
+        }
+
+        .toggle-labels {
+            display: flex; justify-content: space-between;
+            width: 80px; margin-top: 4px; padding: 0 6px;
+        }
+        .toggle-labels span {
+            font-size: 0.5rem; font-weight: 900; letter-spacing: 1px;
+            color: #333; transition: color 0.3s;
+        }
+        .toggle-labels .lbl-on.active-lbl { color: var(--accent-green); }
+        .toggle-labels .lbl-off.active-lbl { color: var(--accent-red); }
+
+        @keyframes cursorBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .cursor-blink {
+            display: inline-block; width: 8px; height: 14px;
+            background: var(--accent-green);
+            animation: cursorBlink 1s step-end infinite;
+            vertical-align: text-bottom; margin-left: 2px;
+        }
+
+        /* Signal bar glow animation for active state */
+        .bar.glow-green {
+            background: var(--accent-green) !important;
+            border-color: rgba(0,255,65,0.6) !important;
+            box-shadow:
+                0 0 8px var(--accent-green),
+                0 0 18px rgba(0,255,65,0.5),
+                0 0 35px rgba(0,255,65,0.25),
+                0 0 60px rgba(0,255,65,0.1),
+                inset 0 0 6px rgba(0,255,65,0.4) !important;
+        }
+        .bar.glow-green.bar-1 { animation: barPulse1 2.5s ease-in-out infinite; }
+        .bar.glow-green.bar-2 { animation: barPulse2 2.5s ease-in-out infinite 0.15s; }
+        .bar.glow-green.bar-3 { animation: barPulse3 2.5s ease-in-out infinite 0.3s; }
+
+        @keyframes barPulse1 {
+            0%, 100% { box-shadow: 0 0 8px var(--accent-green), 0 0 18px rgba(0,255,65,0.5), 0 0 35px rgba(0,255,65,0.25), inset 0 0 6px rgba(0,255,65,0.4); }
+            50% { box-shadow: 0 0 12px var(--accent-green), 0 0 28px rgba(0,255,65,0.6), 0 0 50px rgba(0,255,65,0.35), inset 0 0 10px rgba(0,255,65,0.5); }
+        }
+        @keyframes barPulse2 {
+            0%, 100% { box-shadow: 0 0 10px var(--accent-green), 0 0 22px rgba(0,255,65,0.5), 0 0 40px rgba(0,255,65,0.25), inset 0 0 6px rgba(0,255,65,0.4); }
+            50% { box-shadow: 0 0 15px var(--accent-green), 0 0 35px rgba(0,255,65,0.6), 0 0 60px rgba(0,255,65,0.35), inset 0 0 10px rgba(0,255,65,0.5); }
+        }
+        @keyframes barPulse3 {
+            0%, 100% { box-shadow: 0 0 12px var(--accent-green), 0 0 25px rgba(0,255,65,0.5), 0 0 50px rgba(0,255,65,0.25), inset 0 0 8px rgba(0,255,65,0.4); }
+            50% { box-shadow: 0 0 18px var(--accent-green), 0 0 40px rgba(0,255,65,0.6), 0 0 75px rgba(0,255,65,0.35), inset 0 0 12px rgba(0,255,65,0.5); }
+        }
+
+        @media (max-width: 800px) {
+            body { overflow-y: auto; height: auto; }
+            .wrapper { flex-direction: column; }
+            nav { width: 100%; border-right: none; border-bottom: 6px solid #000; max-height: 40vh; }
+            header { flex-direction: column; gap: 10px; padding: 15px; }
+            .footer-controls { flex-direction: column; gap: 15px; }
+            .scr-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
     </style>
 </head>
 <body id="app-body">
+
     <div id="shutdown-screen"></div>
+
     <header>
-        <div style="font-size:1.2rem;font-weight:900;color:#666">AIO: <span style="color:#fff">MY_STUFF_v3.0</span> | <span id="clock" style="color:var(--accent-amber)">00:00:00</span></div>
+        <div style="font-size: 1.2rem; font-weight: 900; color: #666;">
+            AIO: <span style="color: #fff;">MY_STUFF_v3.0</span> |
+            <span id="clock" style="color: var(--accent-amber);">00:00:00</span>
+        </div>
         <div class="sig-cluster">
-            <div class="sig-bars">
-                <div class="sig-bar sig-bar-1" id="bar1"></div>
-                <div class="sig-bar sig-bar-2" id="bar2"></div>
-                <div class="sig-bar sig-bar-3" id="bar3"></div>
-                <div class="sig-bar sig-bar-4" id="bar4"></div>
+            <div class="sig-bars" id="sig-bars">
+                <div class="bar bar-1"></div>
+                <div class="bar bar-2"></div>
+                <div class="bar bar-3"></div>
             </div>
-            <div class="sig-name">Signal</div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.6rem; color: #444;">DATA LINK</div>
+                <div id="sig-status" style="font-weight: 900; font-size: 0.9rem; color: var(--accent-red);">OFFLINE</div>
+            </div>
         </div>
     </header>
+
     <div class="wrapper">
-        <nav id="sidebar-nav">
+        <nav>
             <div class="nav-label">Modules</div>
-            <button class="m-btn dead" data-screen="dash" onclick="loadScreen('dash',this)">Dashboard</button>
-            <button class="m-btn dead" data-screen="v1" onclick="loadScreen('v1',this)">My Stuff v1.0</button>
-            <button class="m-btn dead" data-screen="v2" onclick="loadScreen('v2',this)">My Stuff v2.0</button>
-            <button class="m-btn m-btn-wt dead" data-screen="wt" onclick="loadScreen('wt',this)">Walkie-Talkie</button>
-            <button class="m-btn dead" data-screen="sys" onclick="loadScreen('sys',this)">System</button>
-            <button class="m-btn dead" data-screen="logs" onclick="loadScreen('logs',this)">Logs</button>
-            <button class="m-btn" style="color:var(--accent-red);margin-top:auto" onclick="location.reload()">Reset</button>
+            <button class="m-btn dead" data-screen="dash" onclick="loadScreen('dash', this)">Dashboard</button>
+            <button class="m-btn dead" data-screen="v1" onclick="loadScreen('v1', this)">My Stuff v1.0</button>
+            <button class="m-btn dead" data-screen="v2" onclick="loadScreen('v2', this)">My Stuff v2.0</button>
+            <button class="m-btn m-btn-wt dead" data-screen="wt" onclick="loadScreen('wt', this)">Walkie-Talkie</button>
+            <button class="m-btn dead" data-screen="sys" onclick="loadScreen('sys', this)">System</button>
+            <button class="m-btn dead" data-screen="logs" onclick="loadScreen('logs', this)">Logs</button>
+            <button class="m-btn" style="color: var(--accent-red); margin-top: auto;" onclick="location.reload()">Reset</button>
         </nav>
+
         <main>
             <div id="main-screen" class="off">
-                <div class="scan-sweep" id="scan-sweep"><div class="scan-sweep-glow"></div><div class="scan-sweep-line"></div></div>
-                <div class="screen-scroll" id="screen-scroll"><div id="screen-content"></div></div>
-                <div class="screen-iframe-wrap" id="iframe-wrap">
-                    <div class="screen-iframe-bar"><span id="iframe-title">LOADING...</span><button onclick="closeIframe()">&#9664; BACK</button></div>
-                    <div class="screen-iframe-body">
-                        <div class="iframe-loading" id="iframe-loader"><div class="spinner"></div><span>ESTABLISHING CONNECTION...</span></div>
-                        <iframe id="screen-iframe" sandbox="allow-scripts allow-same-origin allow-forms" title="Loaded module"></iframe>
-                    </div>
-                </div>
-                <div class="cmd-fixed-area" id="cmd-area">
-                    <div class="cmd-input-wrap">
-                        <div class="cmd-prompt">AIO&gt;</div>
-                        <input type="text" class="cmd-input" id="cmd-input" placeholder="type command..." autocomplete="off" spellcheck="false" maxlength="100">
-                    </div>
-                    <div class="cmd-output" id="cmd-output"></div>
-                </div>
+                <div id="screen-content"></div>
             </div>
         </main>
     </div>
+
     <footer>
         <div id="sys-light-bar"></div>
         <div class="footer-controls">
             <div class="power-unit">
                 <div>
-                    <div class="armor-toggle" id="power-toggle" onclick="togglePower()" role="button" tabindex="0" aria-label="Toggle power"><div class="toggle-lever"></div></div>
-                    <div class="toggle-labels"><span class="lbl-off active-lbl">OFF</span><span class="lbl-on">ON</span></div>
+                    <div class="armor-toggle" id="power-toggle" onclick="togglePower()" role="button" tabindex="0" aria-label="Toggle power">
+                        <div class="toggle-lever"></div>
+                    </div>
+                    <div class="toggle-labels">
+                        <span class="lbl-off active-lbl">OFF</span>
+                        <span class="lbl-on">ON</span>
+                    </div>
                 </div>
-                <div class="power-info"><div class="power-label-top">Master Power</div><div id="status-text">SYSTEM: STANDBY</div></div>
+                <div class="power-info">
+                    <div class="power-label-top">Master Power</div>
+                    <div id="status-text">SYSTEM: STANDBY</div>
+                </div>
             </div>
-            <div style="color:#444;font-size:.7rem">MY_STUFF_AIO v3.0 &copy; 2023-2026</div>
-            <button class="scan-mech" id="scan-btn" onclick="toggleScan()">SCAN</button>
+
+            <div style="color: #444; font-size: 0.7rem;">MY_STUFF_AIO v3.0 &copy; 2023-2026</div>
         </div>
     </footer>
 
     <script>
-        /* ================================================================
-           SECURITY LAYER — runs before any application logic
-           ================================================================ */
-
-        /* [INJ-2] Input sanitization: strips control chars, null bytes,
-           HTML/script tags, and non-printable characters.
-           Returns empty string if input fails validation. */
-        function sanitizeInput(raw) {
-            if (typeof raw !== 'string') return '';
-            /* Strip null bytes — prevents null byte injection in downstream */
-            var cleaned = raw.replace(/\0/g, '');
-            /* Remove control characters except space, tab, newline (U+000A) */
-            cleaned = cleaned.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
-            /* Reject if contains HTML tag-like patterns */
-            if (/<[a-zA-Z\/!]/.test(cleaned)) return '';
-            /* Reject if contains script/eval/function patterns */
-            if (/(?:script|eval|function|onclick|onerror|onload|javascript|data:text)/i.test(cleaned)) return '';
-            /* Reject if contains CSS expression patterns */
-            if (/(?:expression|behavior|binding|url\()/i.test(cleaned)) return '';
-            /* Length check already enforced by maxlength=100 on input */
-            return cleaned;
-        }
-
-        /* [RATE-1] Command rate limiter: max 10 commands per second */
-        var cmdTimestamps = [];
-        var CMD_RATE_LIMIT = 10;
-        var CMD_RATE_WINDOW = 1000;
-        var CMD_COOLDOWN_MS = 500;
-
-        function isRateLimited() {
-            var now = Date.now();
-            /* Remove timestamps outside the window */
-            while (cmdTimestamps.length > 0 && cmdTimestamps[0] < now - CMD_RATE_WINDOW) {
-                cmdTimestamps.shift();
-            }
-            if (cmdTimestamps.length >= CMD_RATE_LIMIT) return true;
-            cmdTimestamps.push(now);
-            return false;
-        }
-
-        /* [URL-1] URL allowlist for iframe loading.
-           Only allow HTTPS URLs from trusted origins or relative paths. */
-        var ALLOWED_ORIGINS = [
-            'https://mohammad3230.github.io'
-        ];
-
-        function isUrlAllowed(url) {
-            if (typeof url !== 'string') return false;
-            /* Allow relative paths (starting with ./ or just filename) */
-            if (/^\.?\/?[^:]/.test(url) && !url.includes('://')) return true;
-            /* Check against allowed origins */
-            try {
-                var parsed = new URL(url, window.location.href);
-                if (parsed.protocol !== 'https:') return false;
-                for (var i = 0; i < ALLOWED_ORIGINS.length; i++) {
-                    if (parsed.origin === ALLOWED_ORIGINS[i]) return true;
-                }
-            } catch (e) {
-                /* Invalid URL */
-                return false;
-            }
-            return false;
-        }
-
-        /* ================================================================
-           APPLICATION STATE
-           ================================================================ */
         var isPowerOn = false;
-        var isScanOn = false;
         var currentScreen = 'dash';
-        var netSpeed = 0;
-        var cmdHistory = [];
-        var cmdHistoryIdx = -1;
-        var bootTime = performance.now();
-        var cmdCooldown = false;
 
-        /* ================================================================
-           SPEED TEST — real bandwidth measurement via Cloudflare
-           ================================================================ */
-        function runSpeedTest() {
-            if (!isPowerOn) return;
-            var img = new Image();
-            var start = performance.now();
-            var done = false;
-            var sz = 500000;
-            img.onload = img.onerror = function () {
-                if (done) return;
-                done = true;
-                var elapsed = (performance.now() - start) / 1000;
-                if (elapsed < 0.1) elapsed = 0.1;
-                netSpeed = Math.round((sz * 8) / elapsed);
-                updateSignalBars();
-            };
-            /* Timeout prevents hung requests from blocking state */
-            setTimeout(function () {
-                if (!done) { done = true; netSpeed = 0; updateSignalBars(); }
-            }, 8000);
-            /* Cache-bust to prevent browser cache from skewing results */
-            img.src = 'https://speed.cloudflare.com/__down?bytes=' + sz + '&r=' + Date.now();
-        }
+        var screenData = {
+            dash: function() {
+                return '<div class="screen-header">[ OPERATIONS MODULE v3.0 ]</div>' +
+                '<div class="screen-body">' +
+                    '<div class="scr-grid">' +
+                        '<div class="scr-cell"><div class="scr-label">NODE</div><div class="scr-val">AIO-CORE</div></div>' +
+                        '<div class="scr-cell"><div class="scr-label">UPLINK</div><div class="scr-val">ACTIVE</div></div>' +
+                        '<div class="scr-cell"><div class="scr-label">ENCRYPT</div><div class="scr-val">AES-256</div></div>' +
+                        '<div class="scr-cell"><div class="scr-label">PROXY</div><div class="scr-val">3 NODES</div></div>' +
+                    '</div>' +
+                    '<hr class="scr-divider">' +
+                    '<div class="scr-block">' +
+                        '<div class="scr-line"><span class="scr-dim">&gt;</span> SYSTEM CHECK... <span class="scr-val">OK</span></div>' +
+                        '<div class="scr-line"><span class="scr-dim">&gt;</span> GPS LOCK... <span class="scr-val">ACQUIRED</span></div>' +
+                        '<div class="scr-line"><span class="scr-dim">&gt;</span> FREQUENCY... 440.7 MHz</div>' +
+                        '<div class="scr-line"><span class="scr-dim">&gt;</span> LAT/LON... <span class="scr-err">REDACTED</span></div>' +
+                        '<div class="scr-line"><span class="scr-dim">&gt;</span> AWAITING INPUT...<span class="cursor-blink"></span></div>' +
+                    '</div>' +
+                '</div>';
+            },
+            v1: function() {
+                return '<div class="screen-header">[ MY_STUFF v1.0 ]</div>' +
+                '<div class="screen-body">' +
+                    '<div class="scr-block">' +
+                        '<div class="scr-line"><span class="scr-label">MODULE:</span> <span class="scr-val">MY_STUFF v1.0</span></div>' +
+                        '<div class="scr-line"><span class="scr-label">STATUS:</span> <span class="scr-val">ONLINE</span></div>' +
+                        '<div class="scr-line"><span class="scr-label">HOST:</span> <span class="scr-dim">mohammad3230.github.io</span></div>' +
+                    '</div>' +
+                    '<hr class="scr-divider">' +
+                    '<div class="scr-line"><span class="scr-dim">&gt;</span> SELECT ACTION:</div>' +
+                    '<div style="margin-top:10px;"><span class="scr-link" onclick="window.open(\'https://mohammad3230.github.io/PROJECT/\',\'_blank\',\'noopener\')">&#9654; OPEN MY_STUFF v1.0</span></div>' +
+                    '<hr class="scr-divider">' +
+                    '<div class="scr-line"><span class="scr-dim">&gt;</span> WAITING FOR COMMAND...<span class="cursor-blink"></span></div>' +
+                '</div>';
+            },
+            v2: function() {
+                return '<div class="screen-header">[ MY_STUFF v2.0 ]</div>' +
+                '<div class="screen-body">' +
+                    '<div class="scr-block">' +
+                        '<div class="scr-line"><span class="scr-label">MODULE:</span> <span class="scr-val">MY_STUFF v2.0</span></div>' +
+                        '<div class="scr-line"><span class="scr-label">STATUS:</span> <span class="scr-val">ONLINE</span></div>' +
+                        '<div class="scr-line"><span class="scr-label">HOST:</span> <span class="scr-dim">mohammad3230.github.io</span></div>' +
+                    '</div>' +
+                    '<hr class="scr-divider">' +
+                    '<div class="scr-line"><span class="scr-dim">&gt;</span> SELECT ACTION:</div>' +
+                    '<div style="margin-top:10px;"><span class="scr-link" onclick="window.open(\'https://mohammad3230.github.io/Games-More-.../\',\'_blank\',\'noopener\')">&#9654; OPEN MY_STUFF v2.0</span></div>' +
+                    '<hr class="scr-divider">' +
+                    '<div class="scr-line"><span class="scr-dim">&gt;</span> WAITING FOR COMMAND...<span class="cursor-blink"></span></div>' +
+                '</div>';
+            },
+            wt: function() {
+                return '<div class="screen-header">[ WALKIE-TALKIE MODULE ]</div>' +
+                '<div class="screen-body">' +
+                    '<div class="scr-block">' +
+                        '<div class="scr-line"><span class="scr-label">MODULE:</span> <span class="scr-warn">WALKIE-TALKIE GLOBAL</span></div>' +
+                        '<div class="scr-line"><span class="scr-label">ENCRYPTION:</span> <span class="scr-val">MILITARY GRADE</span></div>' +
+                        '<div class="scr-line"><span class="scr-label">FREQ:</span> <span class="scr-val">440.7 MHz</span></div>' +
+                        '<div class="scr-line"><span class="scr-label">STATUS:</span> <span class="scr-val">STANDBY</span></div>' +
+                    '</div>' +
+                    '<hr class="scr-divider">' +
+                    '<div class="scr-line"><span class="scr-dim">&gt;</span> AVAILABLE CHANNELS:</div>' +
+                    '<div style="margin-top:10px;"><span class="scr-link" onclick="window.open(\'working As secured Miliatry grade.html\',\'_self\')">&#9654; OPEN WALKIE-TALKIE GLOBAL EDITION</span></div>' +
+                    '<hr class="scr-divider">' +
+                    '<div class="scr-line"><span class="scr-dim">&gt;</span> AWAITING CONNECTION...<span class="cursor-blink"></span></div>' +
+                '</div>';
+            },
+            sys: function() {
+                return '<div class="screen-header">[ SYSTEM DIAGNOSTICS ]</div>' +
+                '<div class="screen-body">' +
+                    '<div class="scr-block">' +
+                        '<div class="scr-line"><span class="scr-dim">&gt;</span> SYSTEM CHECK... <span class="scr-val">OK</span></div>' +
+                        '<div class="scr-line"><span class="scr-dim">&gt;</span> GPS LOCK... <span class="scr-val">ACQUIRED</span></div>' +
+                        '<div class="scr-line"><span class="scr-dim">&gt;</span> FREQUENCY... 440.7 MHz</div>' +
+                        '<div class="scr-line"><span class="scr-dim">&gt;</span> PROXY CHAIN... <span class="scr-val">3 NODES</span></div>' +
+                        '<div class="scr-line"><span class="scr-dim">&gt;</span> LAT/LON... <span class="scr-err">REDACTED</span></div>' +
+                        '<div class="scr-line"><span class="scr-dim">&gt;</span> PLATE READER... <span class="scr-err">OFFLINE</span></div>' +
+                        '<div class="scr-line"><span class="scr-dim">&gt;</span> ENCRYPTION LAYER... <span class="scr-val">LOADED</span></div>' +
+                        '<div class="scr-line"><span class="scr-dim">&gt;</span> FIREWALL... <span class="scr-val">ACTIVE</span></div>' +
+                        '<div class="scr-line"><span class="scr-dim">&gt;</span> SIGNAL INTEGRITY... <span class="scr-val">NOMINAL</span></div>' +
+                    '</div>' +
+                    '<hr class="scr-divider">' +
+                    '<div class="scr-line"><span class="scr-dim">&gt;</span> ALL SUBSYSTEMS REPORTED<span class="cursor-blink"></span></div>' +
+                '</div>';
+            },
+            logs: function() {
+                return '<div class="screen-header">[ SYSTEM LOG ]</div>' +
+                '<div class="screen-body">' +
+                    '<div id="screen-log">' +
+                        '<div>[INIT] Booting AIO-Core v3.0...</div>' +
+                        '<div>[INIT] Encryption layer loaded.</div>' +
+                    '</div>' +
+                    '<hr class="scr-divider">' +
+                    '<div class="scr-line"><span class="scr-dim">&gt;</span> MONITORING...<span class="cursor-blink"></span></div>' +
+                '</div>';
+            }
+        };
 
-        function updateSignalBars() {
-            var bars = [
-                document.getElementById('bar1'),
-                document.getElementById('bar2'),
-                document.getElementById('bar3'),
-                document.getElementById('bar4')
-            ];
-            bars.forEach(function (b) { b.className = 'sig-bar sig-bar-' + (bars.indexOf(b) + 1); });
-            if (!isPowerOn || netSpeed === 0) return;
-            var k = netSpeed / 1000, m = netSpeed / 1000000, c;
-            if (m >= 2) { c = 'good'; bars[0].classList.add(c); bars[1].classList.add(c); bars[2].classList.add(c); bars[3].classList.add(c); }
-            else if (k >= 150) { c = 'average'; bars[0].classList.add(c); bars[1].classList.add(c); bars[2].classList.add(c); }
-            else { c = 'low'; bars[0].classList.add(c); }
-        }
-
-        /* ================================================================
-           SCAN MODE — active monitoring sweep
-           ================================================================ */
-        function toggleScan() {
-            if (!isPowerOn) return;
-            isScanOn = !isScanOn;
-            var sweep = document.getElementById('scan-sweep');
-            var btn = document.getElementById('scan-btn');
-            if (isScanOn) { sweep.classList.add('active'); btn.classList.add('active'); btn.textContent = 'STOP SCAN'; }
-            else { sweep.classList.remove('active'); btn.classList.remove('active'); btn.textContent = 'SCAN'; }
-        }
-
-        /* ================================================================
-           POWER TOGGLE
-           ================================================================ */
         function togglePower() {
             isPowerOn = !isPowerOn;
-            var bar = document.getElementById('sys-light-bar'),
-                st = document.getElementById('status-text'),
-                sd = document.getElementById('shutdown-screen'),
-                tg = document.getElementById('power-toggle'),
-                sc = document.getElementById('main-screen'),
-                ln = document.querySelector('.lbl-on'),
-                lf = document.querySelector('.lbl-off'),
-                bs = document.querySelectorAll('.m-btn[data-screen]');
+            var bar = document.getElementById('sys-light-bar');
+            var status = document.getElementById('status-text');
+            var shutdown = document.getElementById('shutdown-screen');
+            var toggle = document.getElementById('power-toggle');
+            var screen = document.getElementById('main-screen');
+            var lblOn = document.querySelector('.lbl-on');
+            var lblOff = document.querySelector('.lbl-off');
+            var btns = document.querySelectorAll('.m-btn[data-screen]');
 
             if (isPowerOn) {
                 bar.style.background = 'var(--accent-green)';
                 bar.style.boxShadow = '0 0 30px var(--accent-green)';
-                st.innerText = 'SYSTEM: ACTIVE';
-                st.style.color = 'var(--accent-green)';
-                sd.style.display = 'none';
-                tg.classList.add('on');
-                ln.classList.add('active-lbl');
-                lf.classList.remove('active-lbl');
-                sc.classList.remove('off');
-                bs.forEach(function (b) { b.classList.remove('dead'); });
+                status.innerText = 'SYSTEM: ACTIVE';
+                status.style.color = 'var(--accent-green)';
+                shutdown.style.display = 'none';
+                toggle.classList.add('on');
+                lblOn.classList.add('active-lbl');
+                lblOff.classList.remove('active-lbl');
+                screen.classList.remove('off');
+                btns.forEach(function(b) { b.classList.remove('dead'); });
                 loadScreen(currentScreen, document.querySelector('.m-btn[data-screen="' + currentScreen + '"]'));
-                runSpeedTest();
-                bindCmdInput();
+                animateSignal();
             } else {
                 bar.style.background = 'var(--accent-red)';
                 bar.style.boxShadow = '0 0 20px var(--accent-red)';
-                st.innerText = 'SYSTEM: STANDBY';
-                st.style.color = 'var(--accent-red)';
-                sd.style.display = 'block';
-                tg.classList.remove('on');
-                ln.classList.remove('active-lbl');
-                lf.classList.add('active-lbl');
-                sc.classList.add('off');
+                status.innerText = 'SYSTEM: STANDBY';
+                status.style.color = 'var(--accent-red)';
+                shutdown.style.display = 'block';
+                toggle.classList.remove('on');
+                lblOn.classList.remove('active-lbl');
+                lblOff.classList.add('active-lbl');
+                screen.classList.add('off');
                 document.getElementById('screen-content').innerHTML = '';
-                bs.forEach(function (b) { b.classList.remove('active'); b.classList.add('dead'); });
-                netSpeed = 0;
-                updateSignalBars();
-                if (isScanOn) toggleScan();
-                closeIframe();
+                btns.forEach(function(b) { b.classList.remove('active'); b.classList.add('dead'); });
+                /* Kill glow on signal bars */
+                document.querySelectorAll('.bar').forEach(function(b) {
+                    b.classList.remove('glow-green');
+                    b.style.background = '#000';
+                    b.style.boxShadow = 'none';
+                    b.style.borderColor = '#333';
+                });
+                document.getElementById('sig-status').innerText = 'OFFLINE';
+                document.getElementById('sig-status').style.color = 'var(--accent-red)';
             }
         }
-
-        /* ================================================================
-           IFRAME MANAGEMENT
-           [XSS-3] [FS-1] [FS-2] [URL-1] — all security checks applied
-           ================================================================ */
-        function openInScreen(url, title) {
-            if (!isPowerOn) return;
-            /* [URL-1] Validate URL against allowlist before loading */
-            if (!isUrlAllowed(url)) {
-                addCmdOutput([{ t: 'SECURITY: URL blocked — origin not in allowlist', c: 'cmd-out-err' }]);
-                return;
-            }
-            var w = document.getElementById('iframe-wrap'),
-                s = document.getElementById('screen-scroll'),
-                f = document.getElementById('screen-iframe'),
-                l = document.getElementById('iframe-loader');
-            document.getElementById('iframe-title').textContent = title || 'LOADING...';
-            l.style.display = 'flex';
-            f.src = 'about:blank'; /* Clear previous content first */
-            s.style.display = 'none';
-            w.classList.add('active');
-            f.onload = function () { l.style.display = 'none'; };
-            f.onerror = function () { l.innerHTML = '<span style="color:var(--accent-red)">CONNECTION FAILED</span>'; };
-            /* Set src after handlers to prevent race conditions */
-            f.src = url;
-        }
-
-        function closeIframe() {
-            document.getElementById('iframe-wrap').classList.remove('active');
-            document.getElementById('screen-iframe').src = 'about:blank';
-            document.getElementById('screen-scroll').style.display = 'block';
-        }
-
-        /* [FS-1] Focus steal protection: if iframe gains focus, immediately
-           return it to the command input. Prevents loaded content from
-           trapping keyboard focus or simulating user input. */
-        document.getElementById('screen-iframe').addEventListener('focus', function () {
-            if (isPowerOn) {
-                window.focus();
-                var cmdInput = document.getElementById('cmd-input');
-                if (cmdInput) cmdInput.focus();
-            }
-        }, true);
-
-        /* ================================================================
-           COMMAND SYSTEM
-           [PP-1] commandMap frozen to prevent prototype pollution
-           [INJ-2] All user input sanitized before processing
-           [RATE-1] Rate limiting enforced
-           ================================================================ */
-        var commandMap = {
-            help: function () {
-                return [
-                    { t: 'AVAILABLE COMMANDS:', c: 'cmd-out-cyan' },
-                    { t: '  help          Show this list', c: 'cmd-out-dim' },
-                    { t: '  status        System status overview', c: 'cmd-out-dim' },
-                    { t: '  sysinfo       Hardware & software info', c: 'cmd-out-dim' },
-                    { t: '  netstat       Network statistics', c: 'cmd-out-dim' },
-                    { t: '  ping          Test connection latency', c: 'cmd-out-dim' },
-                    { t: '  speed         Run bandwidth test', c: 'cmd-out-dim' },
-                    { t: '  freq          Show radio frequency', c: 'cmd-out-dim' },
-                    { t: '  proxy         Proxy chain status', c: 'cmd-out-dim' },
-                    { t: '  encrypt       Encryption status', c: 'cmd-out-dim' },
-                    { t: '  clear         Clear terminal output', c: 'cmd-out-dim' },
-                    { t: '  uptime        System uptime', c: 'cmd-out-dim' },
-                    { t: '  whoami        Current user identity', c: 'cmd-out-dim' },
-                    { t: '  scan          Toggle scan mode', c: 'cmd-out-dim' },
-                    { t: '  scanstat      Scan detection stats', c: 'cmd-out-dim' },
-                    { t: '  trace         Traceroute simulation', c: 'cmd-out-dim' },
-                    { t: '  decrypt       Run decryption module', c: 'cmd-out-dim' },
-                    { t: '  logout        Power down system', c: 'cmd-out-dim' }
-                ];
-            },
-            status: function () {
-                var u = navigator.onLine ? 'ONLINE' : 'OFFLINE', uc = navigator.onLine ? 'cmd-out-ok' : 'cmd-out-err',
-                    sp = netSpeed === 0 ? 'SCANNING...' : (netSpeed >= 1e6 ? (netSpeed / 1e6).toFixed(1) + ' Mbps' : Math.round(netSpeed / 1e3) + ' Kbps');
-                return [
-                    { t: 'SYSTEM STATUS REPORT', c: 'cmd-out-cyan' },
-                    { t: '  Power:       ACTIVE', c: 'cmd-out-ok' },
-                    { t: '  Uplink:      ' + u, c: uc },
-                    { t: '  Bandwidth:   ' + sp, c: 'cmd-out-dim' },
-                    { t: '  Node:        AIO-CORE', c: 'cmd-out-dim' },
-                    { t: '  Encryption:  AES-256', c: 'cmd-out-dim' },
-                    { t: '  GPS:         LOCKED', c: 'cmd-out-ok' },
-                    { t: '  Firewall:    ACTIVE', c: 'cmd-out-ok' },
-                    { t: '  Scan Mode:   ' + (isScanOn ? 'ENGAGED' : 'OFF'), c: isScanOn ? 'cmd-out-cyan' : 'cmd-out-dim' },
-                    { t: '  Proxy:       3 NODES', c: 'cmd-out-dim' }
-                ];
-            },
-            sysinfo: function () {
-                /* [SE-1] Only expose data already available to any browser extension */
-                var ua = navigator.userAgent, pl = navigator.platform || 'Unknown',
-                    la = navigator.language || 'Unknown', co = navigator.hardwareConcurrency || '?',
-                    me = navigator.deviceMemory ? navigator.deviceMemory + ' GB' : 'N/A';
-                return [
-                    { t: 'SYSTEM INFORMATION', c: 'cmd-out-cyan' },
-                    { t: '  Platform:    ' + pl, c: 'cmd-out-dim' },
-                    { t: '  Cores:       ' + co, c: 'cmd-out-dim' },
-                    { t: '  Memory:      ' + me, c: 'cmd-out-dim' },
-                    { t: '  Language:    ' + la, c: 'cmd-out-dim' },
-                    { t: '  Screen:      ' + screen.width + 'x' + screen.height, c: 'cmd-out-dim' },
-                    { t: '  Color Depth: ' + screen.colorDepth + ' bit', c: 'cmd-out-dim' },
-                    { t: '  User Agent:', c: 'cmd-out-dim' },
-                    { t: '  ' + ua.substring(0, 70), c: 'cmd-out-dim' },
-                    { t: '  ' + ua.substring(70), c: 'cmd-out-dim' }
-                ];
-            },
-            netstat: function () {
-                var sp = netSpeed === 0 ? 'SCANNING...' : (netSpeed >= 1e6 ? (netSpeed / 1e6).toFixed(1) + ' Mbps' : Math.round(netSpeed / 1e3) + ' Kbps'),
-                    u = navigator.onLine ? 'ONLINE' : 'OFFLINE', uc = navigator.onLine ? 'cmd-out-ok' : 'cmd-out-err',
-                    cn = navigator.connection ? navigator.connection : null,
-                    et = cn && cn.effectiveType ? cn.effectiveType.toUpperCase() : 'N/A',
-                    rt = cn && cn.rtt !== undefined ? cn.rtt + ' ms' : 'N/A',
-                    dl = cn && cn.downlink !== undefined ? cn.downlink + ' Mbps' : 'N/A';
-                return [
-                    { t: 'NETWORK STATISTICS', c: 'cmd-out-cyan' },
-                    { t: '  Status:       ' + u, c: uc },
-                    { t: '  Measured:     ' + sp, c: 'cmd-out-dim' },
-                    { t: '  Eff. Type:    ' + et, c: 'cmd-out-dim' },
-                    { t: '  Est. RTT:     ' + rt, c: 'cmd-out-dim' },
-                    { t: '  Est. Down:    ' + dl, c: 'cmd-out-dim' },
-                    { t: '  Protocol:     TLS 1.3', c: 'cmd-out-dim' },
-                    { t: '  DNS:          ENCRYPTED', c: 'cmd-out-ok' },
-                    { t: '  Proxy:        3 NODES ACTIVE', c: 'cmd-out-dim' }
-                ];
-            },
-            ping: function () {
-                if (!navigator.onLine) return [{ t: 'PING FAILED: NO CONNECTION', c: 'cmd-out-err' }];
-                var l = Math.floor(Math.random() * 80 + 10), j = Math.floor(Math.random() * 15);
-                return [
-                    { t: 'PING gateway.aio-core.net', c: 'cmd-out-dim' },
-                    { t: '  Reply: time=' + l + 'ms TTL=64', c: 'cmd-out-ok' },
-                    { t: '  Reply: time=' + (l + j) + 'ms TTL=64', c: 'cmd-out-ok' },
-                    { t: '  Reply: time=' + (l - Math.floor(j / 2)) + 'ms TTL=64', c: 'cmd-out-ok' },
-                    { t: '  Reply: time=' + (l + Math.floor(j / 3)) + 'ms TTL=64', c: 'cmd-out-ok' },
-                    { t: '  --- 4 sent, 4 received ---', c: 'cmd-out-dim' },
-                    { t: '  Avg: ' + l + 'ms | Jitter: ' + j + 'ms', c: 'cmd-out-dim' }
-                ];
-            },
-            speed: function () { runSpeedTest(); return [{ t: 'BANDWIDTH TEST INITIATED...', c: 'cmd-out-warn' }, { t: 'Results will update signal bars.', c: 'cmd-out-dim' }]; },
-            freq: function () { var fs = ['440.700 MHz', '460.025 MHz', '460.150 MHz', '465.900 MHz', '154.825 MHz'], a = fs[Math.floor(Math.random() * fs.length)]; return [{ t: 'RADIO FREQUENCY MODULE', c: 'cmd-out-cyan' }, { t: '  Active Freq:  ' + a, c: 'cmd-out-ok' }, { t: '  Band:         VHF/UHF', c: 'cmd-out-dim' }, { t: '  Modulation:   FM', c: 'cmd-out-dim' }, { t: '  Power:        50W', c: 'cmd-out-dim' }, { t: '  Squelch:      CLOSED', c: 'cmd-out-dim' }]; },
-            proxy: function () { var n = []; for (var i = 1; i <= 3; i++) { var la = (Math.random() * 180 - 90).toFixed(2), lo = (Math.random() * 360 - 180).toFixed(2), ms = Math.floor(Math.random() * 200 + 30); n.push({ t: '  Node ' + i + ': ' + la + ', ' + lo + ' [' + ms + 'ms]', c: 'cmd-out-ok' }); } return [{ t: 'PROXY CHAIN STATUS', c: 'cmd-out-cyan' }].concat(n).concat([{ t: '  Chain integrity: VERIFIED', c: 'cmd-out-ok' }]); },
-            encrypt: function () { return [{ t: 'ENCRYPTION MODULE', c: 'cmd-out-cyan' }, { t: '  Algorithm:    AES-256-GCM', c: 'cmd-out-dim' }, { t: '  Key Length:   256 bit', c: 'cmd-out-dim' }, { t: '  Key Status:   ' + (Math.random() > 0.1 ? 'ROTATED' : 'ROTATING...'), c: 'cmd-out-ok' }, { t: '  Session:      ACTIVE', c: 'cmd-out-ok' }, { t: '  Last Rotate:  ' + new Date().toLocaleTimeString(), c: 'cmd-out-dim' }, { t: '  Forward Sec:  YES', c: 'cmd-out-dim' }]; },
-            clear: function () { return 'CLEAR'; },
-            uptime: function () { var s = Math.floor((performance.now() - bootTime) / 1000), h = Math.floor(s / 3600); s %= 3600; var m = Math.floor(s / 60); s %= 60; return [{ t: 'SYSTEM UPTIME', c: 'cmd-out-cyan' }, { t: '  ' + String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0'), c: 'cmd-out-dim' }]; },
-            whoami: function () { return [{ t: 'USER: operator@aio-core', c: 'cmd-out-ok' }, { t: '  Group:    admin', c: 'cmd-out-dim' }, { t: '  Session:  encrypted', c: 'cmd-out-dim' }, { t: '  Clearance: LEVEL 3', c: 'cmd-out-warn' }]; },
-            scan: function () { toggleScan(); return [{ t: 'SCAN MODE: ' + (isScanOn ? 'ENGAGED' : 'DISABLED'), c: isScanOn ? 'cmd-out-cyan' : 'cmd-out-dim' }, { t: isScanOn ? '  Sweeping all data channels...' : '  Scan halted.', c: 'cmd-out-dim' }]; },
-            scanstat: function () { return [{ t: 'SCAN DETECTION STATS', c: 'cmd-out-cyan' }, { t: '  Mode:         ' + (isScanOn ? 'ACTIVE' : 'OFF'), c: isScanOn ? 'cmd-out-ok' : 'cmd-out-dim' }, { t: '  Detections:   ' + (isScanOn ? Math.floor(Math.random() * 20 + 5) : 0), c: isScanOn ? 'cmd-out-cyan' : 'cmd-out-dim' }, { t: '  Anomalies:    ' + (isScanOn ? Math.floor(Math.random() * 3) : 0), c: isScanOn ? 'cmd-out-warn' : 'cmd-out-dim' }, { t: '  Last Sweep:   ' + (isScanOn ? new Date().toLocaleTimeString() : 'N/A'), c: 'cmd-out-dim' }]; },
-            trace: function () { var h = []; for (var i = 1; i <= 6; i++) { var ms = Math.floor(Math.random() * 100 + i * 10), ip = '10.' + Math.floor(Math.random() * 255) + '.' + Math.floor(Math.random() * 255) + '.' + i; h.push({ t: '  Hop ' + i + ': ' + ip + ' [' + ms + 'ms]', c: 'cmd-out-dim' }); } h.push({ t: '  Destination reached.', c: 'cmd-out-ok' }); return [{ t: 'TRACEROUTE: gateway.aio-core.net', c: 'cmd-out-cyan' }].concat(h); },
-            decrypt: function () { var p = Math.floor(Math.random() * 100), ls = [{ t: 'DECRYPTION MODULE v2.1', c: 'cmd-out-cyan' }, { t: '  Loading cipher block...', c: 'cmd-out-dim' }, { t: '  Key exchange: COMPLETE', c: 'cmd-out-ok' }, { t: '  Block size: 128 bit', c: 'cmd-out-dim' }, { t: '  Progress: ' + p + '%', c: p > 80 ? 'cmd-out-ok' : 'cmd-out-warn' }, { t: '  Status: ' + (p > 90 ? 'DECRYPTED' : 'PROCESSING...'), c: p > 90 ? 'cmd-out-ok' : 'cmd-out-warn' }]; if (p > 90) ls.push({ t: '  Output: [REDACTED - CLEARANCE 4 REQUIRED]', c: 'cmd-out-err' }); return ls; },
-            logout: function () { setTimeout(function () { if (isPowerOn) togglePower(); }, 300); return [{ t: 'POWERING DOWN...', c: 'cmd-out-warn' }, { t: 'GOODBYE.', c: 'cmd-out-dim' }]; }
-        };
-        /* [PP-1] Freeze commandMap to prevent prototype pollution attacks */
-        Object.freeze(commandMap);
-
-        /* [XSS-1] [INJ-2] Command execution — sanitized input, textContent only display */
-        function executeCommand(raw) {
-            var sanitized = sanitizeInput(raw);
-            if (sanitized === '') return; /* Silently reject bad input */
-
-            var inp = sanitized.trim().toLowerCase();
-            if (inp.length === 0) return;
-
-            cmdHistory.unshift(sanitized.trim());
-            if (cmdHistory.length > 50) cmdHistory.pop();
-            cmdHistoryIdx = -1;
-
-            /* [RATE-1] Enforce rate limit */
-            if (isRateLimited()) {
-                addCmdOutput([{ t: 'RATE LIMITED: too many commands', c: 'cmd-out-err' }]);
-                /* Visual cooldown feedback on input */
-                var ci = document.getElementById('cmd-input');
-                if (ci) {
-                    ci.classList.add('rate-limited');
-                    cmdCooldown = true;
-                    setTimeout(function () {
-                        ci.classList.remove('rate-limited');
-                        cmdCooldown = false;
-                    }, CMD_COOLDOWN_MS);
-                }
-                return;
-            }
-
-            /* [XSS-1] All output uses textContent — never innerHTML with user data */
-            addCmdOutput([{ t: '> ' + sanitized.trim(), c: 'cmd-out-cmd' }]);
-
-            var handler = commandMap[inp];
-            if (!handler) {
-                addCmdOutput([{ t: "  UNKNOWN: '" + inp + "' — type 'help'", c: 'cmd-out-err' }]);
-            } else if (handler === 'CLEAR') {
-                document.getElementById('cmd-output').innerHTML = '';
-            } else {
-                try {
-                    var lines = handler();
-                    if (Array.isArray(lines)) {
-                        addCmdOutput(lines);
-                    }
-                } catch (e) {
-                    /* Error boundary: prevent command handler crash from breaking UI */
-                    addCmdOutput([{ t: '  ERROR: Command execution failed', c: 'cmd-out-err' }]);
-                }
-            }
-        }
-
-        /* [XSS-1] All output through textContent — no innerHTML with user data */
-        function addCmdOutput(lines) {
-            var out = document.getElementById('cmd-output');
-            if (!out) return;
-            lines.forEach(function (l) {
-                var d = document.createElement('div');
-                d.className = 'cmd-out-line ' + (l.c || 'cmd-out-dim');
-                d.textContent = l.t;
-                out.appendChild(d);
-            });
-            out.scrollTop = out.scrollHeight;
-        }
-
-        /* ================================================================
-           COMMAND INPUT BINDING
-           ================================================================ */
-        function bindCmdInput() {
-            var inp = document.getElementById('cmd-input');
-            if (!inp) return;
-            /* Replace node to clear any stale event listeners (defense-in-depth) */
-            var newInp = inp.parentNode.replaceChild(inp.cloneNode(true), inp);
-            newInp.focus();
-            newInp.onkeydown = function (e) {
-                /* Reject input during cooldown */
-                if (cmdCooldown) { e.preventDefault(); return; }
-                if (e.key === 'Enter') { e.preventDefault(); executeCommand(newInp.value); newInp.value = ''; }
-                else if (e.key === 'ArrowUp') { e.preventDefault(); if (cmdHistory.length > 0 && cmdHistoryIdx < cmdHistory.length - 1) { cmdHistoryIdx++; newInp.value = cmdHistory[cmdHistoryIdx]; } }
-                else if (e.key === 'ArrowDown') { e.preventDefault(); if (cmdHistoryIdx > 0) { cmdHistoryIdx--; newInp.value = cmdHistory[cmdHistoryIdx]; } else { cmdHistoryIdx = -1; newInp.value = ''; } }
-                /* Block Tab from leaving the input — prevents focus-stealing attacks */
-                else if (e.key === 'Tab') { e.preventDefault(); }
-            };
-        }
-
-        /* ================================================================
-           SCREEN CONTENT (all hardcoded — no user input reaches here)
-           ================================================================ */
-        var screenData = {
-            dash: function () { return '<div class="s-header">[ OPERATIONS MODULE v3.0 ]</div><div class="s-grid"><div class="s-cell"><div class="s-cell-label">Node</div><div class="s-cell-val s-cyan">AIO-CORE</div></div><div class="s-cell"><div class="s-cell-label">Uplink</div><div class="s-cell-val"><span class="s-badge s-badge-green">ACTIVE</span></div></div><div class="s-cell"><div class="s-cell-label">Encrypt</div><div class="s-cell-val s-blue">AES-256</div></div><div class="s-cell"><div class="s-cell-label">Proxy</div><div class="s-cell-val s-amber">3 NODES</div></div><div class="s-cell"><div class="s-cell-label">GPS</div><div class="s-cell-val s-green">LOCKED</div></div><div class="s-cell"><div class="s-cell-label">Coords</div><div class="s-cell-val s-red">REDACTED</div></div></div><hr class="s-divider"><div class="s-block"><div class="s-line"><span class="s-dim">&gt;</span> SYSTEM CHECK... <span class="s-green">OK</span></div><div class="s-line"><span class="s-dim">&gt;</span> GPS LOCK... <span class="s-green">ACQUIRED</span></div><div class="s-line"><span class="s-dim">&gt;</span> FREQUENCY... <span class="s-yellow">440.7 MHz</span></div><div class="s-line"><span class="s-dim">&gt;</span> LAT/LON... <span class="s-red">REDACTED</span></div><div class="s-line"><span class="s-dim">&gt;</span> FIREWALL... <span class="s-green">ACTIVE</span></div><div class="s-line"><span class="s-dim">&gt;</span> BANDWIDTH... <span class="s-cyan">SCANNING</span></div></div><hr class="s-divider"><div class="s-line"><span class="s-dim">&gt;</span> COMMAND INTERFACE READY<span class="cursor-blink"></span></div>'; },
-            v1: function () { return '<div class="s-header">[ MY_STUFF v1.0 ]</div><div class="s-block"><div class="s-line"><span class="s-label">MODULE:</span> <span class="s-cyan">MY_STUFF v1.0</span></div><div class="s-line"><span class="s-label">STATUS:</span> <span class="s-badge s-badge-green">ONLINE</span></div><div class="s-line"><span class="s-label">HOST:</span> <span class="s-dim">mohammad3230.github.io</span></div></div><hr class="s-divider"><div class="s-line"><span class="s-dim">&gt;</span> SELECT ACTION:</div><div style="margin-top:10px"><button class="s-link" onclick="openInScreen(\'https://mohammad3230.github.io/PROJECT/\',\'MY_STUFF v1.0\')">&#9654; OPEN MY_STUFF v1.0</button></div>'; },
-            v2: function () { return '<div class="s-header">[ MY_STUFF v2.0 ]</div><div class="s-block"><div class="s-line"><span class="s-label">MODULE:</span> <span class="s-cyan">MY_STUFF v2.0</span></div><div class="s-line"><span class="s-label">STATUS:</span> <span class="s-badge s-badge-green">ONLINE</span></div><div class="s-line"><span class="s-label">HOST:</span> <span class="s-dim">mohammad3230.github.io</span></div></div><hr class="s-divider"><div class="s-line"><span class="s-dim">&gt;</span> SELECT ACTION:</div><div style="margin-top:10px"><button class="s-link" onclick="openInScreen(\'https://mohammad3230.github.io/Games-More-.../\',\'MY_STUFF v2.0\')">&#9654; OPEN MY_STUFF v2.0</button></div>'; },
-            wt: function () { return '<div class="s-header">[ WALKIE-TALKIE MODULE ]</div><div class="s-block"><div class="s-line"><span class="s-label">MODULE:</span> <span class="s-amber">WALKIE-TALKIE GLOBAL</span></div><div class="s-line"><span class="s-label">ENCRYPTION:</span> <span class="s-badge s-badge-amber">MILITARY GRADE</span></div><div class="s-line"><span class="s-label">FREQ:</span> <span class="s-yellow">440.7 MHz</span></div><div class="s-line"><span class="s-label">STATUS:</span> <span class="s-badge s-badge-cyan">STANDBY</span></div></div><hr class="s-divider"><div class="s-line"><span class="s-dim">&gt;</span> AVAILABLE CHANNELS:</div><div style="margin-top:10px"><button class="s-link" onclick="openInScreen(\'working As secured Miliatry grade.html\',\'WALKIE-TALKIE GLOBAL\')">&#9654; OPEN WALKIE-TALKIE GLOBAL EDITION</button></div>'; },
-            sys: function () { return '<div class="s-header">[ SYSTEM DIAGNOSTICS ]</div><div class="s-block"><div class="s-line"><span class="s-dim">&gt;</span> SYSTEM CHECK... <span class="s-green">OK</span></div><div class="s-line"><span class="s-dim">&gt;</span> GPS LOCK... <span class="s-green">ACQUIRED</span></div><div class="s-line"><span class="s-dim">&gt;</span> FREQUENCY... <span class="s-yellow">440.7 MHz</span></div><div class="s-line"><span class="s-dim">&gt;</span> PROXY CHAIN... <span class="s-amber">3 NODES</span></div><div class="s-line"><span class="s-dim">&gt;</span> LAT/LON... <span class="s-red">REDACTED</span></div><div class="s-line"><span class="s-dim">&gt;</span> ENCRYPTION... <span class="s-blue">AES-256 LOADED</span></div><div class="s-line"><span class="s-dim">&gt;</span> FIREWALL... <span class="s-green">ACTIVE</span></div><div class="s-line"><span class="s-dim">&gt;</span> SIGNAL... <span class="s-lime">NOMINAL</span></div></div>'; },
-            logs: function () { return '<div class="s-header">[ SYSTEM LOG ]</div><div id="screen-log"><div style="color:var(--accent-cyan)">[INIT] Booting AIO-Core v3.0...</div><div style="color:var(--accent-cyan)">[INIT] Encryption layer loaded.</div></div>'; }
-        };
 
         function loadScreen(id, btn) {
             if (!isPowerOn) return;
-            closeIframe();
             currentScreen = id;
-            document.querySelectorAll('.m-btn[data-screen]').forEach(function (b) { b.classList.remove('active'); });
+            document.querySelectorAll('.m-btn[data-screen]').forEach(function(b) { b.classList.remove('active'); });
             if (btn) btn.classList.add('active');
-            if (screenData[id]) document.getElementById('screen-content').innerHTML = screenData[id]();
+            if (screenData[id]) {
+                document.getElementById('screen-content').innerHTML = screenData[id]();
+            }
         }
 
-        /* ================================================================
-           UTILITIES
-           ================================================================ */
-        setInterval(function () { document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }, 1000);
+        function animateSignal() {
+            var bars = document.querySelectorAll('.bar');
+            var label = document.getElementById('sig-status');
+            if (!isPowerOn) return;
+            var online = navigator.onLine;
+            label.innerText = online ? 'LINKED' : 'OFFLINE';
+            label.style.color = online ? 'var(--accent-green)' : 'var(--accent-red)';
 
-        var logMsgs = ['Heartbeat signal received.', 'Node handshake completed.', 'Scanning frequency bands...', 'Proxy rotation successful.', 'Data packet integrity verified.', 'Encryption key refreshed.', 'Uplink stability: nominal.', 'Background sweep clean.', 'Channel noise within tolerance.', 'Backup node synchronized.', 'Decrypting incoming block...', 'Frequency shift detected.', 'Secure tunnel established.', 'Auth token rotated.'];
-        var logColors = ['var(--accent-green)', 'var(--accent-cyan)', 'var(--accent-amber)', 'var(--accent-blue)', 'var(--accent-lime)'];
-        setInterval(function () {
+            bars.forEach(function(b, i) {
+                setTimeout(function() {
+                    if (online) {
+                        b.classList.add('glow-green');
+                        b.style.background = '';
+                        b.style.boxShadow = '';
+                        b.style.borderColor = '';
+                    } else {
+                        b.classList.remove('glow-green');
+                        b.style.background = '#000';
+                        b.style.boxShadow = 'none';
+                        b.style.borderColor = '#333';
+                    }
+                }, i * 120);
+            });
+        }
+
+        setInterval(function() {
+            document.getElementById('clock').textContent = new Date().toLocaleTimeString();
+        }, 1000);
+
+        var logMsgs = [
+            'Heartbeat signal received.',
+            'Node handshake completed.',
+            'Scanning frequency bands...',
+            'Proxy rotation successful.',
+            'Data packet integrity verified.',
+            'Encryption key refreshed.',
+            'Uplink stability: nominal.',
+            'Background sweep clean.',
+            'Channel noise within tolerance.',
+            'Backup node synchronized.',
+            'Decrypting incoming block...',
+            'Frequency shift detected.',
+            'Secure tunnel established.',
+            'Auth token rotated.'
+        ];
+
+        setInterval(function() {
             if (!isPowerOn || currentScreen !== 'logs') return;
-            var el = document.getElementById('screen-log');
-            if (!el) return;
-            var t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            var m = logMsgs[Math.floor(Math.random() * logMsgs.length)];
-            var d = document.createElement('div');
-            if (isScanOn) {
-                d.style.color = 'var(--accent-cyan)';
-                d.style.fontWeight = '900';
-                d.textContent = '[SCAN][' + t + '] DETECTED: ' + m;
-            } else {
-                d.style.color = logColors[Math.floor(Math.random() * logColors.length)];
-                d.textContent = '[' + t + '] ' + m;
-            }
-            el.appendChild(d);
-            el.scrollTop = el.scrollHeight;
-            if (el.children.length > 50) el.removeChild(el.firstChild);
+            var logEl = document.getElementById('screen-log');
+            if (!logEl) return;
+            var time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            var msg = logMsgs[Math.floor(Math.random() * logMsgs.length)];
+            var div = document.createElement('div');
+            div.textContent = '[' + time + '] ' + msg;
+            logEl.appendChild(div);
+            logEl.scrollTop = logEl.scrollHeight;
+            if (logEl.children.length > 40) logEl.removeChild(logEl.firstChild);
         }, 3000);
 
-        setInterval(function () { if (isPowerOn) runSpeedTest(); }, 15000);
-
-        document.getElementById('power-toggle').addEventListener('keydown', function (e) {
+        /* Keyboard support for toggle */
+        document.getElementById('power-toggle').addEventListener('keydown', function(e) {
             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePower(); }
         });
 
-        /* Start OFF — direct state, no togglePower call to avoid race condition */
+        /* Starts in OFF state — shutdown overlay visible, nav buttons dead */
         document.getElementById('shutdown-screen').style.display = 'block';
     </script>
 </body>
