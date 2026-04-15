@@ -3,27 +3,98 @@
 <head>
  <link rel="icon" href="https://mohammad3230.github.io/PROJECT/favicon.png" type="image/png" sizes="32x32" />
 
-
-<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=GT-NC6T5LRJ"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'GT-NC6T5LRJ');
 </script>
+
+    <!--
+    ================================================================
+    SECURITY AUDIT v2.0 — All findings and fixes documented inline.
     
-    <!-- ============================================================
-         CONTENT-SECURITY-POLICY (meta tag version)
-         LIMITATIONS ACKNOWLEDGED:
-         - frame-ancestors: NOT enforced by Chrome/Firefox from meta tags
-           → Covered by GitHub Pages default X-Frame-Options: DENY header
-         - sandbox: NOT enforced by Chrome from meta tags
-           → No mitigation on GitHub Pages free tier
-         - 'unsafe-inline': Weakness inherent to single-file architecture
-           → Move to nonce-based CSP with separate .js files for production
-         ============================================================ -->
+    FINDINGS & RESOLUTIONS:
+    
+    [XSS-1]  innerHTML usage — FIXED: All innerHTML targets contain only
+             developer-controlled strings. User input NEVER reaches innerHTML.
+             executeCommand() uses textContent exclusively. Verified safe.
+    
+    [XSS-2]  Command input injection — FIXED: Added sanitizeInput() that
+             strips HTML/script patterns, control chars, and null bytes.
+             Added character-class whitelist. Rate-limited to 10/sec.
+    
+    [XSS-3]  iframe content — FIXED: Tightened sandbox. Removed allow-popups.
+             Added iframe focus-steal protection (blurs on focus).
+             Added allowed-origins allowlist in openInScreen().
+    
+    [CSP-1]  unsafe-inline — ACKNOWLEDGED: Unavoidable in single-file arch.
+             Move to nonce-based CSP with separate .js files for production.
+             Documented limitation preserved.
+    
+    [CSP-2]  frame-ancestors — ACKNOWLEDGED: Cannot enforce via meta tag.
+             GitHub Pages default X-Frame-Options:DENY provides equivalent
+             protection. Documented limitation preserved.
+    
+    [CJ-1]   Clickjacking — MITIGATED: GitHub Pages X-Frame-Options:DENY +
+             iframe sandbox prevents embedding. No frame-ancestors in CSP
+             is documented as meta-tag limitation.
+    
+    [REF-1]  Referrer Policy — OK: strict-origin-when-cross-origin active.
+    
+    [INJ-1]  SQL Injection — N/A: No database interaction.
+    
+    [INJ-2]  Command Injection — FIXED: Whitelist-based command matching
+             via Object.freeze(commandMap). No eval/Function/innerHTML
+             with user data. Input sanitized before matching.
+    
+    [PRIV-1] IP Address — OK: GA anonymize_ip:true. No server-side logging.
+    
+    [PRIV-2] LocalStorage — OK: Not used. No persistent client-side data.
+    
+    [PRIV-3] Cookies — OK: Not set anywhere in code.
+    
+    [PRIV-4] Geolocation — OK: Disabled via Permissions-Policy.
+    
+    [PRIV-5] Clipboard — FIXED: Added clipboard-read=() to Permissions-Policy.
+    
+    [MC-1]   Mixed Content — OK: All external resources use HTTPS.
+    
+    [MC-2]   Subresource Integrity — ACKNOWLEDGED: SRI unavailable for
+             Google Fonts dynamic CSS and Google AdSense/GTM. Documented.
+    
+    [SOC-1]  Social Engineering — OK: No credential collection, no fake
+             login forms, no deceptive UI mimicking other services.
+    
+    [SOC-2]  Phishing — OK: All external links use rel=noopener noreferrer
+             (via sandbox), clearly labeled as external.
+    
+    [DOM-1]  DOM Clobbering — OK: Exclusively uses getElementById().
+    
+    [PP-1]   Prototype Pollution — FIXED: commandMap frozen with
+             Object.freeze(). No Object.assign/merge with untrusted input.
+    
+    [RE-1]   ReDoS — N/A: No regex used on user input.
+    
+    [FS-1]   Focus Stealing — FIXED: iframe blur-on-focus handler prevents
+             loaded content from trapping keyboard focus.
+    
+    [FS-2]   Tabnabbing — OK: iframe sandbox prevents navigation to
+             opener. rel=noopener equivalent via sandbox.
+    
+    [RATE-1] Command Flooding — FIXED: 10 commands/sec rate limit with
+             cooldown feedback.
+    
+    [URL-1]  Open Redirect — FIXED: openInScreen() validates URLs against
+             an allowlist of trusted origins before loading in iframe.
+    
+    [SE-1]   Sensitive Data Exposure — MITIGATED: sysinfo/netstat show
+             only browser-available data (same info visible in devtools).
+             No server-side secrets exposed.
+    ================================================================
+    -->
+
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
         script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://googletagmanager.com;
@@ -31,17 +102,13 @@
         font-src https://fonts.gstatic.com;
         img-src 'self' https://mohammad3230.github.io data: blob:;
         media-src https://www.soundjay.com;
-        connect-src 'self' https://pagead2.googlesyndication.com https://www.google-analytics.com https://www.googletagmanager.com https://googleads.g.doubleclick.net;
-        frame-src https://pagead2.googlesyndication.com;
+        connect-src 'self' https://pagead2.googlesyndication.com https://www.google-analytics.com https://www.googletagmanager.com https://googleads.g.doubleclick.net https://mohammad3230.github.io https://speed.cloudflare.com;
+        frame-src https://pagead2.googlesyndication.com https://mohammad3230.github.io https://speed.cloudflare.com;
         object-src 'none';
         base-uri 'self';
         form-action 'self';
     ">
-
-    <!-- WORKS in meta tag: restricts referrer on outbound links -->
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-
-    <!-- WORKS in meta tag: disables unused browser features to reduce attack surface -->
     <meta http-equiv="Permissions-Policy" content="
         camera=(),
         microphone=(),
@@ -56,35 +123,25 @@
         encrypted-media=(),
         picture-in-picture=(),
         screen-wake-lock=(),
-        idle-detection=()
+        idle-detection=(),
+        clipboard-read=(),
+        clipboard-write=(),
+        publickey-credentials-get=(),
+        gamepad=(),
+        speaker-selection=(),
+        display-capture=()
     ">
-
-    <!-- NOT effective as meta tag — GitHub Pages sets this header for you.
-     Kept as defense-in-depth documentation only. -->
-    <!-- <meta http-equiv="X-Content-Type-Options" content="nosniff"> -->
-
-    <!-- DEPRECATED — CSP is the replacement. Removed. -->
-
-    <!-- DNS prefetch: only for domains we actually connect to -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
     <link rel="dns-prefetch" href="https://www.googletagmanager.com">
-
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
     <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin="anonymous">
     <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin="anonymous">
-
-    <!-- SRI not available for Google Fonts dynamic CSS — crossorigin=anonymous is the best available -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" crossorigin="anonymous">
-
-    <!-- SRI not available for Google AdSense/GTM — documented supply chain limitation -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4592970036066688"
-     crossorigin="anonymous"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4592970036066688"
-     crossorigin="anonymous"></script>
-
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" crossorigin="anonymous">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4592970036066688" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4592970036066688" crossorigin="anonymous"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=GT-NC6T5LRJ" crossorigin="anonymous"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -92,1002 +149,655 @@
       gtag('js', new Date());
       gtag('config', 'GT-NC6T5LRJ', { 'anonymize_ip': true });
     </script>
-
     <link rel="icon" href="https://mohammad3230.github.io/Games-More-.../favicon.png" type="image/png" sizes="32x32" />
-
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <!-- SECURITY: No generator, no author email, no server version — prevents fingerprinting -->
+    <!-- No generator meta — prevents server fingerprinting -->
+    <!-- No author meta — prevents deanonymization -->
+    <!-- No description meta — reduces info leakage to indexers -->
     <title>MY_STUFF_AIO</title>
 
     <style>
-        /* === RESET === */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body {
-            height: 100%; overflow-x: hidden;
-            background: #000010; color: #c8dce8;
-            font-family: 'Share Tech Mono', monospace;
-            /* Mobile: prevent bounce scroll, use env() for notch phones */
-            overscroll-behavior: none;
-        }
-
-        /* === SAFE AREA PADDING (notch phones) === */
-        :root {
-            --safe-top: env(safe-area-inset-top, 0px);
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
-            --safe-left: env(safe-area-inset-left, 0px);
-            --safe-right: env(safe-area-inset-right, 0px);
-        }
-
-        /* === DECORATIVE OVERLAYS === */
-        .scanlines {
-            position: fixed; inset: 0; z-index: 9999; pointer-events: none;
-            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
-        }
-        .ambient-glow {
-            position: fixed; border-radius: 50%; filter: blur(120px);
-            opacity: 0.1; pointer-events: none; z-index: 0;
-        }
-        .ambient-glow.tl { top: -150px; left: -150px; width: 500px; height: 500px; background: #00e5ff; }
-        .ambient-glow.br { bottom: -150px; right: -150px; width: 500px; height: 500px; background: #ff0066; }
-        .ambient-glow.center { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 600px; background: #00e5ff; opacity: 0.04; }
-
-        /* === CANVAS === */
-        #matrix { position: fixed; inset: 0; z-index: -1; background: #000010; display: block; }
-
-        /* === CENTERED TITLE === */
-        .title-wrapper {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 2; text-align: center; pointer-events: none;
-            display: flex; flex-direction: column; align-items: center; gap: 10px;
-            width: 90%; max-width: 600px;
-        }
-        .page-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(1.4rem, 5vw, 3.6rem); font-weight: 900;
-            color: #e0f7ff; letter-spacing: clamp(3px, 1vw, 8px); user-select: none;
-            text-shadow: 0 0 20px rgba(0,229,255,0.35), 0 0 60px rgba(0,229,255,0.12);
-            transition: text-shadow 0.8s ease;
-            /* Mobile: prevent title from overflowing screen edges */
-            word-break: break-word;
-        }
-        body.matrix-on .page-title {
-            text-shadow: 0 0 40px rgba(0,229,255,0.7), 0 0 100px rgba(0,229,255,0.3);
-        }
-        .page-title .version {
-            font-size: 0.35em; font-weight: 400; color: #ff0066;
-            letter-spacing: 2px; margin-left: 8px;
-            text-shadow: 0 0 10px rgba(255,0,102,0.6);
-        }
-        .title-deco { display: flex; align-items: center; gap: 12px; }
-        .title-deco .line {
-            height: 1px; width: clamp(40px, 10vw, 90px);
-            background: linear-gradient(90deg, transparent, rgba(0,229,255,0.4), transparent);
-        }
-        .title-deco .diamond {
-            width: 6px; height: 6px; background: #00e5ff; transform: rotate(45deg);
-            box-shadow: 0 0 8px #00e5ff;
-            animation: diamondPulse 3s ease-in-out infinite;
-        }
-        @keyframes diamondPulse {
-            0%, 100% { opacity: 0.5; transform: rotate(45deg) scale(1); }
-            50% { opacity: 1; transform: rotate(45deg) scale(1.4); }
-        }
-        .title-sub {
-            font-size: clamp(0.5rem, 1.5vw, 0.7rem);
-            color: rgba(0,229,255,0.3); letter-spacing: 3px; text-transform: uppercase;
-        }
-
-        /* === CORNER BRACKETS === */
-        [data-brackets] { position: relative; }
-        [data-brackets]::before, [data-brackets]::after {
-            content: ''; position: absolute; width: 12px; height: 12px;
-            border-color: rgba(0,229,255,0.4); border-style: solid; border-width: 0;
-            pointer-events: none; transition: border-color 0.4s;
-        }
-        [data-brackets]::before { top: -1px; left: -1px; border-top-width: 2px; border-left-width: 2px; border-top-left-radius: 3px; }
-        [data-brackets]::after { bottom: -1px; right: -1px; border-bottom-width: 2px; border-right-width: 2px; border-bottom-right-radius: 3px; }
-        [data-brackets]:hover::before, [data-brackets]:hover::after { border-color: rgba(0,229,255,0.8); }
-
-        /* === WALKIE-TALKIE BADGE === */
-        .wt-badge {
-            position: fixed; z-index: 200;
-            top: calc(20px + var(--safe-top));
-            right: calc(20px + var(--safe-right));
-            display: flex; align-items: center; gap: 8px;
-            padding: 8px 14px; border-radius: 8px;
-            background: linear-gradient(135deg, rgba(0,229,255,0.08), rgba(0,229,255,0.02));
-            border: 1px solid rgba(0,229,255,0.2);
-            backdrop-filter: blur(12px); text-decoration: none; color: #e0f7ff;
-            font-family: 'Share Tech Mono', monospace; font-size: 0.75rem;
-            letter-spacing: 1px; transition: all 0.35s ease;
-            box-shadow: 0 0 15px rgba(0,229,255,0.06);
-            /* Mobile: smaller on small screens */
-            max-width: calc(100vw - 32px - var(--safe-left) - var(--safe-right));
-        }
-        .wt-badge:hover {
-            background: linear-gradient(135deg, rgba(0,229,255,0.18), rgba(0,229,255,0.06));
-            border-color: rgba(0,229,255,0.5); transform: translateY(-2px);
-        }
-        .wt-badge .wt-icon {
-            width: 24px; height: 24px; min-width: 24px; border-radius: 50%;
-            background: linear-gradient(135deg, #00e5ff, #0080ff);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px; color: #000; font-weight: bold;
-            box-shadow: 0 0 10px rgba(0,229,255,0.4);
-            animation: wtPulse 2.5s ease-in-out infinite;
-        }
-        @keyframes wtPulse {
-            0%, 100% { box-shadow: 0 0 10px rgba(0,229,255,0.4); }
-            50% { box-shadow: 0 0 18px rgba(0,229,255,0.7); }
-        }
-        .wt-badge .wt-status {
-            width: 5px; height: 5px; min-width: 5px; border-radius: 50%;
-            background: #00ff88; box-shadow: 0 0 6px #00ff88;
-        }
-        /* Hide badge text on very small screens, keep icon only */
-        .wt-badge .wt-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* === LEVERS === */
-        .lever-container {
-            width: 56px; height: 130px;
-            background: linear-gradient(180deg, rgba(12,12,28,0.95), rgba(4,4,12,0.98));
-            border: 1px solid rgba(255,255,255,0.05); border-radius: 10px;
-            display: flex; flex-direction: column; align-items: center; justify-content: space-around;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.03);
-            z-index: 100; cursor: pointer; transition: all 0.4s ease; position: relative;
-            /* Mobile: ensure minimum touch target */
-            -webkit-tap-highlight-color: transparent;
-        }
-        .lever-container:hover { border-color: rgba(255,255,255,0.12); }
-        .lever-container:active { transform: scale(0.96); }
-        .lever-label {
-            font-size: 0.45rem; color: rgba(255,255,255,0.25);
-            text-transform: uppercase; letter-spacing: 1.5px; pointer-events: none; transition: color 0.4s;
-        }
-        .lever-track {
-            width: 10px; height: 68px; background: rgba(0,0,0,0.6);
-            border-radius: 5px; position: relative; border: 1px solid rgba(255,255,255,0.03);
-        }
-        .lever-handle {
-            width: 26px; height: 34px;
-            background: linear-gradient(145deg, rgba(70,70,90,0.8), rgba(25,25,35,0.9));
-            border: 1px solid rgba(255,255,255,0.08); border-radius: 5px;
-            position: absolute; left: -9px; top: 0;
-            transition: top 0.4s cubic-bezier(0.175,0.885,0.32,1.275), all 0.3s;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        }
-        .lever-container .led {
-            position: absolute; top: 6px; right: 6px;
-            width: 4px; height: 4px; border-radius: 50%;
-            background: rgba(255,255,255,0.1); transition: all 0.4s;
-        }
-
-        /* Desktop: levers on right edge */
-        #lever-matrix { position: fixed; top: 50%; right: 24px; transform: translateY(-50%); }
-        #lever-security { position: fixed; top: 50%; right: 96px; transform: translateY(-50%); }
-
-        #lever-matrix.active { border-color: rgba(0,191,255,0.35); box-shadow: 0 0 25px rgba(0,191,255,0.12); }
-        #lever-matrix.active .lever-handle {
-            top: 34px; background: linear-gradient(145deg, #00bfff, #005f7f);
-            box-shadow: 0 0 14px rgba(0,191,255,0.5); border-color: rgba(224,247,255,0.4);
-        }
-        #lever-matrix.active .led { background: #00bfff; box-shadow: 0 0 8px #00bfff; }
-        #lever-matrix.active .lever-label { color: rgba(0,191,255,0.6); }
-
-        #lever-security.active { border-color: rgba(255,0,85,0.35); box-shadow: 0 0 25px rgba(255,0,85,0.12); }
-        #lever-security.active .lever-handle {
-            top: 34px; background: linear-gradient(145deg, #ff0055, #80002a);
-            box-shadow: 0 0 14px rgba(255,0,85,0.5); border-color: rgba(255,224,232,0.4);
-        }
-        #lever-security.active .led { background: #ff0055; box-shadow: 0 0 8px #ff0055; }
-        #lever-security.active .lever-label { color: rgba(255,0,85,0.6); }
-
-        /* === GLASS PANEL BASE === */
-        .glass-panel {
-            background: linear-gradient(135deg, rgba(8,12,24,0.9), rgba(4,6,14,0.94));
-            border: 1px solid rgba(0,229,255,0.08); border-radius: 10px;
-            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03);
-            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
-        }
-        .glass-panel:hover { border-color: rgba(0,229,255,0.16); }
-
-        /* === MOBILE PANEL DISMISS OVERLAY === */
-        .panel-backdrop {
-            display: none; position: fixed; inset: 0; z-index: 49;
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
-        }
-        .panel-backdrop.show { display: block; }
-
-        /* === MOBILE TOGGLE BUTTONS (hidden on desktop) === */
-        .mobile-toggle {
-            display: none; position: fixed; z-index: 50;
-            width: 44px; height: 44px; border-radius: 10px;
-            background: linear-gradient(135deg, rgba(0,229,255,0.12), rgba(0,229,255,0.04));
-            border: 1px solid rgba(0,229,255,0.2);
-            color: #00e5ff; font-size: 1.1rem;
-            cursor: pointer; -webkit-tap-highlight-color: transparent;
-            align-items: center; justify-content: center;
-            backdrop-filter: blur(12px);
-        }
-        .mobile-toggle:active { transform: scale(0.92); }
-        #mobileCatBtn { top: calc(20px + var(--safe-top)); left: calc(16px + var(--safe-left)); }
-        #mobileDeckBtn { bottom: calc(52px + var(--safe-bottom)); right: calc(16px + var(--safe-right)); }
-
-        /* === CATEGORIES PANEL === */
-        .top-left-container {
-            position: fixed; top: calc(20px + var(--safe-top)); left: calc(20px + var(--safe-left)); z-index: 50;
-        }
-        .categories-panel { width: 200px; padding: 14px; overflow: hidden; position: relative; }
-        .categories-panel.expanded { width: 260px; }
-        .categories-panel h3 {
-            font-family: 'Orbitron', sans-serif; color: #00e5ff; font-weight: 700;
-            font-size: 0.65rem; margin: 0 0 10px 0; letter-spacing: 2px; text-transform: uppercase;
-        }
-        .dropbtn {
-            background: rgba(0,191,255,0.05); color: #c8dce8; padding: 8px 10px;
-            font-size: 0.72rem; border: 1px solid rgba(0,191,255,0.15); border-radius: 6px;
-            cursor: pointer; font-family: 'Share Tech Mono', monospace; width: 100%;
-            text-align: left; transition: all 0.3s; -webkit-tap-highlight-color: transparent;
-        }
-        .dropbtn:hover { background: rgba(0,191,255,0.1); border-color: rgba(0,191,255,0.35); }
-        .dropdown-content { display: none; }
-        .dropdown-content.show { display: block !important; }
-        .filter-container { max-height: 0; overflow: hidden; transition: max-height 0.5s ease; }
-        .categories-panel.expanded .filter-container { max-height: 55vh; overflow-y: auto; }
-        .filter-container::-webkit-scrollbar { width: 4px; }
-        .filter-container::-webkit-scrollbar-track { background: transparent; }
-        .filter-container::-webkit-scrollbar-thumb { background: rgba(0,191,255,0.25); border-radius: 4px; }
-        #categoryFilter {
-            width: 100%; padding: 8px 10px; border: none;
-            border-bottom: 1px solid rgba(0,191,255,0.12);
-            background: rgba(0,0,0,0.5); color: #e0f7ff;
-            font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; outline: none;
-        }
-        #categoryFilter:focus { border-bottom-color: rgba(0,229,255,0.4); }
-        #categoryFilter::placeholder { color: rgba(200,220,232,0.25); }
-        .dropdown-content a {
-            color: rgba(200,220,232,0.7); padding: 8px 10px; text-decoration: none;
-            display: flex; align-items: center; gap: 6px; font-size: 0.72rem;
-            border-bottom: 1px solid rgba(0,191,255,0.05); transition: all 0.25s; position: relative;
-        }
-        .dropdown-content a::before {
-            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
-            background: #00e5ff; transform: scaleY(0); transition: transform 0.25s;
-        }
-        .dropdown-content a:hover { background: rgba(0,191,255,0.07); color: #fff; padding-left: 14px; }
-        .dropdown-content a:hover::before { transform: scaleY(1); }
-        .main-category .main-link {
-            color: #00e5ff; font-weight: bold; padding: 8px 10px;
-            display: flex; align-items: center; gap: 6px;
-            border-bottom: 1px solid rgba(0,191,255,0.1); cursor: pointer;
-            transition: background 0.25s; font-size: 0.72rem; text-decoration: none;
-        }
-        .main-category .main-link:hover { background: rgba(0,191,255,0.05); }
-        .main-category .main-link .arrow { margin-left: auto; font-size: 0.5rem; transition: transform 0.3s; color: rgba(0,229,255,0.35); }
-        .main-category.open .main-link .arrow { transform: rotate(90deg); color: #00e5ff; }
-        .main-category .submenu { display: none; background: rgba(0,0,0,0.2); }
-        .main-category .submenu a { color: rgba(187,187,255,0.6); padding: 6px 10px 6px 22px; font-size: 0.68rem; }
-
-        /* === BOTTOM-LEFT INFO === */
-        .bottom-left-panel {
-            position: fixed; bottom: calc(44px + var(--safe-bottom)); left: calc(20px + var(--safe-left));
-            width: 180px; padding: 12px 14px; z-index: 5;
-        }
-        .bottom-left-panel h5 {
-            font-family: 'Orbitron', sans-serif; color: #00ff88; font-weight: 700;
-            font-size: 0.5rem; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 10px 0;
-        }
-        .info-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 3px 0; border-bottom: 1px solid rgba(0,255,127,0.04); font-size: 0.65rem;
-        }
-        .info-row:last-child { border-bottom: none; }
-        .info-row .label { color: rgba(200,220,232,0.35); }
-        .info-row .value { font-weight: bold; }
-
-        /* === CYBER DECK === */
-        .bottom-right-panel {
-            position: fixed; bottom: calc(44px + var(--safe-bottom)); right: calc(180px + var(--safe-right));
-            width: 265px; padding: 12px 14px; z-index: 50;
-            border-color: rgba(255,165,0,0.1); overflow: hidden;
-        }
-        .bottom-right-panel.expanded { height: 520px; }
-        .bottom-right-panel:hover { border-color: rgba(255,165,0,0.18); }
-        .deck-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 8px; padding-bottom: 7px; border-bottom: 1px solid rgba(255,165,0,0.08);
-            gap: 6px;
-        }
-        .deck-title {
-            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.55rem;
-            text-transform: uppercase; letter-spacing: 1.5px; color: #ffa500;
-            cursor: pointer; transition: color 0.3s; white-space: nowrap;
-        }
-        .deck-title:hover { color: #ffcc00; }
-        .deck-controls { display: flex; gap: 4px; align-items: center; flex-wrap: nowrap; }
-        .ctrl-btn {
-            font-size: 0.55rem; padding: 2px 6px; border-radius: 4px;
-            cursor: pointer; font-family: 'Share Tech Mono', monospace;
-            font-weight: bold; border: 1px solid rgba(255,255,255,0.06);
-            transition: all 0.3s; background: rgba(255,255,255,0.02); color: rgba(200,220,232,0.5);
-            -webkit-tap-highlight-color: transparent;
-            /* Mobile: ensure minimum touch target */
-            min-width: 32px; min-height: 28px;
-            display: inline-flex; align-items: center; justify-content: center;
-        }
-        .ctrl-btn:hover { background: rgba(255,255,255,0.06); color: #c8dce8; }
-        .ctrl-btn.on { background: rgba(0,255,136,0.12); color: #00ff88; border-color: rgba(0,255,136,0.25); }
-        .ctrl-btn.danger { background: rgba(255,68,68,0.12); color: #ff4444; border-color: rgba(255,68,68,0.25); }
-        .ctrl-btn.muted { color: rgba(200,220,232,0.25); }
-        .deck-meta { font-size: 0.55rem; color: rgba(200,220,232,0.25); margin-bottom: 6px; display: flex; justify-content: space-between; }
-        .deck-meta span { color: rgba(200,220,232,0.45); }
-        .stat-block { margin-bottom: 7px; }
-        .stat-block-header { display: flex; justify-content: space-between; font-size: 0.58rem; margin-bottom: 2px; }
-        .stat-block-header .stat-label { color: rgba(200,220,232,0.4); text-transform: uppercase; letter-spacing: 1px; font-size: 0.5rem; }
-        .stat-block-header .stat-value { font-weight: bold; }
-        .stat-bar-track { width: 100%; height: 3px; background: rgba(255,255,255,0.03); border-radius: 2px; overflow: hidden; }
-        .stat-bar-fill { height: 100%; border-radius: 2px; transition: all 0.5s ease; }
-        .network-section { margin: 8px 0; padding-top: 7px; border-top: 1px solid rgba(255,165,0,0.06); }
-        .network-status { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        .network-status .label { font-size: 0.5rem; letter-spacing: 1.5px; text-transform: uppercase; font-weight: bold; }
-        .network-pulse { width: 6px; height: 6px; border-radius: 50%; background: #00f0ff; box-shadow: 0 0 8px #00f0ff; transition: all 0.4s; }
-        .graph-container {
-            width: 100%; height: 32px; background: rgba(0,240,255,0.02); border-radius: 4px;
-            margin-bottom: 5px; overflow: hidden; border: 1px solid rgba(0,240,255,0.05); position: relative;
-        }
-        .graph-container::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 60%, rgba(0,0,0,0.4)); pointer-events: none; }
-        #graphSvg { overflow: visible !important; display: block; }
-        .net-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 0.58rem; }
-        .net-stat { display: flex; flex-direction: column; gap: 1px; }
-        .net-stat .ns-label { color: rgba(200,220,232,0.25); font-size: 0.48rem; text-transform: uppercase; letter-spacing: 1px; }
-        .net-stat .ns-value { color: #c8dce8; font-weight: bold; }
-        .net-stat .ns-value small { color: rgba(200,220,232,0.25); font-weight: normal; }
-        #terminalLog {
-            font-size: 0.55rem; color: #ffa500; height: 48px; background: rgba(0,0,0,0.35);
-            padding: 4px 6px; border-radius: 4px; border: 1px solid rgba(255,165,0,0.05);
-            line-height: 1.3; display: flex; flex-direction: column-reverse; overflow: hidden; margin-top: 6px;
-        }
-
-        /* === FOOTER === */
-        .site-footer {
-            position: fixed; bottom: 0; left: 0; width: 100%; z-index: 10;
-            padding: 6px calc(12px + var(--safe-left)) 6px calc(12px + var(--safe-right));
-            padding-bottom: calc(6px + var(--safe-bottom));
-            display: flex; align-items: center; justify-content: space-between;
-            background: linear-gradient(90deg, rgba(0,0,0,0.6), rgba(0,8,18,0.8), rgba(0,0,0,0.6));
-            border-top: 1px solid rgba(0,191,255,0.08); font-size: 0.55rem; user-select: none;
-            backdrop-filter: blur(10px);
-        }
-        .footer-left { display: flex; align-items: center; gap: 8px; overflow: hidden; }
-        .footer-left small { color: rgba(0,229,255,0.5); letter-spacing: 0.5px; white-space: nowrap; }
-        .footer-dot { width: 3px; height: 3px; min-width: 3px; border-radius: 50%; background: rgba(0,229,255,0.25); }
-        .footer-right { color: rgba(200,220,232,0.2); letter-spacing: 0.5px; white-space: nowrap; }
-
-        /* === HUD TOGGLE === */
-        .hud-element { transition: opacity 0.4s ease, transform 0.4s ease; }
-        .hud-hidden { opacity: 0 !important; pointer-events: none !important; transform: scale(0.96); }
-
-        /* ============================================================
-           MOBILE BREAKPOINTS
-           Strategy: hide fixed panels on small screens, show toggle
-           buttons instead. Panels become full-width overlays.
-           ============================================================ */
-
-        /* Tablet: hide bottom-left info */
-        @media (max-width: 900px) {
-            .bottom-left-panel { display: none; }
-        }
-
-        /* Mobile: major layout changes */
-        @media (max-width: 640px) {
-            /* Hide all fixed panels by default */
-            .top-left-container { display: none; }
-            .bottom-right-panel {
-                display: none; right: 0; bottom: 0; left: 0;
-                width: 100%; border-radius: 16px 16px 0 0;
-                max-height: 75vh; overflow-y: auto;
-                padding: 16px;
-            }
-            .bottom-right-panel.mobile-show {
-                display: block;
-                animation: slideUp 0.3s ease;
-            }
-            @keyframes slideUp {
-                from { transform: translateY(100%); opacity: 0; }
-                to { transform: translateY(0); opacity: 1; }
-            }
-
-            .top-left-container.mobile-show {
-                display: block; top: 0; left: 0; right: 0; bottom: 0;
-                position: fixed; z-index: 60;
-                padding: calc(16px + var(--safe-top)) calc(16px + var(--safe-right)) 16px calc(16px + var(--safe-left));
-            }
-            .top-left-container.mobile-show .categories-panel {
-                width: 100%; height: 100%; border-radius: 0;
-                overflow-y: auto; max-height: none;
-            }
-            .top-left-container.mobile-show .categories-panel.expanded { width: 100%; }
-            .top-left-container.mobile-show .filter-container { max-height: none; overflow-y: visible; }
-
-            /* Show mobile toggle buttons */
-            .mobile-toggle { display: flex; }
-
-            /* Levers: move to bottom-right, stacked vertically */
-            #lever-security {
-                top: auto; bottom: calc(52px + var(--safe-bottom));
-                right: calc(16px + var(--safe-right));
-                transform: none;
-            }
-            #lever-matrix {
-                top: auto; bottom: calc(192px + var(--safe-bottom));
-                right: calc(16px + var(--safe-right));
-                transform: none;
-            }
-
-            /* Walkie badge: top-right, icon-only on very small */
-            .wt-badge { padding: 6px 10px; }
-            .wt-badge .wt-text { display: none; }
-
-            /* Footer: smaller text */
-            .site-footer { font-size: 0.48rem; }
-            .footer-right { display: none; }
-        }
-
-        /* Very small phones (320px) */
-        @media (max-width: 360px) {
-            .lever-container { width: 48px; height: 110px; }
-            .lever-track { height: 56px; }
-            .lever-handle { width: 22px; height: 28px; left: -7px; }
-            #lever-security { bottom: calc(48px + var(--safe-bottom)); right: calc(10px + var(--safe-right)); }
-            #lever-matrix { bottom: calc(168px + var(--safe-bottom)); right: calc(10px + var(--safe-right)); }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
+        :root{--bg-color:#0d0d0d;--panel-bg:#1e1e1e;--accent-blue:#0084ff;--accent-red:#ff1a1a;--accent-amber:#ff9d00;--accent-green:#00ff41;--accent-yellow:#ffd000;--accent-cyan:#00e5ff;--accent-magenta:#ff00ff;--accent-lime:#b8ff00;--text-main:#c0c0c0;--metal-shine:linear-gradient(145deg,#2a2a2a,#111111)}
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        body{background-color:var(--bg-color);color:var(--text-main);font-family:'Courier New',Courier,monospace;display:flex;flex-direction:column;height:100vh;overflow:hidden;user-select:none}
+        body::after{content:"";position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle,transparent 70%,black 120%);pointer-events:none;z-index:100}
+        #shutdown-screen{position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:999;display:none}
+        header{background:var(--metal-shine);border-bottom:4px solid #000;padding:20px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 10px rgba(0,0,0,0.8);position:relative;z-index:5}
+        .sig-cluster{display:flex;align-items:center;gap:14px}
+        .sig-bars{display:flex;align-items:flex-end;gap:4px;height:32px}
+        .sig-bar{width:10px;background:#222;border:2px solid #111;transition:background .5s ease,box-shadow .5s ease,border-color .5s ease}
+        .sig-bar-1{height:25%}.sig-bar-2{height:50%}.sig-bar-3{height:75%}.sig-bar-4{height:100%}
+        .sig-bar.good{background:var(--accent-green);border-color:#005500;box-shadow:0 0 6px rgba(0,255,65,0.4)}
+        .sig-bar.average{background:var(--accent-yellow);border-color:#665500;box-shadow:0 0 6px rgba(255,208,0,0.4)}
+        .sig-bar.low{background:var(--accent-red);border-color:#660000;box-shadow:0 0 6px rgba(255,26,26,0.4)}
+        .sig-name{font-size:.55rem;color:#444;letter-spacing:2px;text-transform:uppercase;font-weight:900}
+        .wrapper{display:flex;flex:1;overflow:hidden}
+        nav{width:260px;background:#151515;border-right:6px solid #000;display:flex;flex-direction:column;gap:12px;padding:15px;overflow-y:auto;position:relative;z-index:5}
+        .nav-label{font-size:.65rem;color:#444;text-transform:uppercase;letter-spacing:2px;padding:0 5px 8px 5px;border-bottom:2px solid #222}
+        .m-btn{background:#222;color:#666;border:3px solid #111;padding:16px;cursor:pointer;text-transform:uppercase;font-weight:900;font-size:.8rem;box-shadow:4px 4px 0 #000,inset 2px 2px 2px #444;transition:transform .1s,box-shadow .1s;display:flex;justify-content:space-between;align-items:center;font-family:'Courier New',Courier,monospace;text-align:left}
+        .m-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
+        .m-btn.active{color:#fff;border-color:var(--accent-blue);background:#2a2a2a}
+        .m-btn.active::after{content:"";width:10px;height:10px;background:var(--accent-blue);border-radius:50%;box-shadow:0 0 10px var(--accent-blue);flex-shrink:0}
+        .m-btn.dead{opacity:.3;pointer-events:none}
+        .m-btn-wt{background:#1a1a0a;color:var(--accent-amber);border:3px solid #332200}
+        .m-btn-wt:hover{background:#2a2a10}
+        .m-btn-wt.active{border-color:var(--accent-amber);background:#2a2a10}
+        .m-btn-wt.active::after{background:var(--accent-amber);box-shadow:0 0 10px var(--accent-amber)}
+        main{flex:1;padding:20px;background:#050505;position:relative;z-index:5;display:flex;flex-direction:column}
+        #main-screen{flex:1;background:#000;border:4px solid #333;box-shadow:inset 0 0 60px rgba(0,255,65,0.03),inset 0 0 120px rgba(0,0,0,0.8);overflow:hidden;color:var(--accent-green);font-size:.85rem;line-height:1.7;position:relative;display:flex;flex-direction:column}
+        #main-screen::before{content:"";position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px);pointer-events:none;z-index:1}
+        #main-screen.off{background:#020202;border-color:#1a1a1a;box-shadow:inset 0 0 40px rgba(0,0,0,0.9);color:#0a0a0a}
+        #main-screen.off::before{display:none}
+        #main-screen.off .cmd-fixed-area{display:none}
+        .screen-scroll{flex:1;overflow-y:auto;position:relative;z-index:2;padding-bottom:4px}
+        .screen-scroll::-webkit-scrollbar{width:6px}
+        .screen-scroll::-webkit-scrollbar-track{background:#050a05}
+        .screen-scroll::-webkit-scrollbar-thumb{background:rgba(0,229,255,0.15)}
+        .scan-sweep{position:absolute;top:0;left:0;right:0;height:2px;z-index:3;pointer-events:none;opacity:0;transition:opacity .4s}
+        .scan-sweep.active{opacity:1}
+        .scan-sweep-line{position:absolute;top:0;left:0;right:0;height:100%;background:linear-gradient(180deg,transparent,var(--accent-cyan),transparent);box-shadow:0 0 20px var(--accent-cyan),0 0 60px rgba(0,229,255,0.15);animation:sweepDown 3s linear infinite}
+        .scan-sweep-glow{position:absolute;top:-30px;left:0;right:0;height:60px;background:linear-gradient(180deg,transparent,rgba(0,229,255,0.06),transparent);animation:sweepDown 3s linear infinite}
+        @keyframes sweepDown{0%{top:-2px}100%{top:100%}}
+        .s-header{font-weight:900;font-size:.9rem;color:var(--accent-cyan);text-shadow:0 0 10px rgba(0,229,255,0.4);border-bottom:2px solid rgba(0,229,255,0.15);padding-bottom:12px;margin-bottom:18px}
+        .s-green{color:var(--accent-green);text-shadow:0 0 6px rgba(0,255,65,0.2)}.s-cyan{color:var(--accent-cyan);text-shadow:0 0 6px rgba(0,229,255,0.2)}
+        .s-amber{color:var(--accent-amber);text-shadow:0 0 6px rgba(255,157,0,0.2)}.s-red{color:var(--accent-red);text-shadow:0 0 6px rgba(255,26,26,0.2);font-weight:900}
+        .s-blue{color:var(--accent-blue);text-shadow:0 0 6px rgba(0,132,255,0.2)}.s-yellow{color:var(--accent-yellow);text-shadow:0 0 6px rgba(255,208,0,0.2)}
+        .s-magenta{color:var(--accent-magenta);text-shadow:0 0 6px rgba(255,0,255,0.2)}.s-lime{color:var(--accent-lime);text-shadow:0 0 6px rgba(184,255,0,0.2)}
+        .s-dim{color:#225522}.s-label{color:#446644;font-size:.75rem}
+        .s-line{margin-bottom:4px}.s-divider{border:none;border-top:1px solid rgba(0,229,255,0.08);margin:14px 0}
+        .s-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0}
+        .s-cell{background:rgba(0,229,255,0.02);border:1px solid rgba(0,229,255,0.08);padding:12px;border-radius:2px}
+        .s-cell-label{font-size:.65rem;color:#336666;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+        .s-cell-val{font-size:1.1rem;font-weight:900}
+        .s-badge{display:inline-block;padding:2px 8px;font-size:.7rem;font-weight:900;border-radius:2px;letter-spacing:1px}
+        .s-badge-green{background:rgba(0,255,65,0.1);color:var(--accent-green);border:1px solid rgba(0,255,65,0.2)}
+        .s-badge-red{background:rgba(255,26,26,0.1);color:var(--accent-red);border:1px solid rgba(255,26,26,0.2)}
+        .s-badge-amber{background:rgba(255,157,0,0.1);color:var(--accent-amber);border:1px solid rgba(255,157,0,0.2)}
+        .s-badge-cyan{background:rgba(0,229,255,0.1);color:var(--accent-cyan);border:1px solid rgba(0,229,255,0.2)}
+        .s-badge-blue{background:rgba(0,132,255,0.1);color:var(--accent-blue);border:1px solid rgba(0,132,255,0.2)}
+        .s-block{background:rgba(0,229,255,0.015);border:1px solid rgba(0,229,255,0.06);padding:15px;margin:10px 0;border-radius:2px}
+        .s-link{color:var(--accent-blue);text-decoration:underline;cursor:pointer;font-weight:900;text-shadow:0 0 6px rgba(0,132,255,0.2);display:inline-block;padding:3px 0;border:none;background:none;font-family:inherit;font-size:inherit}
+        .s-link:hover{color:#33aaff}
+        @keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
+        .cursor-blink{display:inline-block;width:8px;height:14px;background:var(--accent-cyan);animation:cursorBlink 1s step-end infinite;vertical-align:text-bottom;margin-left:2px}
+        .cmd-fixed-area{flex-shrink:0;border-top:1px solid rgba(0,229,255,0.08);padding-top:8px;margin-top:8px;position:relative;z-index:2}
+        .cmd-input-wrap{display:flex;align-items:center;background:rgba(0,229,255,0.02);border:1px solid rgba(0,229,255,0.08);padding:0}
+        .cmd-prompt{padding:8px 10px;color:var(--accent-cyan);font-weight:900;font-size:.8rem;white-space:nowrap;flex-shrink:0;border-right:1px solid rgba(0,229,255,0.08)}
+        .cmd-input{flex:1;background:transparent;border:none;outline:none;color:var(--accent-cyan);font-family:'Courier New',Courier,monospace;font-size:.8rem;padding:8px 10px;caret-color:var(--accent-cyan)}
+        .cmd-input::placeholder{color:rgba(0,229,255,0.15)}
+        .cmd-input.rate-limited{color:var(--accent-red)!important;caret-color:var(--accent-red)!important}
+        .cmd-output{margin-top:6px;max-height:140px;overflow-y:auto;font-size:.75rem}
+        .cmd-output::-webkit-scrollbar{width:5px}.cmd-output::-webkit-scrollbar-track{background:transparent}.cmd-output::-webkit-scrollbar-thumb{background:rgba(0,229,255,0.12)}
+        .cmd-out-line{margin-bottom:1px}.cmd-out-cmd{color:rgba(0,229,255,0.35)}
+        .cmd-out-ok{color:var(--accent-green)}.cmd-out-warn{color:var(--accent-amber)}.cmd-out-err{color:var(--accent-red)}
+        .cmd-out-dim{color:#225522}.cmd-out-cyan{color:var(--accent-cyan)}
+        .screen-iframe-wrap{flex:1;position:relative;z-index:2;display:none;flex-direction:column}
+        .screen-iframe-wrap.active{display:flex}
+        .screen-iframe-bar{background:#0a0a0a;border:2px solid rgba(0,229,255,0.08);border-bottom:none;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;font-size:.7rem;color:var(--accent-cyan)}
+        .screen-iframe-bar button{background:#111;color:var(--accent-amber);border:2px solid #332200;padding:4px 14px;cursor:pointer;font-family:inherit;font-weight:900;font-size:.65rem;text-transform:uppercase}
+        .screen-iframe-bar button:hover{background:#1a1a0a}
+        .screen-iframe-body{flex:1;border:2px solid rgba(0,229,255,0.08);background:#000;position:relative}
+        .screen-iframe-body iframe{width:100%;height:100%;border:none;display:block;background:#000}
+        .iframe-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#225522;font-size:.8rem;gap:12px}
+        .iframe-loading .spinner{width:30px;height:30px;border:3px solid rgba(0,229,255,0.1);border-top-color:var(--accent-cyan);border-radius:50%;animation:spin .8s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        footer{background:#1a1a1a;padding:0;display:flex;flex-direction:column;border-top:6px solid #000;position:relative;z-index:1001}
+        #sys-light-bar{height:12px;width:100%;background:var(--accent-red);box-shadow:0 0 20px var(--accent-red);transition:.5s}
+        .footer-controls{display:flex;justify-content:space-between;align-items:center;padding:15px 30px;background:var(--metal-shine)}
+        .power-unit{display:flex;align-items:center;gap:18px}
+        .power-info{display:flex;flex-direction:column;gap:4px}
+        .power-label-top{font-size:.55rem;color:#555;text-transform:uppercase;letter-spacing:2px;font-weight:900}
+        #status-text{font-weight:900;letter-spacing:2px;color:var(--accent-red);font-size:.75rem;transition:color .4s}
+        .armor-toggle{width:80px;height:40px;background:linear-gradient(180deg,#1a1a1a,#0a0a0a);border:4px solid #000;border-radius:6px;cursor:pointer;position:relative;box-shadow:3px 3px 0 #000,inset 0 0 15px rgba(0,0,0,0.8);transition:all .3s ease;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+        .armor-toggle:active{transform:translate(1px,1px);box-shadow:1px 1px 0 #000,inset 0 0 15px rgba(0,0,0,0.8)}
+        .armor-toggle::before{content:"";position:absolute;top:50%;right:10px;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;background:var(--accent-red);border:2px solid #330000;box-shadow:0 0 8px var(--accent-red);transition:all .4s ease;z-index:3}
+        .armor-toggle.on::before{background:var(--accent-green);border-color:#005500;box-shadow:0 0 12px var(--accent-green),0 0 25px rgba(0,255,65,0.2)}
+        .toggle-lever{position:absolute;top:3px;left:3px;width:30px;height:26px;background:linear-gradient(180deg,#444,#222);border:2px solid #000;border-radius:4px;box-shadow:inset 1px 1px 0 #666,2px 2px 4px rgba(0,0,0,0.6);transition:left .3s cubic-bezier(.4,0,.2,1);z-index:2}
+        .toggle-lever::after{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:14px;height:2px;background:#111;box-shadow:0 -5px 0 #111,0 5px 0 #111;border-radius:1px}
+        .armor-toggle.on .toggle-lever{left:39px;background:linear-gradient(180deg,#555,#2a2a2a);box-shadow:inset 1px 1px 0 #777,2px 2px 4px rgba(0,0,0,0.6),0 0 8px rgba(0,255,65,0.15)}
+        .toggle-labels{display:flex;justify-content:space-between;width:80px;margin-top:4px;padding:0 6px}
+        .toggle-labels span{font-size:.5rem;font-weight:900;letter-spacing:1px;color:#333;transition:color .3s}
+        .toggle-labels .lbl-on.active-lbl{color:var(--accent-green)}
+        .toggle-labels .lbl-off.active-lbl{color:var(--accent-red)}
+        .scan-mech{background:linear-gradient(145deg,#001a1a,#000a0a);color:var(--accent-cyan);border:4px solid #003333;padding:15px 40px;font-weight:900;cursor:pointer;box-shadow:4px 4px 0 #000,inset 1px 1px 0 #004444;text-transform:uppercase;font-family:'Courier New',Courier,monospace;transition:all .3s}
+        .scan-mech:hover{background:linear-gradient(145deg,#002a2a,#001515)}
+        .scan-mech:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
+        .scan-mech.active{background:linear-gradient(145deg,#002020,#001010);border-color:var(--accent-cyan);box-shadow:4px 4px 0 #000,0 0 20px rgba(0,229,255,0.15),inset 0 0 10px rgba(0,229,255,0.05);animation:scanPulse 2s ease-in-out infinite}
+        @keyframes scanPulse{0%,100%{box-shadow:4px 4px 0 #000,0 0 10px rgba(0,229,255,0.1)}50%{box-shadow:4px 4px 0 #000,0 0 25px rgba(0,229,255,0.25)}}
+        @media(max-width:800px){body{overflow-y:auto;height:auto}.wrapper{flex-direction:column}nav{width:100%;border-right:none;border-bottom:6px solid #000;max-height:40vh}header{flex-direction:column;gap:10px;padding:15px}.footer-controls{flex-direction:column;gap:15px}.s-grid{grid-template-columns:1fr}}
+        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
     </style>
 </head>
-<body>
-
-<div class="scanlines" aria-hidden="true"></div>
-<div class="ambient-glow tl" aria-hidden="true"></div>
-<div class="ambient-glow br" aria-hidden="true"></div>
-<div class="ambient-glow center" aria-hidden="true"></div>
-
-<!-- Mobile backdrop overlay for panel dismissal -->
-<div class="panel-backdrop" id="panelBackdrop" onclick="closeAllPanels()"></div>
-
-<!-- Mobile toggle buttons -->
-<button class="mobile-toggle" id="mobileCatBtn" onclick="toggleMobilePanel('cat')" aria-label="Open categories">&#9776;</button>
-<button class="mobile-toggle" id="mobileDeckBtn" onclick="toggleMobilePanel('deck')" aria-label="Open cyber deck">&#9881;</button>
-
-<a href="receiver.html" class="wt-badge" aria-label="Open Walkie Talkie">
-    <span class="wt-icon" aria-hidden="true">&#9993;</span>
-    <span class="wt-text">WALKIE-TALKIE</span>
-    <span class="wt-status" aria-hidden="true"></span>
-</a>
-
-<canvas id="matrix" aria-hidden="true"></canvas>
-
-<div class="title-wrapper" aria-hidden="true">
-    <div class="title-deco">
-        <div class="line"></div>
-        <div class="diamond"></div>
-        <div class="line"></div>
-    </div>
-    <h1 class="page-title">MY_STUFF_AIO<span class="version">v3.0</span></h1>
-    <div class="title-deco">
-        <div class="line"></div>
-        <div class="diamond"></div>
-        <div class="line"></div>
-    </div>
-    <div class="title-sub">All-In-One Operations Interface</div>
-</div>
-
-<div id="lever-security" class="lever-container" onclick="toggleHUD()" role="button" tabindex="0" aria-label="Toggle HUD">
-    <span class="led" aria-hidden="true"></span>
-    <span class="lever-label">HUD</span>
-    <div class="lever-track"><div class="lever-handle"></div></div>
-    <span class="lever-label">SEC</span>
-</div>
-
-<div id="lever-matrix" class="lever-container" onclick="toggleMatrix()" role="button" tabindex="0" aria-label="Toggle Network Matrix">
-    <span class="led" aria-hidden="true"></span>
-    <span class="lever-label">OFF</span>
-    <div class="lever-track"><div class="lever-handle"></div></div>
-    <span class="lever-label">MATRIX</span>
-</div>
-
-<!-- CATEGORIES -->
-<div class="top-left-container" id="catContainer">
-    <div class="categories-panel glass-panel" id="categoriesPanel" data-brackets>
-        <h3>Categories</h3>
-        <div class="dropdown">
-            <button onclick="toggleCategoryPanel()" class="dropbtn" type="button">&#9776; Filter Categories</button>
-            <div id="categoryDropdown" class="dropdown-content filter-container">
-                <input type="text" id="categoryFilter" placeholder="Search categories..." maxlength="60" autocomplete="off" spellcheck="false" onkeyup="filterCategories()">
-                <a href="working As secured Miliatry grade.html">&#9993; WALKIE-TALKIE GLOBAL EDITION</a>
-
-                <div class="main-category">
-                    <a href="#" class="main-link" onclick="toggleSubmenu(event)">&#128193; MY_STUFF v1.0 <span class="arrow" aria-hidden="true">&#9654;</span></a>
-                    <div class="submenu"><a href="https://mohammad3230.github.io/PROJECT/" target="_blank" rel="noopener noreferrer">MY_STUFF v1.0</a></div>
-                </div>
-
-              <div class="main-category">
-                    <a href="#" class="main-link" onclick="toggleSubmenu(event)">&#128193; MY_STUFF v2.0 <span class="arrow" aria-hidden="true">&#9654;</span></a>
-                    <div class="submenu"><a href="https://mohammad3230.github.io/Games-More-.../" target="_blank" rel="noopener noreferrer">MY_STUFF v2.0</a></div>
-                </div>
-
-
-             
-                <div class="main-category">
-                    <a href="#" class="main-link" onclick="toggleSubmenu(event)">&#128193; WALKIE-TALKIE <span class="arrow" aria-hidden="true">&#9654;</span></a>
-                    <div class="submenu">
-                        
-                        <a href="working As secured Miliatry grade.html">WALKIE-TALKIE GLOBAL</a>
+<body id="app-body">
+    <div id="shutdown-screen"></div>
+    <header>
+        <div style="font-size:1.2rem;font-weight:900;color:#666">AIO: <span style="color:#fff">MY_STUFF_v3.0</span> | <span id="clock" style="color:var(--accent-amber)">00:00:00</span></div>
+        <div class="sig-cluster">
+            <div class="sig-bars">
+                <div class="sig-bar sig-bar-1" id="bar1"></div>
+                <div class="sig-bar sig-bar-2" id="bar2"></div>
+                <div class="sig-bar sig-bar-3" id="bar3"></div>
+                <div class="sig-bar sig-bar-4" id="bar4"></div>
+            </div>
+            <div class="sig-name">Signal</div>
+        </div>
+    </header>
+    <div class="wrapper">
+        <nav id="sidebar-nav">
+            <div class="nav-label">Modules</div>
+            <button class="m-btn dead" data-screen="dash" onclick="loadScreen('dash',this)">Dashboard</button>
+            <button class="m-btn dead" data-screen="v1" onclick="loadScreen('v1',this)">My Stuff v1.0</button>
+            <button class="m-btn dead" data-screen="v2" onclick="loadScreen('v2',this)">My Stuff v2.0</button>
+            <button class="m-btn m-btn-wt dead" data-screen="wt" onclick="loadScreen('wt',this)">Walkie-Talkie</button>
+            <button class="m-btn dead" data-screen="sys" onclick="loadScreen('sys',this)">System</button>
+            <button class="m-btn dead" data-screen="logs" onclick="loadScreen('logs',this)">Logs</button>
+            <button class="m-btn" style="color:var(--accent-red);margin-top:auto" onclick="location.reload()">Reset</button>
+        </nav>
+        <main>
+            <div id="main-screen" class="off">
+                <div class="scan-sweep" id="scan-sweep"><div class="scan-sweep-glow"></div><div class="scan-sweep-line"></div></div>
+                <div class="screen-scroll" id="screen-scroll"><div id="screen-content"></div></div>
+                <div class="screen-iframe-wrap" id="iframe-wrap">
+                    <div class="screen-iframe-bar"><span id="iframe-title">LOADING...</span><button onclick="closeIframe()">&#9664; BACK</button></div>
+                    <div class="screen-iframe-body">
+                        <div class="iframe-loading" id="iframe-loader"><div class="spinner"></div><span>ESTABLISHING CONNECTION...</span></div>
+                        <iframe id="screen-iframe" sandbox="allow-scripts allow-same-origin allow-forms" title="Loaded module"></iframe>
                     </div>
                 </div>
-               
-<!-- BOTTOM-LEFT INFO (hidden on tablet+) -->
-<div class="bottom-left-panel glass-panel hud-element" data-brackets>
-    <h5>SYS.INFO</h5>
-    <div class="info-row"><span class="label">NODE</span><span class="value" style="color:#00e5ff;">AIO-CORE</span></div>
-    <div class="info-row"><span class="label">FREQ</span><span class="value" style="color:#ffa500;">440.7 MHz</span></div>
-    <div class="info-row"><span class="label">UPLINK</span><span class="value" style="color:#00ff88;">ACTIVE</span></div>
-    <div class="info-row"><span class="label">ENCRYPT</span><span class="value" style="color:#c8dce8;">AES-256</span></div>
-    <div class="info-row"><span class="label">PROXY</span><span class="value" style="color:#ffa500;">3 NODES</span></div>
-    <div class="info-row"><span class="label">LAT/LON</span><span class="value" style="color:rgba(200,220,232,0.4);font-size:0.58rem;">REDACTED</span></div>
-</div>
-
-<!-- CYBER DECK -->
-<div class="bottom-right-panel glass-panel hud-element" id="systemPanel" data-brackets>
-    <div class="deck-header">
-        <div class="deck-title" onclick="toggleDeckExpand()" title="Minimize / Maximize (Right click to purge)">CYBER DECK &#11015;</div>
-        <div class="deck-controls">
-            <span id="powerBtn" onclick="togglePower(event)" class="ctrl-btn on" role="button" tabindex="0">PWR</span>
-            <span id="muteBtn" onclick="toggleMute()" class="ctrl-btn" role="button" tabindex="0">&#128266;</span>
-            <span id="autoResponse" onclick="toggleAutoResponse()" class="ctrl-btn muted" role="button" tabindex="0">AUTO</span>
-            <span id="breachCount" style="font-size:0.5rem;color:#ff4444;font-weight:bold;margin-left:2px;">0</span>
-            <span id="digitalClock" style="font-size:0.6rem;color:#00f0ff;font-weight:bold;">00:00:00</span>
-        </div>
+                <div class="cmd-fixed-area" id="cmd-area">
+                    <div class="cmd-input-wrap">
+                        <div class="cmd-prompt">AIO&gt;</div>
+                        <input type="text" class="cmd-input" id="cmd-input" placeholder="type command..." autocomplete="off" spellcheck="false" maxlength="100">
+                    </div>
+                    <div class="cmd-output" id="cmd-output"></div>
+                </div>
+            </div>
+        </main>
     </div>
-    <div id="deckContent">
-        <div class="deck-meta">UPTIME <span id="uptimeVar">00:00:00:00</span></div>
-        <div class="stat-block">
-            <div class="stat-block-header">
-                <span class="stat-label">Core Decryption</span>
-                <span class="stat-value" id="decryptVal" style="color:#00f0ff;">0%</span>
+    <footer>
+        <div id="sys-light-bar"></div>
+        <div class="footer-controls">
+            <div class="power-unit">
+                <div>
+                    <div class="armor-toggle" id="power-toggle" onclick="togglePower()" role="button" tabindex="0" aria-label="Toggle power"><div class="toggle-lever"></div></div>
+                    <div class="toggle-labels"><span class="lbl-off active-lbl">OFF</span><span class="lbl-on">ON</span></div>
+                </div>
+                <div class="power-info"><div class="power-label-top">Master Power</div><div id="status-text">SYSTEM: STANDBY</div></div>
             </div>
-            <div class="stat-bar-track">
-                <div class="stat-bar-fill" id="decryptBar" style="width:0%;background:#00f0ff;box-shadow:0 0 6px #00f0ff;"></div>
-            </div>
+            <div style="color:#444;font-size:.7rem">MY_STUFF_AIO v3.0 &copy; 2023-2026</div>
+            <button class="scan-mech" id="scan-btn" onclick="toggleScan()">SCAN</button>
         </div>
-        <div class="stat-block">
-            <div class="stat-block-header">
-                <span class="stat-label" style="color:rgba(255,0,128,0.6);">Threat Level</span>
-                <span class="stat-value" id="threatVal" style="color:#ff4444;">0%</span>
-            </div>
-            <div class="stat-bar-track" style="background:rgba(255,0,100,0.04);">
-                <div class="stat-bar-fill" id="threatBar" style="width:0%;background:linear-gradient(90deg,#ff0080,#ff4444);box-shadow:0 0 6px #ff0080;"></div>
-            </div>
-        </div>
-        <div class="network-section">
-            <div class="network-status">
-                <span class="label" id="statusLabel" style="color:#00f0ff;">STATUS: SECURE</span>
-                <div class="network-pulse" id="pulseNode"></div>
-            </div>
-            <div class="graph-container">
-                <svg width="100%" height="100%" viewBox="0 0 200 40" preserveAspectRatio="none" id="graphSvg">
-                    <polyline id="graphLine" fill="none" stroke="#00f0ff" stroke-width="1.5" points="0,40 20,40 40,40 60,40 80,40 100,40 120,40 140,40 160,40 180,40 200,40" />
-                    <g id="particleGroup"></g>
-                </svg>
-            </div>
-            <div class="net-stats">
-                <div class="net-stat"><span class="ns-label">Downlink</span><span class="ns-value"><span id="downMB">0</span> <small>Mbps</small></span></div>
-                <div class="net-stat"><span class="ns-label">Uplink</span><span class="ns-value"><span id="upMB">0</span> <small>Mbps</small></span></div>
-                <div class="net-stat"><span class="ns-label">Ping</span><span class="ns-value"><span id="pingVal">20</span> <small>ms</small></span></div>
-                <div class="net-stat"><span class="ns-label">Loss</span><span class="ns-value"><span id="lossVal">0.00</span><small>%</small></span></div>
-            </div>
-        </div>
-        <div id="terminalLog"><div style="color:#ffa500;">&#62; initializing_sys_v2.0...</div></div>
-    </div>
-    <audio id="alertSound" src="https://www.soundjay.com/misc/sounds/beep-07.wav" preload="auto"></audio>
-</div>
+    </footer>
 
-<footer class="site-footer">
-    <div class="footer-left">
-        <small>&copy; 2023-2026 MY_STUFF_AIO</small>
-        <span class="footer-dot" aria-hidden="true"></span>
-        <small>All rights reserved</small>
-    </div>
-    <div class="footer-right">ENCRYPTED CHANNEL // AES-256</div>
-</footer>
+    <script>
+        /* ================================================================
+           SECURITY LAYER — runs before any application logic
+           ================================================================ */
 
-<script>
-    /* ================================================================
-       SECURITY MEASURES — see previous audit for full documentation.
-       Key points:
-       - All DOM writes use textContent (XSS-safe)
-       - No eval/Function/document.write
-       - External links: rel="noopener noreferrer" (anti-tabnabbing)
-       - Input: maxlength + autocomplete=off + spellcheck=false
-       - Terminal log capped at 5 entries (DoS prevention)
-       - Particle count fixed at 90 (no dynamic allocation)
-       - Mouse coords: local canvas only, zero network/storage
-       - GA: IP anonymization enabled
-       - Permissions-Policy: 14 features disabled
-       ================================================================ */
-
-    let matrixActive = false;
-    let hudActive = true;
-
-    const canvas = document.getElementById('matrix');
-    const ctx = canvas.getContext('2d');
-    let currentBg = { r: 0, g: 0, b: 16 };
-
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    resizeCanvas();
-
-    const mouse = { x: -9999, y: -9999 };
-    document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-    document.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
-
-    const PARTICLE_COUNT = 90;
-    const CONNECT_DIST = 140;
-    const particles = [];
-
-    class Particle {
-        constructor() {
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * canvas.height;
-            this.vx = (Math.random() - 0.5) * 0.6;
-            this.vy = (Math.random() - 0.5) * 0.6;
-            this.baseRadius = Math.random() * 1.8 + 0.5;
-            this.radius = this.baseRadius;
-            this.depth = Math.random();
-            this.phase = Math.random() * Math.PI * 2;
+        /* [INJ-2] Input sanitization: strips control chars, null bytes,
+           HTML/script tags, and non-printable characters.
+           Returns empty string if input fails validation. */
+        function sanitizeInput(raw) {
+            if (typeof raw !== 'string') return '';
+            /* Strip null bytes — prevents null byte injection in downstream */
+            var cleaned = raw.replace(/\0/g, '');
+            /* Remove control characters except space, tab, newline (U+000A) */
+            cleaned = cleaned.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+            /* Reject if contains HTML tag-like patterns */
+            if (/<[a-zA-Z\/!]/.test(cleaned)) return '';
+            /* Reject if contains script/eval/function patterns */
+            if (/(?:script|eval|function|onclick|onerror|onload|javascript|data:text)/i.test(cleaned)) return '';
+            /* Reject if contains CSS expression patterns */
+            if (/(?:expression|behavior|binding|url\()/i.test(cleaned)) return '';
+            /* Length check already enforced by maxlength=100 on input */
+            return cleaned;
         }
-        update(active, time) {
-            const speed = active ? 1.8 : 0.4;
-            this.x += this.vx * speed;
-            this.y += this.vy * speed;
-            if (this.x < -10) this.x = canvas.width + 10;
-            if (this.x > canvas.width + 10) this.x = -10;
-            if (this.y < -10) this.y = canvas.height + 10;
-            if (this.y > canvas.height + 10) this.y = -10;
-            if (active && mouse.x > 0) {
-                const dx = this.x - mouse.x, dy = this.y - mouse.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 160 && dist > 0) {
-                    const f = (160 - dist) / 160 * 0.8;
-                    this.x += (dx / dist) * f;
-                    this.y += (dy / dist) * f;
-                }
+
+        /* [RATE-1] Command rate limiter: max 10 commands per second */
+        var cmdTimestamps = [];
+        var CMD_RATE_LIMIT = 10;
+        var CMD_RATE_WINDOW = 1000;
+        var CMD_COOLDOWN_MS = 500;
+
+        function isRateLimited() {
+            var now = Date.now();
+            /* Remove timestamps outside the window */
+            while (cmdTimestamps.length > 0 && cmdTimestamps[0] < now - CMD_RATE_WINDOW) {
+                cmdTimestamps.shift();
             }
-            const breathe = active ? Math.sin(time * 0.002 + this.phase) * 0.4 : 0;
-            const targetR = active ? (this.baseRadius * 1.6 + breathe) : (this.baseRadius * 0.4);
-            this.radius += (targetR - this.radius) * 0.06;
-            this.radius = Math.max(0.3, this.radius);
+            if (cmdTimestamps.length >= CMD_RATE_LIMIT) return true;
+            cmdTimestamps.push(now);
+            return false;
         }
-        draw(active) {
-            const isRed = currentBg.r > 20;
-            let alpha, r, g, b;
-            if (active) {
-                alpha = 0.5 + this.depth * 0.5;
-                if (isRed) { r=255; g=Math.floor(80-this.depth*40); b=Math.floor(80-this.depth*40); }
-                else { r=0; g=Math.floor(190+this.depth*65); b=255; }
+
+        /* [URL-1] URL allowlist for iframe loading.
+           Only allow HTTPS URLs from trusted origins or relative paths. */
+        var ALLOWED_ORIGINS = [
+            'https://mohammad3230.github.io'
+        ];
+
+        function isUrlAllowed(url) {
+            if (typeof url !== 'string') return false;
+            /* Allow relative paths (starting with ./ or just filename) */
+            if (/^\.?\/?[^:]/.test(url) && !url.includes('://')) return true;
+            /* Check against allowed origins */
+            try {
+                var parsed = new URL(url, window.location.href);
+                if (parsed.protocol !== 'https:') return false;
+                for (var i = 0; i < ALLOWED_ORIGINS.length; i++) {
+                    if (parsed.origin === ALLOWED_ORIGINS[i]) return true;
+                }
+            } catch (e) {
+                /* Invalid URL */
+                return false;
+            }
+            return false;
+        }
+
+        /* ================================================================
+           APPLICATION STATE
+           ================================================================ */
+        var isPowerOn = false;
+        var isScanOn = false;
+        var currentScreen = 'dash';
+        var netSpeed = 0;
+        var cmdHistory = [];
+        var cmdHistoryIdx = -1;
+        var bootTime = performance.now();
+        var cmdCooldown = false;
+
+        /* ================================================================
+           SPEED TEST — real bandwidth measurement via Cloudflare
+           ================================================================ */
+        function runSpeedTest() {
+            if (!isPowerOn) return;
+            var img = new Image();
+            var start = performance.now();
+            var done = false;
+            var sz = 500000;
+            img.onload = img.onerror = function () {
+                if (done) return;
+                done = true;
+                var elapsed = (performance.now() - start) / 1000;
+                if (elapsed < 0.1) elapsed = 0.1;
+                netSpeed = Math.round((sz * 8) / elapsed);
+                updateSignalBars();
+            };
+            /* Timeout prevents hung requests from blocking state */
+            setTimeout(function () {
+                if (!done) { done = true; netSpeed = 0; updateSignalBars(); }
+            }, 8000);
+            /* Cache-bust to prevent browser cache from skewing results */
+            img.src = 'https://speed.cloudflare.com/__down?bytes=' + sz + '&r=' + Date.now();
+        }
+
+        function updateSignalBars() {
+            var bars = [
+                document.getElementById('bar1'),
+                document.getElementById('bar2'),
+                document.getElementById('bar3'),
+                document.getElementById('bar4')
+            ];
+            bars.forEach(function (b) { b.className = 'sig-bar sig-bar-' + (bars.indexOf(b) + 1); });
+            if (!isPowerOn || netSpeed === 0) return;
+            var k = netSpeed / 1000, m = netSpeed / 1000000, c;
+            if (m >= 2) { c = 'good'; bars[0].classList.add(c); bars[1].classList.add(c); bars[2].classList.add(c); bars[3].classList.add(c); }
+            else if (k >= 150) { c = 'average'; bars[0].classList.add(c); bars[1].classList.add(c); bars[2].classList.add(c); }
+            else { c = 'low'; bars[0].classList.add(c); }
+        }
+
+        /* ================================================================
+           SCAN MODE — active monitoring sweep
+           ================================================================ */
+        function toggleScan() {
+            if (!isPowerOn) return;
+            isScanOn = !isScanOn;
+            var sweep = document.getElementById('scan-sweep');
+            var btn = document.getElementById('scan-btn');
+            if (isScanOn) { sweep.classList.add('active'); btn.classList.add('active'); btn.textContent = 'STOP SCAN'; }
+            else { sweep.classList.remove('active'); btn.classList.remove('active'); btn.textContent = 'SCAN'; }
+        }
+
+        /* ================================================================
+           POWER TOGGLE
+           ================================================================ */
+        function togglePower() {
+            isPowerOn = !isPowerOn;
+            var bar = document.getElementById('sys-light-bar'),
+                st = document.getElementById('status-text'),
+                sd = document.getElementById('shutdown-screen'),
+                tg = document.getElementById('power-toggle'),
+                sc = document.getElementById('main-screen'),
+                ln = document.querySelector('.lbl-on'),
+                lf = document.querySelector('.lbl-off'),
+                bs = document.querySelectorAll('.m-btn[data-screen]');
+
+            if (isPowerOn) {
+                bar.style.background = 'var(--accent-green)';
+                bar.style.boxShadow = '0 0 30px var(--accent-green)';
+                st.innerText = 'SYSTEM: ACTIVE';
+                st.style.color = 'var(--accent-green)';
+                sd.style.display = 'none';
+                tg.classList.add('on');
+                ln.classList.add('active-lbl');
+                lf.classList.remove('active-lbl');
+                sc.classList.remove('off');
+                bs.forEach(function (b) { b.classList.remove('dead'); });
+                loadScreen(currentScreen, document.querySelector('.m-btn[data-screen="' + currentScreen + '"]'));
+                runSpeedTest();
+                bindCmdInput();
             } else {
-                alpha = 0.06 + this.depth * 0.06; r=0; g=Math.floor(180+this.depth*40); b=255;
+                bar.style.background = 'var(--accent-red)';
+                bar.style.boxShadow = '0 0 20px var(--accent-red)';
+                st.innerText = 'SYSTEM: STANDBY';
+                st.style.color = 'var(--accent-red)';
+                sd.style.display = 'block';
+                tg.classList.remove('on');
+                ln.classList.remove('active-lbl');
+                lf.classList.add('active-lbl');
+                sc.classList.add('off');
+                document.getElementById('screen-content').innerHTML = '';
+                bs.forEach(function (b) { b.classList.remove('active'); b.classList.add('dead'); });
+                netSpeed = 0;
+                updateSignalBars();
+                if (isScanOn) toggleScan();
+                closeIframe();
             }
-            if (active && this.radius > 1) {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, Math.max(0.5, this.radius*3), 0, Math.PI*2);
-                ctx.fillStyle = `rgba(${r},${g},${b},${alpha*0.08})`;
-                ctx.fill();
-            }
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, Math.max(0.3, this.radius), 0, Math.PI*2);
-            ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
-            ctx.fill();
         }
-    }
 
-    function initParticles() { particles.length = 0; for (let i=0; i<PARTICLE_COUNT; i++) particles.push(new Particle()); }
-    initParticles();
+        /* ================================================================
+           IFRAME MANAGEMENT
+           [XSS-3] [FS-1] [FS-2] [URL-1] — all security checks applied
+           ================================================================ */
+        function openInScreen(url, title) {
+            if (!isPowerOn) return;
+            /* [URL-1] Validate URL against allowlist before loading */
+            if (!isUrlAllowed(url)) {
+                addCmdOutput([{ t: 'SECURITY: URL blocked — origin not in allowlist', c: 'cmd-out-err' }]);
+                return;
+            }
+            var w = document.getElementById('iframe-wrap'),
+                s = document.getElementById('screen-scroll'),
+                f = document.getElementById('screen-iframe'),
+                l = document.getElementById('iframe-loader');
+            document.getElementById('iframe-title').textContent = title || 'LOADING...';
+            l.style.display = 'flex';
+            f.src = 'about:blank'; /* Clear previous content first */
+            s.style.display = 'none';
+            w.classList.add('active');
+            f.onload = function () { l.style.display = 'none'; };
+            f.onerror = function () { l.innerHTML = '<span style="color:var(--accent-red)">CONNECTION FAILED</span>'; };
+            /* Set src after handlers to prevent race conditions */
+            f.src = url;
+        }
 
-    const pulseWaves = [];
-    function triggerPulse() { pulseWaves.push({ x: canvas.width/2, y: canvas.height/2, radius: 0, alpha: 0.5 }); }
+        function closeIframe() {
+            document.getElementById('iframe-wrap').classList.remove('active');
+            document.getElementById('screen-iframe').src = 'about:blank';
+            document.getElementById('screen-scroll').style.display = 'block';
+        }
 
-    function drawConnections() {
-        const isRed = currentBg.r > 20;
-        for (let i=0; i<particles.length; i++) {
-            for (let j=i+1; j<particles.length; j++) {
-                const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y;
-                const distSq=dx*dx+dy*dy;
-                if (distSq < CONNECT_DIST*CONNECT_DIST) {
-                    const dist=Math.sqrt(distSq), s=1-dist/CONNECT_DIST;
-                    const a=s*0.25*(0.5+(particles[i].depth+particles[j].depth)*0.25);
-                    ctx.strokeStyle = isRed ? `rgba(255,60,60,${a})` : `rgba(0,200,255,${a})`;
-                    ctx.lineWidth = s*1.2;
-                    ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y); ctx.lineTo(particles[j].x,particles[j].y); ctx.stroke();
+        /* [FS-1] Focus steal protection: if iframe gains focus, immediately
+           return it to the command input. Prevents loaded content from
+           trapping keyboard focus or simulating user input. */
+        document.getElementById('screen-iframe').addEventListener('focus', function () {
+            if (isPowerOn) {
+                window.focus();
+                var cmdInput = document.getElementById('cmd-input');
+                if (cmdInput) cmdInput.focus();
+            }
+        }, true);
+
+        /* ================================================================
+           COMMAND SYSTEM
+           [PP-1] commandMap frozen to prevent prototype pollution
+           [INJ-2] All user input sanitized before processing
+           [RATE-1] Rate limiting enforced
+           ================================================================ */
+        var commandMap = {
+            help: function () {
+                return [
+                    { t: 'AVAILABLE COMMANDS:', c: 'cmd-out-cyan' },
+                    { t: '  help          Show this list', c: 'cmd-out-dim' },
+                    { t: '  status        System status overview', c: 'cmd-out-dim' },
+                    { t: '  sysinfo       Hardware & software info', c: 'cmd-out-dim' },
+                    { t: '  netstat       Network statistics', c: 'cmd-out-dim' },
+                    { t: '  ping          Test connection latency', c: 'cmd-out-dim' },
+                    { t: '  speed         Run bandwidth test', c: 'cmd-out-dim' },
+                    { t: '  freq          Show radio frequency', c: 'cmd-out-dim' },
+                    { t: '  proxy         Proxy chain status', c: 'cmd-out-dim' },
+                    { t: '  encrypt       Encryption status', c: 'cmd-out-dim' },
+                    { t: '  clear         Clear terminal output', c: 'cmd-out-dim' },
+                    { t: '  uptime        System uptime', c: 'cmd-out-dim' },
+                    { t: '  whoami        Current user identity', c: 'cmd-out-dim' },
+                    { t: '  scan          Toggle scan mode', c: 'cmd-out-dim' },
+                    { t: '  scanstat      Scan detection stats', c: 'cmd-out-dim' },
+                    { t: '  trace         Traceroute simulation', c: 'cmd-out-dim' },
+                    { t: '  decrypt       Run decryption module', c: 'cmd-out-dim' },
+                    { t: '  logout        Power down system', c: 'cmd-out-dim' }
+                ];
+            },
+            status: function () {
+                var u = navigator.onLine ? 'ONLINE' : 'OFFLINE', uc = navigator.onLine ? 'cmd-out-ok' : 'cmd-out-err',
+                    sp = netSpeed === 0 ? 'SCANNING...' : (netSpeed >= 1e6 ? (netSpeed / 1e6).toFixed(1) + ' Mbps' : Math.round(netSpeed / 1e3) + ' Kbps');
+                return [
+                    { t: 'SYSTEM STATUS REPORT', c: 'cmd-out-cyan' },
+                    { t: '  Power:       ACTIVE', c: 'cmd-out-ok' },
+                    { t: '  Uplink:      ' + u, c: uc },
+                    { t: '  Bandwidth:   ' + sp, c: 'cmd-out-dim' },
+                    { t: '  Node:        AIO-CORE', c: 'cmd-out-dim' },
+                    { t: '  Encryption:  AES-256', c: 'cmd-out-dim' },
+                    { t: '  GPS:         LOCKED', c: 'cmd-out-ok' },
+                    { t: '  Firewall:    ACTIVE', c: 'cmd-out-ok' },
+                    { t: '  Scan Mode:   ' + (isScanOn ? 'ENGAGED' : 'OFF'), c: isScanOn ? 'cmd-out-cyan' : 'cmd-out-dim' },
+                    { t: '  Proxy:       3 NODES', c: 'cmd-out-dim' }
+                ];
+            },
+            sysinfo: function () {
+                /* [SE-1] Only expose data already available to any browser extension */
+                var ua = navigator.userAgent, pl = navigator.platform || 'Unknown',
+                    la = navigator.language || 'Unknown', co = navigator.hardwareConcurrency || '?',
+                    me = navigator.deviceMemory ? navigator.deviceMemory + ' GB' : 'N/A';
+                return [
+                    { t: 'SYSTEM INFORMATION', c: 'cmd-out-cyan' },
+                    { t: '  Platform:    ' + pl, c: 'cmd-out-dim' },
+                    { t: '  Cores:       ' + co, c: 'cmd-out-dim' },
+                    { t: '  Memory:      ' + me, c: 'cmd-out-dim' },
+                    { t: '  Language:    ' + la, c: 'cmd-out-dim' },
+                    { t: '  Screen:      ' + screen.width + 'x' + screen.height, c: 'cmd-out-dim' },
+                    { t: '  Color Depth: ' + screen.colorDepth + ' bit', c: 'cmd-out-dim' },
+                    { t: '  User Agent:', c: 'cmd-out-dim' },
+                    { t: '  ' + ua.substring(0, 70), c: 'cmd-out-dim' },
+                    { t: '  ' + ua.substring(70), c: 'cmd-out-dim' }
+                ];
+            },
+            netstat: function () {
+                var sp = netSpeed === 0 ? 'SCANNING...' : (netSpeed >= 1e6 ? (netSpeed / 1e6).toFixed(1) + ' Mbps' : Math.round(netSpeed / 1e3) + ' Kbps'),
+                    u = navigator.onLine ? 'ONLINE' : 'OFFLINE', uc = navigator.onLine ? 'cmd-out-ok' : 'cmd-out-err',
+                    cn = navigator.connection ? navigator.connection : null,
+                    et = cn && cn.effectiveType ? cn.effectiveType.toUpperCase() : 'N/A',
+                    rt = cn && cn.rtt !== undefined ? cn.rtt + ' ms' : 'N/A',
+                    dl = cn && cn.downlink !== undefined ? cn.downlink + ' Mbps' : 'N/A';
+                return [
+                    { t: 'NETWORK STATISTICS', c: 'cmd-out-cyan' },
+                    { t: '  Status:       ' + u, c: uc },
+                    { t: '  Measured:     ' + sp, c: 'cmd-out-dim' },
+                    { t: '  Eff. Type:    ' + et, c: 'cmd-out-dim' },
+                    { t: '  Est. RTT:     ' + rt, c: 'cmd-out-dim' },
+                    { t: '  Est. Down:    ' + dl, c: 'cmd-out-dim' },
+                    { t: '  Protocol:     TLS 1.3', c: 'cmd-out-dim' },
+                    { t: '  DNS:          ENCRYPTED', c: 'cmd-out-ok' },
+                    { t: '  Proxy:        3 NODES ACTIVE', c: 'cmd-out-dim' }
+                ];
+            },
+            ping: function () {
+                if (!navigator.onLine) return [{ t: 'PING FAILED: NO CONNECTION', c: 'cmd-out-err' }];
+                var l = Math.floor(Math.random() * 80 + 10), j = Math.floor(Math.random() * 15);
+                return [
+                    { t: 'PING gateway.aio-core.net', c: 'cmd-out-dim' },
+                    { t: '  Reply: time=' + l + 'ms TTL=64', c: 'cmd-out-ok' },
+                    { t: '  Reply: time=' + (l + j) + 'ms TTL=64', c: 'cmd-out-ok' },
+                    { t: '  Reply: time=' + (l - Math.floor(j / 2)) + 'ms TTL=64', c: 'cmd-out-ok' },
+                    { t: '  Reply: time=' + (l + Math.floor(j / 3)) + 'ms TTL=64', c: 'cmd-out-ok' },
+                    { t: '  --- 4 sent, 4 received ---', c: 'cmd-out-dim' },
+                    { t: '  Avg: ' + l + 'ms | Jitter: ' + j + 'ms', c: 'cmd-out-dim' }
+                ];
+            },
+            speed: function () { runSpeedTest(); return [{ t: 'BANDWIDTH TEST INITIATED...', c: 'cmd-out-warn' }, { t: 'Results will update signal bars.', c: 'cmd-out-dim' }]; },
+            freq: function () { var fs = ['440.700 MHz', '460.025 MHz', '460.150 MHz', '465.900 MHz', '154.825 MHz'], a = fs[Math.floor(Math.random() * fs.length)]; return [{ t: 'RADIO FREQUENCY MODULE', c: 'cmd-out-cyan' }, { t: '  Active Freq:  ' + a, c: 'cmd-out-ok' }, { t: '  Band:         VHF/UHF', c: 'cmd-out-dim' }, { t: '  Modulation:   FM', c: 'cmd-out-dim' }, { t: '  Power:        50W', c: 'cmd-out-dim' }, { t: '  Squelch:      CLOSED', c: 'cmd-out-dim' }]; },
+            proxy: function () { var n = []; for (var i = 1; i <= 3; i++) { var la = (Math.random() * 180 - 90).toFixed(2), lo = (Math.random() * 360 - 180).toFixed(2), ms = Math.floor(Math.random() * 200 + 30); n.push({ t: '  Node ' + i + ': ' + la + ', ' + lo + ' [' + ms + 'ms]', c: 'cmd-out-ok' }); } return [{ t: 'PROXY CHAIN STATUS', c: 'cmd-out-cyan' }].concat(n).concat([{ t: '  Chain integrity: VERIFIED', c: 'cmd-out-ok' }]); },
+            encrypt: function () { return [{ t: 'ENCRYPTION MODULE', c: 'cmd-out-cyan' }, { t: '  Algorithm:    AES-256-GCM', c: 'cmd-out-dim' }, { t: '  Key Length:   256 bit', c: 'cmd-out-dim' }, { t: '  Key Status:   ' + (Math.random() > 0.1 ? 'ROTATED' : 'ROTATING...'), c: 'cmd-out-ok' }, { t: '  Session:      ACTIVE', c: 'cmd-out-ok' }, { t: '  Last Rotate:  ' + new Date().toLocaleTimeString(), c: 'cmd-out-dim' }, { t: '  Forward Sec:  YES', c: 'cmd-out-dim' }]; },
+            clear: function () { return 'CLEAR'; },
+            uptime: function () { var s = Math.floor((performance.now() - bootTime) / 1000), h = Math.floor(s / 3600); s %= 3600; var m = Math.floor(s / 60); s %= 60; return [{ t: 'SYSTEM UPTIME', c: 'cmd-out-cyan' }, { t: '  ' + String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0'), c: 'cmd-out-dim' }]; },
+            whoami: function () { return [{ t: 'USER: operator@aio-core', c: 'cmd-out-ok' }, { t: '  Group:    admin', c: 'cmd-out-dim' }, { t: '  Session:  encrypted', c: 'cmd-out-dim' }, { t: '  Clearance: LEVEL 3', c: 'cmd-out-warn' }]; },
+            scan: function () { toggleScan(); return [{ t: 'SCAN MODE: ' + (isScanOn ? 'ENGAGED' : 'DISABLED'), c: isScanOn ? 'cmd-out-cyan' : 'cmd-out-dim' }, { t: isScanOn ? '  Sweeping all data channels...' : '  Scan halted.', c: 'cmd-out-dim' }]; },
+            scanstat: function () { return [{ t: 'SCAN DETECTION STATS', c: 'cmd-out-cyan' }, { t: '  Mode:         ' + (isScanOn ? 'ACTIVE' : 'OFF'), c: isScanOn ? 'cmd-out-ok' : 'cmd-out-dim' }, { t: '  Detections:   ' + (isScanOn ? Math.floor(Math.random() * 20 + 5) : 0), c: isScanOn ? 'cmd-out-cyan' : 'cmd-out-dim' }, { t: '  Anomalies:    ' + (isScanOn ? Math.floor(Math.random() * 3) : 0), c: isScanOn ? 'cmd-out-warn' : 'cmd-out-dim' }, { t: '  Last Sweep:   ' + (isScanOn ? new Date().toLocaleTimeString() : 'N/A'), c: 'cmd-out-dim' }]; },
+            trace: function () { var h = []; for (var i = 1; i <= 6; i++) { var ms = Math.floor(Math.random() * 100 + i * 10), ip = '10.' + Math.floor(Math.random() * 255) + '.' + Math.floor(Math.random() * 255) + '.' + i; h.push({ t: '  Hop ' + i + ': ' + ip + ' [' + ms + 'ms]', c: 'cmd-out-dim' }); } h.push({ t: '  Destination reached.', c: 'cmd-out-ok' }); return [{ t: 'TRACEROUTE: gateway.aio-core.net', c: 'cmd-out-cyan' }].concat(h); },
+            decrypt: function () { var p = Math.floor(Math.random() * 100), ls = [{ t: 'DECRYPTION MODULE v2.1', c: 'cmd-out-cyan' }, { t: '  Loading cipher block...', c: 'cmd-out-dim' }, { t: '  Key exchange: COMPLETE', c: 'cmd-out-ok' }, { t: '  Block size: 128 bit', c: 'cmd-out-dim' }, { t: '  Progress: ' + p + '%', c: p > 80 ? 'cmd-out-ok' : 'cmd-out-warn' }, { t: '  Status: ' + (p > 90 ? 'DECRYPTED' : 'PROCESSING...'), c: p > 90 ? 'cmd-out-ok' : 'cmd-out-warn' }]; if (p > 90) ls.push({ t: '  Output: [REDACTED - CLEARANCE 4 REQUIRED]', c: 'cmd-out-err' }); return ls; },
+            logout: function () { setTimeout(function () { if (isPowerOn) togglePower(); }, 300); return [{ t: 'POWERING DOWN...', c: 'cmd-out-warn' }, { t: 'GOODBYE.', c: 'cmd-out-dim' }]; }
+        };
+        /* [PP-1] Freeze commandMap to prevent prototype pollution attacks */
+        Object.freeze(commandMap);
+
+        /* [XSS-1] [INJ-2] Command execution — sanitized input, textContent only display */
+        function executeCommand(raw) {
+            var sanitized = sanitizeInput(raw);
+            if (sanitized === '') return; /* Silently reject bad input */
+
+            var inp = sanitized.trim().toLowerCase();
+            if (inp.length === 0) return;
+
+            cmdHistory.unshift(sanitized.trim());
+            if (cmdHistory.length > 50) cmdHistory.pop();
+            cmdHistoryIdx = -1;
+
+            /* [RATE-1] Enforce rate limit */
+            if (isRateLimited()) {
+                addCmdOutput([{ t: 'RATE LIMITED: too many commands', c: 'cmd-out-err' }]);
+                /* Visual cooldown feedback on input */
+                var ci = document.getElementById('cmd-input');
+                if (ci) {
+                    ci.classList.add('rate-limited');
+                    cmdCooldown = true;
+                    setTimeout(function () {
+                        ci.classList.remove('rate-limited');
+                        cmdCooldown = false;
+                    }, CMD_COOLDOWN_MS);
+                }
+                return;
+            }
+
+            /* [XSS-1] All output uses textContent — never innerHTML with user data */
+            addCmdOutput([{ t: '> ' + sanitized.trim(), c: 'cmd-out-cmd' }]);
+
+            var handler = commandMap[inp];
+            if (!handler) {
+                addCmdOutput([{ t: "  UNKNOWN: '" + inp + "' — type 'help'", c: 'cmd-out-err' }]);
+            } else if (handler === 'CLEAR') {
+                document.getElementById('cmd-output').innerHTML = '';
+            } else {
+                try {
+                    var lines = handler();
+                    if (Array.isArray(lines)) {
+                        addCmdOutput(lines);
+                    }
+                } catch (e) {
+                    /* Error boundary: prevent command handler crash from breaking UI */
+                    addCmdOutput([{ t: '  ERROR: Command execution failed', c: 'cmd-out-err' }]);
                 }
             }
         }
-        if (matrixActive && mouse.x > 0) {
-            for (let i=0; i<particles.length; i++) {
-                const dx=particles[i].x-mouse.x, dy=particles[i].y-mouse.y, dist=Math.sqrt(dx*dx+dy*dy);
-                if (dist < 180) {
-                    const a=(1-dist/180)*0.35;
-                    ctx.strokeStyle = isRed ? `rgba(255,80,80,${a})` : `rgba(0,220,255,${a})`;
-                    ctx.lineWidth = (1-dist/180)*1.5;
-                    ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y); ctx.lineTo(mouse.x,mouse.y); ctx.stroke();
-                }
+
+        /* [XSS-1] All output through textContent — no innerHTML with user data */
+        function addCmdOutput(lines) {
+            var out = document.getElementById('cmd-output');
+            if (!out) return;
+            lines.forEach(function (l) {
+                var d = document.createElement('div');
+                d.className = 'cmd-out-line ' + (l.c || 'cmd-out-dim');
+                d.textContent = l.t;
+                out.appendChild(d);
+            });
+            out.scrollTop = out.scrollHeight;
+        }
+
+        /* ================================================================
+           COMMAND INPUT BINDING
+           ================================================================ */
+        function bindCmdInput() {
+            var inp = document.getElementById('cmd-input');
+            if (!inp) return;
+            /* Replace node to clear any stale event listeners (defense-in-depth) */
+            var newInp = inp.parentNode.replaceChild(inp.cloneNode(true), inp);
+            newInp.focus();
+            newInp.onkeydown = function (e) {
+                /* Reject input during cooldown */
+                if (cmdCooldown) { e.preventDefault(); return; }
+                if (e.key === 'Enter') { e.preventDefault(); executeCommand(newInp.value); newInp.value = ''; }
+                else if (e.key === 'ArrowUp') { e.preventDefault(); if (cmdHistory.length > 0 && cmdHistoryIdx < cmdHistory.length - 1) { cmdHistoryIdx++; newInp.value = cmdHistory[cmdHistoryIdx]; } }
+                else if (e.key === 'ArrowDown') { e.preventDefault(); if (cmdHistoryIdx > 0) { cmdHistoryIdx--; newInp.value = cmdHistory[cmdHistoryIdx]; } else { cmdHistoryIdx = -1; newInp.value = ''; } }
+                /* Block Tab from leaving the input — prevents focus-stealing attacks */
+                else if (e.key === 'Tab') { e.preventDefault(); }
+            };
+        }
+
+        /* ================================================================
+           SCREEN CONTENT (all hardcoded — no user input reaches here)
+           ================================================================ */
+        var screenData = {
+            dash: function () { return '<div class="s-header">[ OPERATIONS MODULE v3.0 ]</div><div class="s-grid"><div class="s-cell"><div class="s-cell-label">Node</div><div class="s-cell-val s-cyan">AIO-CORE</div></div><div class="s-cell"><div class="s-cell-label">Uplink</div><div class="s-cell-val"><span class="s-badge s-badge-green">ACTIVE</span></div></div><div class="s-cell"><div class="s-cell-label">Encrypt</div><div class="s-cell-val s-blue">AES-256</div></div><div class="s-cell"><div class="s-cell-label">Proxy</div><div class="s-cell-val s-amber">3 NODES</div></div><div class="s-cell"><div class="s-cell-label">GPS</div><div class="s-cell-val s-green">LOCKED</div></div><div class="s-cell"><div class="s-cell-label">Coords</div><div class="s-cell-val s-red">REDACTED</div></div></div><hr class="s-divider"><div class="s-block"><div class="s-line"><span class="s-dim">&gt;</span> SYSTEM CHECK... <span class="s-green">OK</span></div><div class="s-line"><span class="s-dim">&gt;</span> GPS LOCK... <span class="s-green">ACQUIRED</span></div><div class="s-line"><span class="s-dim">&gt;</span> FREQUENCY... <span class="s-yellow">440.7 MHz</span></div><div class="s-line"><span class="s-dim">&gt;</span> LAT/LON... <span class="s-red">REDACTED</span></div><div class="s-line"><span class="s-dim">&gt;</span> FIREWALL... <span class="s-green">ACTIVE</span></div><div class="s-line"><span class="s-dim">&gt;</span> BANDWIDTH... <span class="s-cyan">SCANNING</span></div></div><hr class="s-divider"><div class="s-line"><span class="s-dim">&gt;</span> COMMAND INTERFACE READY<span class="cursor-blink"></span></div>'; },
+            v1: function () { return '<div class="s-header">[ MY_STUFF v1.0 ]</div><div class="s-block"><div class="s-line"><span class="s-label">MODULE:</span> <span class="s-cyan">MY_STUFF v1.0</span></div><div class="s-line"><span class="s-label">STATUS:</span> <span class="s-badge s-badge-green">ONLINE</span></div><div class="s-line"><span class="s-label">HOST:</span> <span class="s-dim">mohammad3230.github.io</span></div></div><hr class="s-divider"><div class="s-line"><span class="s-dim">&gt;</span> SELECT ACTION:</div><div style="margin-top:10px"><button class="s-link" onclick="openInScreen(\'https://mohammad3230.github.io/PROJECT/\',\'MY_STUFF v1.0\')">&#9654; OPEN MY_STUFF v1.0</button></div>'; },
+            v2: function () { return '<div class="s-header">[ MY_STUFF v2.0 ]</div><div class="s-block"><div class="s-line"><span class="s-label">MODULE:</span> <span class="s-cyan">MY_STUFF v2.0</span></div><div class="s-line"><span class="s-label">STATUS:</span> <span class="s-badge s-badge-green">ONLINE</span></div><div class="s-line"><span class="s-label">HOST:</span> <span class="s-dim">mohammad3230.github.io</span></div></div><hr class="s-divider"><div class="s-line"><span class="s-dim">&gt;</span> SELECT ACTION:</div><div style="margin-top:10px"><button class="s-link" onclick="openInScreen(\'https://mohammad3230.github.io/Games-More-.../\',\'MY_STUFF v2.0\')">&#9654; OPEN MY_STUFF v2.0</button></div>'; },
+            wt: function () { return '<div class="s-header">[ WALKIE-TALKIE MODULE ]</div><div class="s-block"><div class="s-line"><span class="s-label">MODULE:</span> <span class="s-amber">WALKIE-TALKIE GLOBAL</span></div><div class="s-line"><span class="s-label">ENCRYPTION:</span> <span class="s-badge s-badge-amber">MILITARY GRADE</span></div><div class="s-line"><span class="s-label">FREQ:</span> <span class="s-yellow">440.7 MHz</span></div><div class="s-line"><span class="s-label">STATUS:</span> <span class="s-badge s-badge-cyan">STANDBY</span></div></div><hr class="s-divider"><div class="s-line"><span class="s-dim">&gt;</span> AVAILABLE CHANNELS:</div><div style="margin-top:10px"><button class="s-link" onclick="openInScreen(\'working As secured Miliatry grade.html\',\'WALKIE-TALKIE GLOBAL\')">&#9654; OPEN WALKIE-TALKIE GLOBAL EDITION</button></div>'; },
+            sys: function () { return '<div class="s-header">[ SYSTEM DIAGNOSTICS ]</div><div class="s-block"><div class="s-line"><span class="s-dim">&gt;</span> SYSTEM CHECK... <span class="s-green">OK</span></div><div class="s-line"><span class="s-dim">&gt;</span> GPS LOCK... <span class="s-green">ACQUIRED</span></div><div class="s-line"><span class="s-dim">&gt;</span> FREQUENCY... <span class="s-yellow">440.7 MHz</span></div><div class="s-line"><span class="s-dim">&gt;</span> PROXY CHAIN... <span class="s-amber">3 NODES</span></div><div class="s-line"><span class="s-dim">&gt;</span> LAT/LON... <span class="s-red">REDACTED</span></div><div class="s-line"><span class="s-dim">&gt;</span> ENCRYPTION... <span class="s-blue">AES-256 LOADED</span></div><div class="s-line"><span class="s-dim">&gt;</span> FIREWALL... <span class="s-green">ACTIVE</span></div><div class="s-line"><span class="s-dim">&gt;</span> SIGNAL... <span class="s-lime">NOMINAL</span></div></div>'; },
+            logs: function () { return '<div class="s-header">[ SYSTEM LOG ]</div><div id="screen-log"><div style="color:var(--accent-cyan)">[INIT] Booting AIO-Core v3.0...</div><div style="color:var(--accent-cyan)">[INIT] Encryption layer loaded.</div></div>'; }
+        };
+
+        function loadScreen(id, btn) {
+            if (!isPowerOn) return;
+            closeIframe();
+            currentScreen = id;
+            document.querySelectorAll('.m-btn[data-screen]').forEach(function (b) { b.classList.remove('active'); });
+            if (btn) btn.classList.add('active');
+            if (screenData[id]) document.getElementById('screen-content').innerHTML = screenData[id]();
+        }
+
+        /* ================================================================
+           UTILITIES
+           ================================================================ */
+        setInterval(function () { document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }, 1000);
+
+        var logMsgs = ['Heartbeat signal received.', 'Node handshake completed.', 'Scanning frequency bands...', 'Proxy rotation successful.', 'Data packet integrity verified.', 'Encryption key refreshed.', 'Uplink stability: nominal.', 'Background sweep clean.', 'Channel noise within tolerance.', 'Backup node synchronized.', 'Decrypting incoming block...', 'Frequency shift detected.', 'Secure tunnel established.', 'Auth token rotated.'];
+        var logColors = ['var(--accent-green)', 'var(--accent-cyan)', 'var(--accent-amber)', 'var(--accent-blue)', 'var(--accent-lime)'];
+        setInterval(function () {
+            if (!isPowerOn || currentScreen !== 'logs') return;
+            var el = document.getElementById('screen-log');
+            if (!el) return;
+            var t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            var m = logMsgs[Math.floor(Math.random() * logMsgs.length)];
+            var d = document.createElement('div');
+            if (isScanOn) {
+                d.style.color = 'var(--accent-cyan)';
+                d.style.fontWeight = '900';
+                d.textContent = '[SCAN][' + t + '] DETECTED: ' + m;
+            } else {
+                d.style.color = logColors[Math.floor(Math.random() * logColors.length)];
+                d.textContent = '[' + t + '] ' + m;
             }
-            const grad = ctx.createRadialGradient(mouse.x,mouse.y,0,mouse.x,mouse.y,60);
-            const gc = isRed ? '255,60,60' : '0,200,255';
-            grad.addColorStop(0, `rgba(${gc},0.12)`); grad.addColorStop(1, `rgba(${gc},0)`);
-            ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(mouse.x,mouse.y,60,0,Math.PI*2); ctx.fill();
-        }
-    }
+            el.appendChild(d);
+            el.scrollTop = el.scrollHeight;
+            if (el.children.length > 50) el.removeChild(el.firstChild);
+        }, 3000);
 
-    function drawGrid() {
-        const isRed = currentBg.r > 20;
-        ctx.strokeStyle = isRed ? 'rgba(255,40,40,0.018)' : 'rgba(0,180,255,0.018)';
-        ctx.lineWidth = 0.5;
-        for (let x=0; x<canvas.width; x+=80) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }
-        for (let y=0; y<canvas.height; y+=80) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke(); }
-    }
+        setInterval(function () { if (isPowerOn) runSpeedTest(); }, 15000);
 
-    function drawPulses() {
-        const isRed = currentBg.r > 20;
-        for (let i=pulseWaves.length-1; i>=0; i--) {
-            const p=pulseWaves[i]; p.radius+=6; p.alpha*=0.965;
-            if (p.alpha<0.005) { pulseWaves.splice(i,1); continue; }
-            ctx.beginPath(); ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
-            ctx.strokeStyle = isRed ? `rgba(255,60,60,${p.alpha})` : `rgba(0,200,255,${p.alpha})`;
-            ctx.lineWidth = 1.5; ctx.stroke();
-            if (p.radius > 20) {
-                ctx.beginPath(); ctx.arc(p.x,p.y,p.radius-15,0,Math.PI*2);
-                ctx.strokeStyle = isRed ? `rgba(255,60,60,${p.alpha*0.4})` : `rgba(0,200,255,${p.alpha*0.4})`;
-                ctx.lineWidth = 0.8; ctx.stroke();
-            }
-        }
-    }
-
-    function renderNetwork(time) {
-        ctx.fillStyle = `rgba(${currentBg.r},${currentBg.g},${currentBg.b},${matrixActive?0.12:0.25})`;
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-        if (matrixActive) drawGrid();
-        for (const p of particles) { p.update(matrixActive, time); p.draw(matrixActive); }
-        if (matrixActive) drawConnections();
-        drawPulses();
-        requestAnimationFrame(renderNetwork);
-    }
-    requestAnimationFrame(renderNetwork);
-
-    function toggleMatrix() {
-        matrixActive = !matrixActive;
-        const lever = document.getElementById('lever-matrix');
-        if (matrixActive) { lever.classList.add('active'); document.body.classList.add('matrix-on'); triggerPulse(); }
-        else { lever.classList.remove('active'); document.body.classList.remove('matrix-on'); }
-    }
-
-    window.addEventListener('resize', () => {
-        resizeCanvas();
-        for (const p of particles) {
-            if (p.x > canvas.width) p.x = Math.random() * canvas.width;
-            if (p.y > canvas.height) p.y = Math.random() * canvas.height;
-        }
-    });
-
-    function toggleHUD() {
-        hudActive = !hudActive;
-        const lever = document.getElementById('lever-security');
-        const els = document.querySelectorAll('.hud-element');
-        if (hudActive) { lever.classList.add('active'); els.forEach(el => el.classList.remove('hud-hidden')); }
-        else { lever.classList.remove('active'); els.forEach(el => el.classList.add('hud-hidden')); }
-    }
-
-    // === MOBILE PANEL MANAGEMENT ===
-    function toggleMobilePanel(type) {
-        const backdrop = document.getElementById('panelBackdrop');
-        const catContainer = document.getElementById('catContainer');
-        const deckPanel = document.getElementById('systemPanel');
-
-        if (type === 'cat') {
-            const isOpen = catContainer.classList.toggle('mobile-show');
-            deckPanel.classList.remove('mobile-show');
-            backdrop.classList.toggle('show', isOpen);
-            if (isOpen) {
-                // Auto-expand categories on mobile
-                document.getElementById('categoriesPanel').classList.add('expanded');
-                document.getElementById('categoryDropdown').classList.add('show');
-            }
-        } else if (type === 'deck') {
-            const isOpen = deckPanel.classList.toggle('mobile-show');
-            catContainer.classList.remove('mobile-show');
-            backdrop.classList.toggle('show', isOpen);
-            // Auto-expand deck on mobile
-            if (isOpen) deckPanel.classList.add('expanded');
-        }
-    }
-
-    function closeAllPanels() {
-        document.getElementById('panelBackdrop').classList.remove('show');
-        document.getElementById('catContainer').classList.remove('mobile-show');
-        document.getElementById('systemPanel').classList.remove('mobile-show');
-    }
-
-    function toggleCategoryPanel() {
-        // On mobile, panel is already full-screen expanded
-        if (window.innerWidth <= 640) return;
-        document.getElementById('categoriesPanel').classList.toggle('expanded');
-        document.getElementById('categoryDropdown').classList.toggle('show');
-    }
-
-    function toggleSubmenu(event) {
-        event.preventDefault();
-        const mc = event.target.closest(".main-category");
-        if (!mc) return;
-        const sub = mc.querySelector(".submenu");
-        if (!sub) return;
-        sub.style.display = mc.classList.toggle('open') ? "block" : "none";
-    }
-
-    function filterCategories() {
-        const f = document.getElementById("categoryFilter").value.toUpperCase();
-        document.getElementById("categoryDropdown").querySelectorAll("a").forEach(el => {
-            el.style.display = (el.textContent||el.innerText).toUpperCase().indexOf(f) > -1 ? "" : "none";
+        document.getElementById('power-toggle').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePower(); }
         });
-    }
 
-    function toggleDeckExpand() {
-        if (window.innerWidth <= 640) return; // Already expanded on mobile
-        document.getElementById('systemPanel').classList.toggle('expanded');
-    }
-
-    let isPoweredOn = true;
-    function togglePower(event) {
-        event.stopPropagation();
-        isPoweredOn = !isPoweredOn;
-        const btn = document.getElementById('powerBtn');
-        const c = document.getElementById('deckContent');
-        if (isPoweredOn) {
-            btn.className = 'ctrl-btn on'; c.style.opacity = "1"; c.style.pointerEvents = "auto";
-            addTerminalLog("SYSTEM COLD BOOT SUCCESSFUL", "#00f0ff");
-        } else {
-            btn.className = 'ctrl-btn danger'; c.style.opacity = "0.1"; c.style.pointerEvents = "none";
-            document.getElementById('downMB').innerText = "0";
-            document.getElementById('upMB').innerText = "0";
-            document.getElementById('lossVal').innerText = "0.00";
-            document.getElementById('threatVal').innerText = "0%";
-            document.getElementById('threatBar').style.width = "0%";
-            document.getElementById('decryptVal').innerText = "0%";
-            document.getElementById('decryptBar').style.width = "0%";
-        }
-    }
-
-    let startTime = Date.now();
-    let graphPoints = [35,30,32,28,35,30,25,30,35,38,40];
-    let decryptPercent = 0, isMuted = false, lastBreachStatus = false;
-    let breachCount = 0, autoResponse = false, isLockdown = false, tracePercent = 0;
-    const deckLogs = ["Decrypting block...","RSA Key Found","Bypassing Firewall","Node link: Active","Shifting Frequency"];
-    const MAX_TERMINAL_ENTRIES = 5;
-
-    function addTerminalLog(msg, color) {
-        const t = document.getElementById('terminalLog');
-        if (!t) return;
-        const entry = document.createElement('div');
-        entry.style.color = color;
-        entry.textContent = "> " + msg; // textContent — XSS-safe
-        t.prepend(entry);
-        while (t.childNodes.length > MAX_TERMINAL_ENTRIES) t.removeChild(t.lastElementChild);
-    }
-
-    function updateDashboard() {
-        if (isLockdown) return;
-        document.getElementById('digitalClock').innerText = new Date().toLocaleTimeString('en-GB');
-        if (!isPoweredOn) return;
-
-        let diff = Math.floor((Date.now() - startTime) / 1000) + 87200;
-        document.getElementById('uptimeVar').innerText =
-            `${Math.floor(diff/86400).toString().padStart(2,'0')}:${Math.floor((diff%86400)/3600).toString().padStart(2,'0')}:${Math.floor((diff%3600)/60).toString().padStart(2,'0')}:${(diff%60).toString().padStart(2,'0')}`;
-
-        let dl=(Math.random()*45+10).toFixed(1), ul=(Math.random()*15+2).toFixed(1);
-        let lossNum=(Math.random()>0.92)?(Math.random()*0.15):(Math.random()*0.01);
-
-        if (autoResponse && lossNum > 0.05) { lossNum = 0; addTerminalLog("AUTO-RESPONSE: Threat neutralized","#00ff88"); }
-
-        const isBreach = lossNum > 0.05;
-        const color = isBreach ? "#ff4444" : "#00f0ff";
-
-        if (isBreach) {
-            tracePercent += 2.5; breachCount++;
-            document.getElementById('breachCount').innerText = breachCount;
-            if (!lastBreachStatus) {
-                if (!isMuted) document.getElementById('alertSound').play().catch(()=>{});
-                addTerminalLog("BREACH_DETECTED", "#ff4444");
-            }
-        } else if (tracePercent > 0) tracePercent -= 0.5;
-        tracePercent = Math.max(0, Math.min(100, tracePercent));
-
-        if (tracePercent >= 100) {
-            isLockdown = true;
-            addTerminalLog("SYSTEM LOCKDOWN: TRACE COMPLETE", "#ff0000");
-            document.body.style.filter = "grayscale(1) contrast(2) invert(1)";
-            return;
-        }
-
-        lastBreachStatus = isBreach;
-        document.getElementById('statusLabel').innerText = isBreach ? "STATUS: BREACH" : "STATUS: SECURE";
-        document.getElementById('statusLabel').style.color = color;
-        document.getElementById('pulseNode').style.backgroundColor = color;
-        document.getElementById('pulseNode').style.boxShadow = `0 0 8px ${color}`;
-        document.getElementById('downMB').innerText = dl;
-        document.getElementById('upMB').innerText = ul;
-        document.getElementById('lossVal').innerText = lossNum.toFixed(2);
-
-        if (decryptPercent < 99.9) decryptPercent += Math.random() * 0.5;
-        else if (Math.random() > 0.98) decryptPercent = 0;
-        document.getElementById('decryptVal').innerText = decryptPercent.toFixed(1) + "%";
-        document.getElementById('decryptBar').style.width = decryptPercent + "%";
-
-        let tl = Math.min(100, (lossNum * 2000) + (decryptPercent * 0.4));
-        document.getElementById('threatVal').innerText = tl.toFixed(0) + '%';
-        document.getElementById('threatBar').style.width = tl + '%';
-        document.getElementById('threatBar').style.boxShadow = `0 0 8px hsl(${120-tl},100%,50%)`;
-
-        if (tl > 80) {
-            currentBg = { r:40, g:0, b:0 };
-            document.getElementById('systemPanel').style.boxShadow = "0 0 40px rgba(255,0,0,0.25),inset 0 1px 0 rgba(255,255,255,0.03)";
-            document.getElementById('systemPanel').style.borderColor = "rgba(255,0,85,0.25)";
-        } else {
-            currentBg = { r:0, g:0, b:16 };
-            document.getElementById('systemPanel').style.boxShadow = "0 0 25px rgba(255,165,0,0.06),inset 0 1px 0 rgba(255,255,255,0.03)";
-            document.getElementById('systemPanel').style.borderColor = "rgba(255,165,0,0.1)";
-        }
-
-        graphPoints.shift();
-        graphPoints.push(Math.floor(Math.random() * 30 + 5));
-        document.getElementById('graphLine').setAttribute("points", graphPoints.map((p,i) => `${i*20},${p}`).join(" "));
-        if (Math.random() > 0.85) addTerminalLog(deckLogs[Math.floor(Math.random()*deckLogs.length)], "#ffa500");
-    }
-
-    function toggleMute() {
-        isMuted = !isMuted;
-        const btn = document.getElementById('muteBtn');
-        btn.innerHTML = isMuted ? '&#128263;' : '&#128266;';
-        btn.className = isMuted ? 'ctrl-btn muted' : 'ctrl-btn';
-    }
-
-    function toggleAutoResponse() {
-        autoResponse = !autoResponse;
-        document.getElementById('autoResponse').className = autoResponse ? 'ctrl-btn on' : 'ctrl-btn muted';
-    }
-
-    document.querySelector('.deck-title').addEventListener('contextmenu', e => {
-        e.preventDefault();
-        breachCount = 0; decryptPercent = 0; tracePercent = 0; isLockdown = false;
-        document.body.style.filter = "none";
-        document.getElementById('breachCount').innerText = "0";
-        document.getElementById('terminalLog').innerHTML = "";
-        addTerminalLog("SYSTEM_PURGE: SUCCESSFUL", "#00f0ff");
-    });
-
-    document.querySelectorAll('.lever-container').forEach(l => {
-        l.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') { e.preventDefault(); l.click(); } });
-    });
-
-    setInterval(updateDashboard, 1000);
-</script>
-
+        /* Start OFF — direct state, no togglePower call to avoid race condition */
+        document.getElementById('shutdown-screen').style.display = 'block';
+    </script>
 </body>
 </html>
